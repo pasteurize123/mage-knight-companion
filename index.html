@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Centered Reputation</title>
+  <title>Mage Knight Companion — Reputation & Fame</title>
   <style>
     :root{
       --bg:#f4f4f4;
@@ -35,7 +35,7 @@
     .rep-row .rep-cell{flex:0 0 auto;min-width:var(--rep-min);padding:6px 8px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;font-size:13px;user-select:none}
     .rep-cell.selected{background:var(--sel-rep);font-weight:700}
 
-    /* Fame input (descriptor removed) */
+    /* Fame input */
     .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
     input[type=number]{width:110px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
     .fame-result{font-weight:700;font-size:16px;padding:6px 8px;background:#fff;border-radius:6px}
@@ -63,7 +63,7 @@
   <h1>Mage Knight Companion</h1>
 
   <div class="panel" aria-labelledby="rep-title">
-    <h2 id="rep-title" style="margin:6px 0 8px 0;font-size:14px">Reputation Track (3 rows)</h2>
+    <h2 id="rep-title" style="margin:6px 0 8px 0;font-size:14px">Reputation Track</h2>
 
     <div class="rep-wrap" id="rep-wrap" aria-label="Reputation three rows">
       <!-- rows inserted by JS -->
@@ -73,7 +73,7 @@
 
     <hr style="border:none;height:8px;background:transparent">
 
-    <!-- Fame descriptor removed; only input and result remain -->
+    <h2 style="margin:6px 0 8px 0;font-size:14px">Fame Track</h2>
     <div class="fame-row">
       <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
       <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
@@ -81,7 +81,7 @@
     </div>
 
     <div class="legend">
-      <div class="small">Tap a reputation cell to set it</div>
+      <div class="small"></div>
       <div class="small">Fame levels: 1=0–2, 2=3–7, 3=8–14, 4=15–23, 5=24–34, 6=35–47, 7=48–62, 8=63–79, 9=80–98, 10=99–119</div>
     </div>
   </div>
