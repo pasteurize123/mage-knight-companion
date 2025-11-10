@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Draw Behavior</title>
+  <title>Mage Knight Companion — UI tweaks</title>
   <style>
     :root{
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
@@ -20,17 +20,24 @@
     input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center}
     .smallbtn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
     .muted{color:#666;font-size:13px}
+
+    /* Reputation track */
     .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:center}
     .rep-row{display:flex;gap:8px;justify-content:center;align-items:center}
     .rep-cell{min-width:var(--rep-min);padding:6px 10px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;user-select:none}
     .rep-row.top .rep-cell.selected{background:var(--gold);font-weight:700;color:#111}
     .rep-row.mid .rep-cell.selected{background:var(--yellow);font-weight:700;color:#111}
     .rep-row.bot .rep-cell.selected{background:var(--danger);font-weight:700;color:#fff}
+
+    /* Levels Achieved */
     .levels-list{background:#fff;padding:8px;border-radius:6px;min-height:36px;display:flex;gap:6px;flex-wrap:wrap}
     .level-pill{background:#eef;padding:6px 8px;border-radius:999px;font-weight:600;font-size:13px}
+
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:14px}
+
     .center{display:flex;align-items:center;justify-content:center;gap:8px}
     .center-column{display:flex;flex-direction:column;align-items:center;gap:6px}
+
     .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--overlay);z-index:60}
     .modal{background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
     .modal h3{margin:0 0 8px 0;font-size:16px}
@@ -38,6 +45,7 @@
     .choice-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
     .choice-btn{padding:8px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer}
     .choice-btn.selected{background:#eef6e9;border-color:#9fd49f}
+
     footer{display:flex;justify-content:center;padding:8px 0}
     @media (max-width:700px){ input[type=number]{width:90px} :root{--rep-min:34px} }
   </style>
@@ -57,13 +65,16 @@
     <section class="panel" aria-labelledby="fame-title">
       <div class="panel-inner">
         <h2 id="fame-title">Fame Track</h2>
+
         <div class="center-column" style="width:100%">
           <div class="center" style="width:100%;margin-bottom:6px">
             <div style="text-align:center">
               <label style="font-weight:700;display:block;margin-bottom:6px">Player Fame</label>
               <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
             </div>
+
             <div style="width:18px"></div>
+
             <div style="text-align:center">
               <label style="font-weight:700;display:block;margin-bottom:6px">Player Level</label>
               <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
@@ -72,11 +83,11 @@
 
           <div class="center" style="width:100%">
             <div>
-              <button class="smallbtn fame-inc" data-inc="1">+1 Fame</button>
-              <button class="smallbtn fame-inc" data-inc="2">+2 Fame</button>
-              <button class="smallbtn fame-inc" data-inc="3">+3 Fame</button>
-              <button class="smallbtn fame-inc" data-inc="5">+5 Fame</button>
-              <button class="smallbtn fame-inc" data-inc="10">+10 Fame</button>
+              <button class="smallbtn fame-inc" data-inc="1">+1</button>
+              <button class="smallbtn fame-inc" data-inc="2">+2</button>
+              <button class="smallbtn fame-inc" data-inc="3">+3</button>
+              <button class="smallbtn fame-inc" data-inc="5">+5</button>
+              <button class="smallbtn fame-inc" data-inc="10">+10</button>
             </div>
           </div>
         </div>
@@ -149,6 +160,7 @@
     </footer>
   </div>
 
+  <!-- End round modal for choosing crystal/card when end of round occurs -->
   <div id="endround-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="endround-title">
       <h3 id="endround-title">End Round — Choose Additions</h3>
@@ -181,6 +193,7 @@
     </div>
   </div>
 
+  <!-- Level modal (combined prompts) -->
   <div id="level-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="lvl-title">
       <h3 id="lvl-title">Level Up</h3>
@@ -333,7 +346,7 @@
       });
     }
 
-    // Fame handling
+    // Fame UI and prompt handling
     function handleLevelPrompts(prevLevel,newLevel){
       const messages=[];
       for(let L=prevLevel+1; L<=newLevel; L++) if(LEVEL_PROMPTS[L]) messages.push(`Level ${L}: ${LEVEL_PROMPTS[L]}`);
@@ -341,6 +354,7 @@
       levelMessage.textContent = messages.join('\n');
       levelModal.style.display='flex'; levelModal.setAttribute('aria-hidden','false');
     }
+
     function updateFameUI(prevFame=null){
       const prevLevel = prevFame !== null ? getFameLevel(prevFame) : null;
       const level = getFameLevel(fame);
@@ -357,7 +371,7 @@
       saveState();
     }
 
-    // Deck & draw helpers
+    // Deck & draw
     function rebuildDeckFromCounts(){
       dummyDeck = [];
       Object.keys(cardCounts).forEach(color => { for(let i=0;i<cardCounts[color];i++) dummyDeck.push(`${color} Card`); });
@@ -370,13 +384,10 @@
 
     // Draw logic: only flip to End Round when the deck is empty at the moment the player presses Draw
     function drawCardsOnce(){
-      // draw up to 3
       const drawn = [];
       for (let i = 0; i < 3 && dummyDeck.length > 0; i++) {
         drawn.push(dummyDeck.pop());
       }
-
-      // if nothing was drawn, return empty
       return drawn;
     }
 
@@ -385,12 +396,12 @@
       if (dummyDeck.length === 0) {
         endRoundFlag = true;
         drawBtn.textContent = 'End Round';
-        dummyOutput.textContent = 'Nil cards in deck. End of round announced';
+        dummyOutput.textContent = 'Nil cards drawn. End of round announced';
         saveState();
         return;
       }
 
-      // Otherwise perform a normal draw
+      // perform normal draw
       const drawn = drawCardsOnce();
 
       // apply extra draws based on last card and crystals
@@ -401,12 +412,11 @@
         for (let i = 0; i < extra && dummyDeck.length > 0; i++) drawn.push(dummyDeck.pop());
       }
 
+      // if nothing was drawn (defensive), treat as end-round announcement
       if (drawn.length === 0) {
-        // In practice this won't happen here because we checked deck length before drawing,
-        // but keep defensive behavior
         endRoundFlag = true;
         drawBtn.textContent = 'End Round';
-        dummyOutput.textContent = 'Nil cards in deck. End of round announced';
+        dummyOutput.textContent = 'Nil cards drawn. End of round announced';
         saveState();
         return;
       }
@@ -418,9 +428,7 @@
       updateDeckCount();
       updateDiscardUI();
 
-      // IMPORTANT: do NOT automatically change to End Round if the deck became empty as a result of this draw.
-      // The button only flips when the player presses Draw while the deck is already empty.
-
+      // Do not auto-flip to End Round if deck became empty from this draw.
       saveState();
     }
 
@@ -455,7 +463,9 @@
       endroundConfirm.disabled = !(selectedCrystal && selectedCard);
     });
 
-    endroundCancel.addEventListener('click', () => closeEndRoundModal());
+    endroundCancel.addEventListener('click', () => {
+      closeEndRoundModal();
+    });
 
     endroundConfirm.addEventListener('click', () => {
       if (!selectedCrystal || !selectedCard) return;
@@ -472,7 +482,7 @@
       updateDeckCount();
       updateDiscardUI();
 
-      // reset end round state and button
+      // reset end round state
       endRoundFlag = false;
       drawBtn.textContent = 'Draw';
       dummyOutput.textContent = `End Round: added ${COLOR_SYMBOL[selectedCard] || selectedCard} and ${COLOR_SYMBOL[selectedCrystal] || selectedCrystal}. Deck reshuffled.`;
@@ -498,7 +508,7 @@
       saveState();
     }
 
-    // crystals & cards helpers
+    // crystals & cards
     function changeCrystal(color,delta){
       crystals[color] = Math.max(0,(crystals[color]||0)+delta);
       document.getElementById(color).textContent = crystals[color];
@@ -580,7 +590,7 @@
       fameInput.addEventListener('change', ()=> setFameOverride(fameInput.value));
       fameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); setFameOverride(fameInput.value); fameInput.blur(); } });
 
-      // fame inc buttons
+      // fame inc buttons (labels updated to +1, +2, etc.)
       document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=> addFame(Number(btn.dataset.inc||0))));
 
       // crystals buttons
@@ -598,13 +608,14 @@
       reshuffleBtn.addEventListener('click', reshuffleDeck);
       newGameBtn.addEventListener('click', newGame);
 
-      // endround modal handling wired earlier; level modal ok
+      // endround modal wired earlier; level modal ok
       document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
+      // save on unload
       window.addEventListener('beforeunload', saveState);
     });
 
-    // expose for debugging
+    // expose for debug
     window._mk_save = saveState;
     window._mk_load = loadState;
     window._mk_newGame = newGame;
