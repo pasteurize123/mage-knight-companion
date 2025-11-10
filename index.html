@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Full Reset</title>
+  <title>Mage Knight Companion — Levels sync to current level</title>
   <style>
     :root{
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
@@ -239,7 +239,7 @@
     let dummyDeck = [];
     let discardPile = [];
     let endRoundFlag = false;
-    let achievedLevels = []; // chronological
+    let achievedLevels = []; // will be synced to current player level
     let repSelection = null;
 
     // DOM refs
@@ -348,18 +348,24 @@
     }
 
     function updateFameUI(prevFame=null){
+      // Determine previous and current levels
       const prevLevel = prevFame !== null ? getFameLevel(prevFame) : null;
       const level = getFameLevel(fame);
+
+      // Update displayed level and fame input
       playerLevelEl.textContent = level;
       fameInput.value = fame;
-      if(!achievedLevels || achievedLevels.length===0) achievedLevels = [1];
-      if(prevLevel !== null && level > prevLevel){
-        for(let L=prevLevel+1; L<=level; L++){
-          if(!achievedLevels.includes(L)) achievedLevels.push(L);
-        }
+
+      // Sync achievedLevels to match exactly levels 1..current level
+      achievedLevels = [];
+      for (let i = 1; i <= level; i++) achievedLevels.push(i);
+
+      // Show level prompts only for levels newly reached
+      if (prevLevel !== null && level > prevLevel) {
+        handleLevelPrompts(prevLevel, level);
       }
+
       renderLevels();
-      if(prevLevel !== null && level > prevLevel) handleLevelPrompts(prevLevel, level);
       saveState();
     }
 
@@ -374,7 +380,7 @@
     function updateDiscardUI(){ if(!discardPile||discardPile.length===0) discardOutput.textContent='Discard pile is empty.'; else {
       const syms = discardPile.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c); discardOutput.textContent = `Discard (${discardPile.length}): ${syms.join(' ')}`; } }
 
-    // Draw logic: only flip to End Round when the deck is empty at the moment the player presses Draw
+    // Draw logic
     function drawCardsOnce(){
       const drawn = [];
       for (let i = 0; i < 3 && dummyDeck.length > 0; i++) {
@@ -388,7 +394,6 @@
     }
 
     function onDrawClick(){
-      // If deck empty at the moment of press -> announce end of round and switch button
       if (dummyDeck.length === 0) {
         endRoundFlag = true;
         drawBtn.textContent = 'End Round';
@@ -397,10 +402,8 @@
         return;
       }
 
-      // Normal draw
       const drawn = drawCardsOnce();
 
-      // apply crystals extra draws when applicable
       const last = drawn[drawn.length - 1];
       if (last) {
         const color = last.split(' ')[0].toLowerCase();
@@ -408,7 +411,6 @@
         for (let i = 0; i < extra && dummyDeck.length > 0; i++) drawn.push(dummyDeck.pop());
       }
 
-      // Defensive: if nothing drawn (shouldn't happen due to initial check) announce end-round
       if (drawn.length === 0) {
         endRoundFlag = true;
         drawBtn.textContent = 'End Round';
@@ -417,14 +419,12 @@
         return;
       }
 
-      // Move drawn to discard and update UI
       discardPile.push(...drawn);
       const syms = drawn.map(c => COLOR_SYMBOL[c.split(' ')[0]] || c);
       dummyOutput.textContent = syms.join(' ');
       updateDeckCount();
       updateDiscardUI();
 
-      // Do NOT auto-flip to End Round if the deck became empty from this draw; only flip on a subsequent press.
       saveState();
     }
 
@@ -466,11 +466,9 @@
     endroundConfirm.addEventListener('click', () => {
       if (!selectedCrystal || !selectedCard) return;
 
-      // Apply chosen crystal and card
       changeCrystal(selectedCrystal, 1);
       changeCard(selectedCard, 1);
 
-      // Move discard into deck and reshuffle
       if (discardPile.length > 0) {
         dummyDeck.push(...discardPile);
         discardPile = [];
@@ -480,7 +478,6 @@
       updateDeckCount();
       updateDiscardUI();
 
-      // Reset end round state and button
       endRoundFlag = false;
       drawBtn.textContent = 'Draw';
       dummyOutput.textContent = `End Round: added ${COLOR_SYMBOL[selectedCard] || selectedCard} and ${COLOR_SYMBOL[selectedCrystal] || selectedCrystal}. Deck reshuffled.`;
@@ -489,7 +486,7 @@
       closeEndRoundModal();
     });
 
-    // Reshuffle button (under discard)
+    // Reshuffle button
     function reshuffleDeck(){
       if (!discardPile || discardPile.length === 0) {
         dummyOutput.textContent = 'Discard pile is empty. Nothing to reshuffle.';
@@ -547,23 +544,19 @@
     function newGame(){
       if (!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
 
-      // clear storage
       clearSavedState();
 
-      // reset state
       fame = 0;
       crystals = { ...DEFAULT_CRYSTALS };
       cardCounts = { ...DEFAULT_CARDS };
       dummyDeck = [];
       discardPile = [];
       endRoundFlag = false;
-      achievedLevels = [1]; // include Level 1 start
+      achievedLevels = [1];
       repSelection = null;
 
-      // rebuild deck from card counts and shuffle
       rebuildDeckFromCounts();
 
-      // update UI values
       document.getElementById('red').textContent = crystals.red;
       document.getElementById('blue').textContent = crystals.blue;
       document.getElementById('green').textContent = crystals.green;
@@ -578,19 +571,18 @@
       updateDiscardUI();
       buildRepRows();
 
-      // default reputation mid selected if available
       const midCell = repWrap.querySelector('.rep-row.mid .rep-cell');
       if (midCell) { midCell.classList.add('selected'); repSelection = {row:'mid', index:0}; }
 
-      // reset UI text and level/fame display
       endRoundFlag = false;
       drawBtn.textContent = 'Draw';
       dummyOutput.textContent = 'Drawn symbols appear here';
 
+      // sync levels display to start level
+      fame = 0;
       updateFameUI(null);
       renderLevels();
 
-      // persist cleared state
       saveState();
     }
 
@@ -609,7 +601,11 @@
       document.getElementById('card-white').textContent = cardCounts.White;
       if(!ok){ rebuildDeckFromCounts(); achievedLevels = [1]; saveState(); }
       else { if(!Array.isArray(dummyDeck) || dummyDeck.length===0) rebuildDeckFromCounts(); }
-      updateDeckCount(); updateDiscardUI(); updateFameUI(null); renderLevels();
+      updateDeckCount(); updateDiscardUI();
+
+      // ensure levels reflect loaded fame/level
+      updateFameUI(null);
+      renderLevels();
 
       // fame input override behavior
       fameInput.addEventListener('change', ()=> setFameOverride(fameInput.value));
@@ -630,7 +626,6 @@
 
       // draw/reshuffle/new game wiring
       drawBtn.addEventListener('click', (e)=>{
-        // If currently showing End Round, clicking should open the modal
         if (endRoundFlag && drawBtn.textContent === 'End Round') {
           openEndRoundModal();
           return;
@@ -640,10 +635,9 @@
       reshuffleBtn.addEventListener('click', reshuffleDeck);
       newGameBtn.addEventListener('click', newGame);
 
-      // endround modal wired above; level modal ok
+      // level modal ok
       document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
-      // save on unload
       window.addEventListener('beforeunload', saveState);
     });
 
