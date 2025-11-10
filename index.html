@@ -309,7 +309,6 @@
         discardPile = Array.isArray(s.discardPile) ? s.discardPile : discardPile;
         endRoundFlag = !!s.endRoundFlag;
         lastShownLevel = typeof s.lastShownLevel === 'number' ? s.lastShownLevel : lastShownLevel;
-        // repSelection will be applied after building rows
         window._loadedRepSelection = s.repSelection;
         return true;
       } catch (e) { return false; }
@@ -337,7 +336,6 @@
       repMid.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => {
-          // mid-row special mapping (left/center/right not present exactly here, but kept for compatibility)
           selectRepCell(el);
           saveState();
         });
@@ -358,7 +356,6 @@
       repWrap.appendChild(midRow);
       repWrap.appendChild(botRow);
 
-      // apply saved selection if present
       if (window._loadedRepSelection) applyRepSelection(window._loadedRepSelection);
     }
 
@@ -369,7 +366,6 @@
     }
 
     function getSelectedRepCellIndex() {
-      // return an object { row: 'top'|'mid'|'bot', index: n } or null
       const rows = { top: repWrap.querySelector('.rep-row.top'), mid: repWrap.querySelector('.rep-row.mid'), bot: repWrap.querySelector('.rep-row.bot') };
       for (const r of ['top','mid','bot']) {
         if (!rows[r]) continue;
@@ -430,7 +426,6 @@
       const prevLevel = getFameLevel(fame);
       fame = newVal;
       const newLevel = getFameLevel(fame);
-      // if jump multiple levels, show combined prompts in one modal
       if (newLevel > prevLevel) handleLevelPrompts(prevLevel, newLevel);
       updateFameUI();
     }
@@ -600,9 +595,6 @@
       }
     });
 
-    // optional live update commented out - change/enter override is authoritative
-    // fameInput.addEventListener('input', () => { setFame(fameInput.value); });
-
     fameButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const inc = parseInt(btn.dataset.inc || "0", 10);
@@ -612,35 +604,56 @@
 
     levelOk.addEventListener('click', hideLevelModal);
 
-    // --- Persistence on interactive changes ---
-    // Save when crystals/cards changed via buttons (handled in those functions).
-    // Save when rep selection changes (handled in event listeners when building rows).
-    // Save when deck/discard change (handled by functions that alter them).
-
-    // --- New Game button behavior ---
+    // --- New Game button behavior (now resets crystals and cards to defaults as requested) ---
     newGameBtn.addEventListener('click', () => {
-      if (confirm('Start a new game? This will reset saved progress.')) {
+      if (confirm('Start a new game? This will reset saved progress and all values to defaults.')) {
+        // clear persistent storage
         clearSavedState();
-        // reset local state to defaults
+
+        // reset game state to defaults
         fame = 0;
-        crystals = { red: 0, blue: 0, green: 0, white: 0 };
-        cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 };
-        initializeDeck();
+        crystals = { red: 0, blue: 0, green: 0, white: 0 }; // reset crystals
+        cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 }; // reset cards
+        dummyDeck = [];
+        discardPile = [];
+        endRoundFlag = false;
+        lastShownLevel = 1;
+
+        // rebuild deck and UI
+        rebuildDeckFromCounts();
+        updateDiscard();
+        updateDrawButton();
+
+        // rebuild and select default rep cell
         buildRepRows();
-        // default select middle 0
         const midCell = repWrap.querySelector('.rep-row.mid .rep-cell');
         if (midCell) selectRepCell(midCell);
+
+        // update visible crystal/card counters
+        document.getElementById('red').textContent = crystals.red;
+        document.getElementById('blue').textContent = crystals.blue;
+        document.getElementById('green').textContent = crystals.green;
+        document.getElementById('white').textContent = crystals.white;
+
+        document.getElementById('card-red').textContent = cardCounts.Red;
+        document.getElementById('card-blue').textContent = cardCounts.Blue;
+        document.getElementById('card-green').textContent = cardCounts.Green;
+        document.getElementById('card-white').textContent = cardCounts.White;
+
+        // reset fame UI and hide any modal
+        updateFameUI();
+        hideLevelModal();
+
+        // Save the fresh default state
         saveState();
       }
     });
 
     // --- Init and load ---
     window.addEventListener('load', () => {
-      // try load; if none exists initialize defaults
       const ok = loadState();
       buildRepRows();
 
-      // reflect crystals and cards in UI
       document.getElementById('red').textContent = crystals.red || 0;
       document.getElementById('blue').textContent = crystals.blue || 0;
       document.getElementById('green').textContent = crystals.green || 0;
@@ -653,20 +666,16 @@
 
       if (!ok) initializeDeck();
       else {
-        // if deck empty rebuild from counts for safety
         if (!Array.isArray(dummyDeck) || dummyDeck.length === 0) rebuildDeckFromCounts();
         updateDeckCount();
         updateDiscard();
         updateFameUI();
       }
 
-      // default rep selection when nothing saved
       if (!window._loadedRepSelection) {
         const midCell = repWrap.querySelector('.rep-row.mid .rep-cell');
         if (midCell) selectRepCell(midCell);
       }
-
-      // clean temporary flag
       delete window._loadedRepSelection;
     });
 
