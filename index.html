@@ -21,12 +21,12 @@
       background:var(--bg);
       color:#111;
       padding:12px;
-      font-size:var(--base-font); /* default text size 16px */
+      font-size:var(--base-font);
       line-height:1.3;
     }
 
     h1{
-      font-size:var(--title-font); /* Mage Knight Companion remains 18px */
+      font-size:var(--title-font);
       margin:0 0 12px;
       text-align:center;
       font-weight:700;
@@ -35,7 +35,6 @@
     .container{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
     .panel{background:var(--panel);border-radius:10px;padding:10px}
     .panel-inner{background:var(--card);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
-    /* Section headings Reputation, Fame, Dummy Player sized 16px (inherited) */
     .panel-inner h2{font-size:16px;margin:0 0 12px;font-weight:700}
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center;font-size:1rem}
@@ -66,9 +65,15 @@
     .choice-btn.selected{background:#eef6e9;border-color:#9fd49f}
     footer{display:flex;justify-content:center;padding:8px 0}
 
+    /* Match crystals layout for cards */
+    .mini-group{display:flex;align-items:center;gap:8px}
+    .mini-group .count{min-width:28px;text-align:center;font-weight:700}
+    .icon-label{display:flex;align-items:center;gap:6px}
+
     @media (max-width:700px){
       input[type=number]{width:90px}
       :root{--rep-min:34px}
+      .mini-group{gap:6px}
     }
   </style>
 </head>
@@ -129,34 +134,47 @@
           <div>
             <h3 style="margin:0 0 6px 0;font-size:1rem">Crystals</h3>
             <div class="row" style="align-items:center">
-              <div>🔴 <strong id="red">0</strong></div>
-              <div><button class="smallbtn" data-crystal="red" data-act="inc">+</button><button class="smallbtn" data-crystal="red" data-act="dec">−</button></div>
+              <div class="mini-group icon-label">🔴 <strong id="red">0</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-crystal="red" data-act="inc">+</button><button class="smallbtn" data-crystal="red" data-act="dec">−</button></div>
+
               <div style="width:12px"></div>
-              <div>🔵 <strong id="blue">0</strong></div>
-              <div><button class="smallbtn" data-crystal="blue" data-act="inc">+</button><button class="smallbtn" data-crystal="blue" data-act="dec">−</button></div>
+
+              <div class="mini-group icon-label">🔵 <strong id="blue">0</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-crystal="blue" data-act="inc">+</button><button class="smallbtn" data-crystal="blue" data-act="dec">−</button></div>
+
               <div style="width:12px"></div>
-              <div>🟢 <strong id="green">0</strong></div>
-              <div><button class="smallbtn" data-crystal="green" data-act="inc">+</button><button class="smallbtn" data-crystal="green" data-act="dec">−</button></div>
+
+              <div class="mini-group icon-label">🟢 <strong id="green">0</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-crystal="green" data-act="inc">+</button><button class="smallbtn" data-crystal="green" data-act="dec">−</button></div>
+
               <div style="width:12px"></div>
-              <div>⚪ <strong id="white">0</strong></div>
-              <div><button class="smallbtn" data-crystal="white" data-act="inc">+</button><button class="smallbtn" data-crystal="white" data-act="dec">−</button></div>
+
+              <div class="mini-group icon-label">⚪ <strong id="white">0</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-crystal="white" data-act="inc">+</button><button class="smallbtn" data-crystal="white" data-act="dec">−</button></div>
             </div>
           </div>
 
           <div>
             <h3 style="margin:0 0 6px 0;font-size:1rem">Cards</h3>
-            <div class="row" style="align-items:center;gap:12px">
-              <div>🔴 <strong id="card-red">4</strong></div>
-              <div><button class="smallbtn card-btn" data-color="Red" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Red" data-act="dec">−</button></div>
+            <!-- Cards section now matches crystals layout (spacing and controls) -->
+            <div class="row" style="align-items:center">
+              <div class="mini-group icon-label">🔴 <strong id="card-red">4</strong></div>
+              <div class="mini-group"><button class="smallbtn card-btn" data-color="Red" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Red" data-act="dec">−</button></div>
 
-              <div>🔵 <strong id="card-blue">4</strong></div>
-              <div><button class="smallbtn card-btn" data-color="Blue" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Blue" data-act="dec">−</button></div>
+              <div style="width:12px"></div>
 
-              <div>🟢 <strong id="card-green">4</strong></div>
-              <div><button class="smallbtn card-btn" data-color="Green" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Green" data-act="dec">−</button></div>
+              <div class="mini-group icon-label">🔵 <strong id="card-blue">4</strong></div>
+              <div class="mini-group"><button class="smallbtn card-btn" data-color="Blue" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Blue" data-act="dec">−</button></div>
 
-              <div>⚪ <strong id="card-white">4</strong></div>
-              <div><button class="smallbtn card-btn" data-color="White" data-act="inc">+</button><button class="smallbtn card-btn" data-color="White" data-act="dec">−</button></div>
+              <div style="width:12px"></div>
+
+              <div class="mini-group icon-label">🟢 <strong id="card-green">4</strong></div>
+              <div class="mini-group"><button class="smallbtn card-btn" data-color="Green" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Green" data-act="dec">−</button></div>
+
+              <div style="width:12px"></div>
+
+              <div class="mini-group icon-label">⚪ <strong id="card-white">4</strong></div>
+              <div class="mini-group"><button class="smallbtn card-btn" data-color="White" data-act="inc">+</button><button class="smallbtn card-btn" data-color="White" data-act="dec">−</button></div>
             </div>
 
             <div style="margin-top:8px" class="muted">Cards in deck: <strong id="deck-count">0</strong></div>
@@ -269,7 +287,7 @@
     let dummyDeck = [];
     let discardPile = [];
     let endRoundFlag = false;
-    let achievedLevels = []; // synced to current player level
+    let achievedLevels = [];
     let repSelection = null;
 
     // DOM refs
@@ -384,7 +402,6 @@
       playerLevelEl.textContent = level;
       fameInput.value = fame;
 
-      // Sync achievedLevels to exactly levels 1..current level
       achievedLevels = [];
       for (let i = 1; i <= level; i++) achievedLevels.push(i);
 
