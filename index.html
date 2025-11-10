@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Mage Knight Companion — Independent Tracks</title>
+  <title>Mage Knight Companion — Clickable Tracks</title>
   <style>
     :root{
       --rep-cell-w: 60px;
@@ -23,19 +23,15 @@
     /* Reputation track */
     .rep-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
     .rep-grid { display: grid; grid-auto-flow: column; gap: var(--rep-gap); align-items: center; position: relative; }
-    .rep-cell { width: var(--rep-cell-w); background:#ddd; padding:6px; text-align:center; border-radius:6px; font-size:13px; }
+    .rep-cell { width: var(--rep-cell-w); background:#ddd; padding:6px; text-align:center; border-radius:6px; font-size:13px; cursor:pointer; user-select:none; }
+    .rep-cell.selected { background:#bfe7c7; }
 
     /* Fame track grouped by level rows */
-    .levels {
-      display: flex;
-      flex-direction: column;
-      gap: var(--level-gap);
-      position: relative;
-      padding-bottom: 8px;
-    }
+    .levels { display: flex; flex-direction: column; gap: var(--level-gap); position: relative; padding-bottom: 8px; }
     .level-row { display: flex; gap: var(--fame-gap); align-items: center; }
     .level-label { width: 72px; font-weight:600; font-size:13px; }
-    .fame-cell { width: var(--fame-cell-w); min-width: var(--fame-cell-w); background:#e0e0e0; padding:6px; text-align:center; border-radius:6px; font-size:12px; }
+    .fame-cell { width: var(--fame-cell-w); min-width: var(--fame-cell-w); background:#e0e0e0; padding:6px; text-align:center; border-radius:6px; font-size:12px; cursor:pointer; user-select:none; }
+    .fame-cell.selected { background:#ffdca3; }
 
     /* markers */
     .marker { position: absolute; transform: translate(-50%, -140%); pointer-events: none; font-size:20px; transition: left .16s linear, top .16s linear; }
@@ -57,13 +53,7 @@
   <div class="track-container section">
     <h2>Reputation Track</h2>
     <div class="rep-row">
-      <div class="track-controls">
-        <button id="rep-decrease" onclick="changeReputation(-1)">−</button>
-        <button id="rep-increase" onclick="changeReputation(1)">+</button>
-      </div>
-      <div class="rep-grid" id="rep-grid" aria-hidden="false">
-        <!-- rep cells inserted by JS -->
-      </div>
+      <div class="rep-grid" id="rep-grid" aria-hidden="false"></div>
       <div style="min-width:80px; text-align:center;">Current: <strong id="rep-display">0</strong></div>
     </div>
 
@@ -71,9 +61,7 @@
     <div style="position:relative;">
       <div id="fame-marker" class="marker">⭐</div>
       <div id="rep-marker" class="rep-marker">🧭</div>
-      <div class="levels" id="levels-container">
-        <!-- level rows inserted by JS -->
-      </div>
+      <div class="levels" id="levels-container"></div>
     </div>
 
     <div class="legend">
@@ -161,18 +149,22 @@
     // DOM refs
     const repGrid = document.getElementById('rep-grid');
     const levelsContainer = document.getElementById('levels-container');
-    const marker = document.getElementById('fame-marker');
+    const fameMarker = document.getElementById('fame-marker');
     const repMarker = document.getElementById('rep-marker');
     const fameLevelEl = document.getElementById('fame-level');
     const fameDisplayEl = document.getElementById('fame-display');
     const repDisplayEl = document.getElementById('rep-display');
 
-    // Build reputation UI
+    // Build reputation UI (clickable)
     repValues.forEach((v, idx) => {
       const c = document.createElement('div');
       c.className = 'rep-cell';
       c.textContent = v;
       c.dataset.index = idx;
+      c.addEventListener('click', () => {
+        reputationIndex = idx;
+        updateRepMarker();
+      });
       repGrid.appendChild(c);
     });
 
@@ -203,6 +195,10 @@
         cell.className = 'fame-cell';
         cell.textContent = v;
         cell.dataset.value = v;
+        cell.addEventListener('click', () => {
+          fame = v;
+          updateFameMarker();
+        });
         cellsContainer.appendChild(cell);
         fameCellRefs.push({ levelIndex, value: v, el: cell });
       }
@@ -224,8 +220,10 @@
       return { levelIndex:0, level:1, indexInRow:0 };
     }
 
-    // position fame marker above the correct cell
+    // position fame marker above the correct cell and highlight selected cell
     function updateFameMarker() {
+      // clear previous selections
+      fameCellRefs.forEach(r => r.el.classList.toggle('selected', r.value === fame));
       const ref = fameCellRefs.find(r => r.value === fame);
       if (!ref) return;
       const containerRect = levelsContainer.getBoundingClientRect();
@@ -234,8 +232,8 @@
       const rowEl = ref.el.closest('.level-row');
       const rowRect = rowEl.getBoundingClientRect();
       const top = rowRect.top - containerRect.top;
-      marker.style.left = `${left}px`;
-      marker.style.top = `${top}px`;
+      fameMarker.style.left = `${left}px`;
+      fameMarker.style.top = `${top}px`;
       // update displays
       const loc = locateFame(fame);
       fameLevelEl.textContent = loc.level;
@@ -251,19 +249,20 @@
       }
     }
 
-    // position reputation marker above selected rep cell
+    // position reputation marker above selected rep cell and highlight selection
     function updateRepMarker() {
+      // clear previous selection
+      Array.from(repGrid.children).forEach(c => c.classList.toggle('selected', Number(c.dataset.index) === reputationIndex));
       const repCell = repGrid.querySelector(`.rep-cell[data-index="${reputationIndex}"]`);
       if (!repCell) return;
       const gridRect = repGrid.getBoundingClientRect();
       const cellRect = repCell.getBoundingClientRect();
       const left = (cellRect.left + cellRect.right)/2 - gridRect.left;
-      // place repMarker above rep grid
-      const top = repGrid.getBoundingClientRect().top - levelsContainer.getBoundingClientRect().top - 28; // lift above fame area
+      // place repMarker above rep grid area
+      const top = repGrid.getBoundingClientRect().top - levelsContainer.getBoundingClientRect().top - 28;
       repMarker.style.left = `${left}px`;
       repMarker.style.top = `${top}px`;
-      // update rep display (middle index 7 maps to 0)
-      // map index 0..14 to logical rep value display using repValues array
+      // update rep display (map index to repValues)
       repDisplayEl.textContent = repValues[reputationIndex];
     }
 
@@ -334,7 +333,7 @@
           drawn.push(dummyDeck.pop());
         }
       }
-      // if deck empty and discard exists, reshuffle discard into deck AFTER the draw (current drawn go to discard)
+      // if deck empty and discard exists, reshuffle discard into deck AFTER the draw
       if (dummyDeck.length === 0 && discardPile.length > 0){
         const moved = discardPile.splice(0);
         dummyDeck.push(...moved);
@@ -354,7 +353,7 @@
     // initialize UI on load
     window.addEventListener('load', () => {
       initializeDeck();
-      // ensure fame marker positioned
+      // position markers after layout stabilizes
       setTimeout(() => {
         updateFameMarker();
         updateRepMarker();
