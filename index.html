@@ -22,17 +22,16 @@
       background:var(--bg);
       color:#111;
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-      font-size:14px; /* default body text 14px */
+      font-size:14px;
       padding:12px;
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
     }
 
-    /* Headings sizes */
+    /* Headings */
     h1{font-size:18px;margin:0 0 12px;text-align:center}
-    h2{font-size:16px;margin:0 0 6px 0}
-    /* subheadings (Crystals, Cards, Fame label) set to 14px per request */
-    .subhead { font-size:14px; margin:0 0 6px 0; font-weight:400; color:inherit }
+    h2,h3{font-size:16px;margin:0}
+    h3{font-weight:400;color:inherit}
 
     .container{display:flex;flex-direction:column;gap:12px;max-width:900px;margin:0 auto}
     .boxed { background:var(--panel-bg); border-radius:10px; padding:10px; }
@@ -42,15 +41,15 @@
     .rep-wrap{display:flex;flex-direction:column;gap:8px;width:100%;align-items:center}
     .rep-row{display:flex;gap:8px;align-items:center;justify-content:center}
     .rep-row .rep-cell{flex:0 0 auto;min-width:var(--rep-min);padding:6px 10px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;font-size:14px;user-select:none}
-    .rep-row.top.active .rep-cell{background:var(--gold);color:#111;font-weight:700}
-    .rep-row.mid.active .rep-cell{background:var(--yellow);color:#111;font-weight:700}
-    .rep-row.bot.active .rep-cell{background:var(--red);color:#fff;font-weight:700}
+    /* single-cell selected styles: color depends on row containing the cell */
+    .rep-row.top .rep-cell.selected{background:var(--gold);color:#111;font-weight:700}
+    .rep-row.mid .rep-cell.selected{background:var(--yellow);color:#111;font-weight:700}
+    .rep-row.bot .rep-cell.selected{background:var(--red);color:#fff;font-weight:700}
 
-    /* Fame area: label, box, input, and addition buttons all 14px */
     .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .fame-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .fame-controls .subhead { font-size:14px } /* Fame label */
-    input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
+    input[type=number], select, button { font-size:14px; }
+    input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc}
     .fame-result{font-weight:400;font-size:14px;padding:6px 8px;background:#fff;border-radius:6px}
     .fame-result strong{font-weight:700}
     .fame-btn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px}
@@ -59,13 +58,9 @@
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .cols{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
     .col{background:var(--box-bg);border-radius:8px;padding:8px;min-width:160px;flex:1}
-    .col .subhead { font-size:14px } /* Crystals and Cards subheadings */
-
-    /* draw and reset deck buttons 14px */
     .smallbtn{font-size:14px;padding:6px 8px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:14px;overflow:hidden}
 
-    /* numeric labels uniform */
     .stat{font-weight:700;font-size:14px;line-height:1;min-width:20px;display:inline-block;text-align:center}
 
     .inline-item{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
@@ -81,12 +76,12 @@
     @media (max-width:820px){ .cols{flex-direction:column} .col{min-width:0} }
     @media (max-width:420px){
       :root{--rep-min:32px}
-      input[type=number]{width:90px;padding:6px;font-size:13px}
+      input[type=number]{width:90px;padding:6px}
       .rep-cell{font-size:13px;padding:5px 6px}
       .smallbtn{font-size:13px;padding:5px 6px}
       .stat{font-size:13px}
       h1{font-size:16px}
-      h2{font-size:15px}
+      h2,h3{font-size:15px}
     }
   </style>
 </head>
@@ -109,7 +104,7 @@
 
         <div class="fame-row" role="group" aria-label="Fame input">
           <div class="fame-controls" style="flex:1;align-items:center">
-            <div class="subhead" style="margin-right:8px">Fame</div>
+            <h3 style="margin:0 8px 0 0">Fame</h3>
             <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
             <div class="fame-result" id="fame-result" aria-live="polite">Level: <strong id="fame-level">1</strong></div>
           </div>
@@ -133,7 +128,7 @@
         <div class="combined-grid">
           <div class="cols">
             <div class="col" aria-labelledby="crystal-title">
-              <div id="crystal-title" class="subhead">Crystals</div>
+              <h3 id="crystal-title">Crystals</h3>
               <div class="inline-item">
                 <div style="font-size:18px">🔴 <span class="stat" id="red">0</span></div>
                 <div><button class="smallbtn" onclick="changeCrystal('red',1)">+</button><button class="smallbtn" onclick="changeCrystal('red',-1)">−</button></div>
@@ -156,7 +151,7 @@
             </div>
 
             <div class="col" aria-labelledby="cards-title">
-              <div id="cards-title" class="subhead">Cards</div>
+              <h3 id="cards-title">Cards</h3>
               <div class="inline-item">
                 <div style="font-size:18px">🔴 <span class="stat" id="card-red">4</span></div>
                 <div><button class="smallbtn" onclick="changeCard('Red',1)">+</button><button class="smallbtn" onclick="changeCard('Red',-1)">−</button></div>
@@ -285,21 +280,21 @@
       const topRow = document.createElement('div'); topRow.className = 'rep-row top';
       repPositive.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
-        el.addEventListener('click', () => selectRow(topRow));
+        el.addEventListener('click', () => selectRepCell(el));
         topRow.appendChild(el);
       });
 
       const midRow = document.createElement('div'); midRow.className = 'rep-row mid';
       repNeutral.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
-        el.addEventListener('click', () => selectRow(midRow));
+        el.addEventListener('click', () => selectRepCell(el));
         midRow.appendChild(el);
       });
 
       const botRow = document.createElement('div'); botRow.className = 'rep-row bot';
       repNegative.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
-        el.addEventListener('click', () => selectRow(botRow));
+        el.addEventListener('click', () => selectRepCell(el));
         botRow.appendChild(el);
       });
 
@@ -308,12 +303,14 @@
       repWrap.appendChild(botRow);
     }
 
-    // Select a row: clear other rows' active state and set this one active
-    function selectRow(rowEl) {
-      const currentlyActive = rowEl.classList.contains('active');
-      const rows = repWrap.querySelectorAll('.rep-row');
-      rows.forEach(r => r.classList.remove('active'));
-      if (!currentlyActive) rowEl.classList.add('active');
+    // Select a single rep cell; only one cell may be selected at a time
+    function selectRepCell(cellEl) {
+      const all = repWrap.querySelectorAll('.rep-cell');
+      all.forEach(c => c.classList.remove('selected'));
+      // toggle selection for the clicked cell
+      if (!cellEl.classList.contains('selected')) {
+        cellEl.classList.add('selected');
+      }
     }
 
     // Fame helpers
@@ -333,6 +330,7 @@
       updateFameUI();
     }
 
+    // wired to numeric input
     fameInput.addEventListener('input', () => {
       setFame(fameInput.value);
     });
@@ -344,6 +342,7 @@
       });
     });
 
+    // Crystal / Card functions (unchanged)
     function changeCrystal(color, amount) {
       const key = color.toLowerCase();
       crystals[key] = Math.max(0, (crystals[key] || 0) + amount);
@@ -396,7 +395,6 @@
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
 
     function resetDeck(){ initializeDeck(); }
-
     function updateDrawButton(){ drawBtn.textContent = endRoundFlag ? 'End Round' : 'Draw'; }
 
     function onDrawClick(){
