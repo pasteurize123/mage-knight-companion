@@ -1,58 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8" />
   <title>Mage Knight Companion</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
-    }
-    h1 {
-      color: #333;
-    }
-    .section {
-      margin-bottom: 30px;
-    }
-    button {
-      margin: 5px;
-      padding: 6px 10px;
-    }
-    .output {
-      background: #fff;
-      padding: 10px;
-      border-radius: 5px;
-    }
-    .track-container {
-      padding: 10px;
-      background: #eaeaea;
-      border-radius: 8px;
-    }
-    .rep-grid {
-      display: grid;
-      grid-template-columns: repeat(15, 40px);
-      gap: 2px;
-      margin-bottom: 20px;
-      position: relative;
-    }
-    .fame-grid {
-      display: grid;
-      grid-template-columns: repeat(120, 30px);
-      gap: 2px;
-      position: relative;
-    }
-    .rep-cell, .fame-cell {
-      background: #ddd;
-      text-align: center;
-      font-size: 12px;
-      padding: 5px;
-      border-radius: 4px;
-    }
-    .marker {
-      position: absolute;
-      font-size: 20px;
-      transition: all 0.3s ease;
-    }
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    h1 { color: #333; margin-bottom: 10px; }
+    .section { margin-bottom: 20px; }
+    button { margin: 4px; padding: 6px 10px; }
+    .output { background: #fff; padding: 10px; border-radius: 5px; min-height:40px; }
+    .track-container { padding: 10px; background: #eaeaea; border-radius: 8px; margin-bottom: 16px; }
+    .rep-grid { display: grid; grid-template-columns: repeat(15, 60px); gap: 4px; position: relative; align-items: center; }
+    .fame-grid { display: grid; grid-template-columns: repeat(120, 24px); gap: 2px; position: relative; align-items: center; margin-top: 8px; overflow-x: auto; }
+    .rep-cell, .fame-cell { background: #ddd; text-align: center; font-size: 12px; padding: 4px; border-radius: 4px; white-space: nowrap; }
+    .marker { position: absolute; font-size: 20px; transform: translate(-50%,-125%); transition: all 0.18s ease; pointer-events: none; }
+    .track-legend { margin-top: 8px; font-size: 14px; }
+    /* make fame grid scroll nicely */
+    .fame-grid::-webkit-scrollbar { height: 10px; }
+    .fame-grid::-webkit-scrollbar-thumb { background: #bbb; border-radius: 6px; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .crystal-row { margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -60,17 +27,20 @@
 
   <div class="track-container">
     <h2>Reputation Track</h2>
-    <div class="rep-grid" id="rep-grid">
+    <div class="rep-grid" id="rep-grid" aria-hidden="false">
       <div id="rep-marker" class="marker">🧭</div>
     </div>
 
     <h2>Fame Track</h2>
-    <div class="fame-grid" id="fame-grid">
+    <div class="fame-grid" id="fame-grid" aria-hidden="false">
       <div id="fame-marker" class="marker">⭐</div>
+    </div>
+    <div class="track-legend">
+      Fame Level: <strong id="fame-level">1</strong> &nbsp;|&nbsp; Fame: <strong id="fame-display">0</strong>
     </div>
   </div>
 
-  <div class="section">
+  <div class="section controls">
     <button onclick="changeFame(1)">+1 Fame</button>
     <button onclick="changeFame(-1)">-1 Fame</button>
     <button onclick="changeReputation(1)">+1 Rep</button>
@@ -79,78 +49,127 @@
 
   <div class="section">
     <h2>Crystals</h2>
-    🔴 Red: <span id="red">0</span>
-    <button onclick="changeCrystal('red', 1)">➕</button>
-    <button onclick="changeCrystal('red', -1)">➖</button><br>
-    🔵 Blue: <span id="blue">0</span>
-    <button onclick="changeCrystal('blue', 1)">➕</button>
-    <button onclick="changeCrystal('blue', -1)">➖</button><br>
-    🟢 Green: <span id="green">0</span>
-    <button onclick="changeCrystal('green', 1)">➕</button>
-    <button onclick="changeCrystal('green', -1)">➖</button><br>
-    ⚪ White: <span id="white">0</span>
-    <button onclick="changeCrystal('white', 1)">➕</button>
-    <button onclick="changeCrystal('white', -1)">➖</button>
+    <div class="crystal-row">🔴 Red: <span id="red">0</span>
+      <button onclick="changeCrystal('red', 1)">➕</button>
+      <button onclick="changeCrystal('red', -1)">➖</button>
+    </div>
+    <div class="crystal-row">🔵 Blue: <span id="blue">0</span>
+      <button onclick="changeCrystal('blue', 1)">➕</button>
+      <button onclick="changeCrystal('blue', -1)">➖</button>
+    </div>
+    <div class="crystal-row">🟢 Green: <span id="green">0</span>
+      <button onclick="changeCrystal('green', 1)">➕</button>
+      <button onclick="changeCrystal('green', -1)">➖</button>
+    </div>
+    <div class="crystal-row">⚪ White: <span id="white">0</span>
+      <button onclick="changeCrystal('white', 1)">➕</button>
+      <button onclick="changeCrystal('white', -1)">➖</button>
+    </div>
   </div>
 
   <div class="section">
     <h2>Dummy Deck</h2>
-    <button onclick="addCard('Red')">+ Red Card</button>
-    <button onclick="addCard('Blue')">+ Blue Card</button>
-    <button onclick="addCard('Green')">+ Green Card</button>
-    <button onclick="addCard('White')">+ White Card</button>
-    <button onclick="resetDeck()">Reset Deck</button>
-    <p>Cards left in deck: <span id="deck-count">16</span></p>
+    <div class="controls">
+      <button onclick="addCard('Red')">+ Red Card</button>
+      <button onclick="addCard('Blue')">+ Blue Card</button>
+      <button onclick="addCard('Green')">+ Green Card</button>
+      <button onclick="addCard('White')">+ White Card</button>
+      <button onclick="resetDeck()">Reset Deck</button>
+      <button onclick="reshuffleDiscardIntoDeck()">Reshuffle Discard Into Deck</button>
+      <div style="margin-left:8px">Cards left: <strong id="deck-count">0</strong></div>
+    </div>
   </div>
 
   <div class="section">
-    <h2>Draw Cards</h2>
-    <button onclick="drawDummyCards()">Draw Dummy Cards</button>
-    <div class="output">
-      <p id="dummy-output">Drawn cards will appear here.</p>
+    <h2>Draw</h2>
+    <div class="controls">
+      <button onclick="drawDummyCards()">Draw Dummy Cards</button>
+      <div id="dummy-output" class="output">Drawn cards will appear here.</div>
     </div>
   </div>
 
   <div class="section">
     <h2>Discard Pile</h2>
-    <div class="output">
-      <p id="discard-output">Discard pile is empty.</p>
-    </div>
+    <div id="discard-output" class="output">Discard pile is empty.</div>
   </div>
 
   <script>
+    // State
     let fame = 0;
-    let reputationIndex = 7; // 0–14, center is 7
+    let reputationIndex = 7; // center index (0..14)
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let dummyDeck = [];
     let discardPile = [];
 
+    // Reputation values as requested
     const repValues = ["–X", "–5", "–3", "–2", "–1", "–1", "0", "0", "0", "+1", "+1", "+2", "+2", "+3", "+5"];
+
+    // DOM refs
     const repGrid = document.getElementById("rep-grid");
     const fameGrid = document.getElementById("fame-grid");
     const repMarker = document.getElementById("rep-marker");
     const fameMarker = document.getElementById("fame-marker");
+    const fameLevelEl = document.getElementById("fame-level");
+    const fameDisplayEl = document.getElementById("fame-display");
 
-    repValues.forEach(val => {
+    // Build reputation grid
+    repValues.forEach((v, idx) => {
       const cell = document.createElement("div");
       cell.className = "rep-cell";
-      cell.textContent = val;
+      cell.textContent = v;
+      cell.dataset.index = idx;
       repGrid.appendChild(cell);
     });
 
+    // Build fame grid 0..119
     for (let i = 0; i <= 119; i++) {
       const cell = document.createElement("div");
       cell.className = "fame-cell";
       cell.textContent = i;
+      cell.dataset.value = i;
       fameGrid.appendChild(cell);
     }
 
+    // Fame level brackets
+    function getFameLevel(value) {
+      if (value <= 3) return 1;
+      if (value <= 7) return 2;
+      if (value <= 14) return 3;
+      if (value <= 23) return 4;
+      if (value <= 34) return 5;
+      if (value <= 47) return 6;
+      if (value <= 52) return 7;
+      if (value <= 79) return 8;
+      if (value <= 98) return 9;
+      return 10;
+    }
+
+    // Positioning helpers: use cell widths + gaps from CSS (keep in sync if you change CSS)
     function updateFameMarker() {
-      fameMarker.style.left = `${fame * 32}px`;
+      // compute left based on cell index and gap: cell width 24px + gap 2px = 26px approximate
+      const idx = Math.max(0, Math.min(119, fame));
+      const cellWidth = 24;
+      const gap = 2;
+      const offset = idx * (cellWidth + gap);
+      fameMarker.style.left = `${offset}px`;
+      // update displays
+      fameLevelEl.textContent = getFameLevel(fame);
+      fameDisplayEl.textContent = fame;
+      // auto-scroll fame grid so marker is visible
+      const grid = fameGrid;
+      const markerCenter = offset;
+      const viewWidth = grid.clientWidth;
+      const scrollLeft = Math.max(0, markerCenter - viewWidth / 2);
+      grid.scrollLeft = scrollLeft;
     }
 
     function updateRepMarker() {
-      repMarker.style.left = `${reputationIndex * 42}px`;
+      // rep cell width 60px + gap 4px = 64px approx
+      const idx = Math.max(0, Math.min(repValues.length - 1, reputationIndex));
+      const cellWidth = 60;
+      const gap = 4;
+      const offset = idx * (cellWidth + gap);
+      repMarker.style.left = `${offset}px`;
     }
 
     function changeFame(amount) {
@@ -159,7 +178,7 @@
     }
 
     function changeReputation(amount) {
-      reputationIndex = Math.max(0, Math.min(14, reputationIndex + amount));
+      reputationIndex = Math.max(0, Math.min(repValues.length - 1, reputationIndex + amount));
       updateRepMarker();
     }
 
@@ -168,6 +187,7 @@
       document.getElementById(color).textContent = crystals[color];
     }
 
+    // Deck functions
     function initializeDeck() {
       dummyDeck = [
         ...Array(4).fill("Red Card"),
@@ -176,8 +196,17 @@
         ...Array(4).fill("White Card")
       ];
       discardPile = [];
+      shuffleArray(dummyDeck);
       updateDeckCount();
       updateDiscardPile();
+      document.getElementById("dummy-output").textContent = "Deck initialized and shuffled.";
+    }
+
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
     }
 
     function addCard(color) {
@@ -187,30 +216,51 @@
 
     function resetDeck() {
       initializeDeck();
-      document.getElementById("dummy-output").textContent = "Deck reset to 16 cards.";
+    }
+
+    function reshuffleDiscardIntoDeck() {
+      if (discardPile.length === 0) {
+        alert("Discard pile is empty.");
+        return;
+      }
+      dummyDeck.push(...discardPile);
+      discardPile = [];
+      shuffleArray(dummyDeck);
+      updateDeckCount();
+      updateDiscardPile();
     }
 
     function drawDummyCards() {
       let drawn = [];
 
+      // Always draw 3 cards (or as many as remain)
       for (let i = 0; i < 3 && dummyDeck.length > 0; i++) {
-        let index = Math.floor(Math.random() * dummyDeck.length);
-        drawn.push(dummyDeck.splice(index, 1)[0]);
+        drawn.push(dummyDeck.pop());
       }
 
-      let lastCard = drawn[drawn.length - 1];
+      // Determine last card color and draw extras equal to number of crystals of that color
+      const lastCard = drawn[drawn.length - 1];
       if (lastCard) {
-        let color = lastCard.split(" ")[0].toLowerCase();
-        let extraDraws = crystals[color] || 0;
-
-        for (let i = 0; i < extraDraws && dummyDeck.length > 0; i++) {
-          let index = Math.floor(Math.random() * dummyDeck.length);
-          drawn.push(dummyDeck.splice(index, 1)[0]);
+        const color = lastCard.split(" ")[0].toLowerCase();
+        const extra = crystals[color] || 0;
+        for (let i = 0; i < extra && dummyDeck.length > 0; i++) {
+          drawn.push(dummyDeck.pop());
         }
       }
 
+      // If deck empties mid-draw and discard exists, reshuffle discard into deck automatically
+      if (dummyDeck.length === 0 && discardPile.length > 0) {
+        dummyDeck = discardPile.splice(0);
+        shuffleArray(dummyDeck);
+      }
+
+      // Put drawn into discard
       discardPile.push(...drawn);
-      document.getElementById("dummy-output").textContent = `Dummy draws: ${drawn.join(", ")}`;
+
+      // Display results (textual; replace with images later if desired)
+      document.getElementById("dummy-output").textContent =
+        drawn.length === 0 ? "No cards drawn (deck empty)." : `Dummy draws: ${drawn.join(", ")}`;
+
       updateDeckCount();
       updateDiscardPile();
     }
@@ -221,14 +271,22 @@
 
     function updateDiscardPile() {
       document.getElementById("discard-output").textContent =
-        discardPile.length === 0
-          ? "Discard pile is empty."
-          : `Discard pile: ${discardPile.join(", ")}`;
+        discardPile.length === 0 ? "Discard pile is empty." : `Discard pile (${discardPile.length}): ${discardPile.join(", ")}`;
     }
 
+    // Initialize UI and state on load
     initializeDeck();
     updateFameMarker();
     updateRepMarker();
+
+    // Expose a couple functions to global scope for buttons (already using inline onclick)
+    window.changeFame = changeFame;
+    window.changeReputation = changeReputation;
+    window.changeCrystal = changeCrystal;
+    window.addCard = addCard;
+    window.resetDeck = resetDeck;
+    window.drawDummyCards = drawDummyCards;
+    window.reshuffleDiscardIntoDeck = reshuffleDiscardIntoDeck;
   </script>
 </body>
 </html>
