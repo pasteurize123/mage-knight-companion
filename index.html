@@ -209,7 +209,8 @@
     </div>
   </div>
 
-  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true" style="display:none">
+  <!-- End round modal -->
+  <div id="overlay-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true" style="display:none">
     <div class="modal" role="document">
       <h3 id="modal-title">End Round — Choose Additions</h3>
 
@@ -245,9 +246,10 @@
     let endRoundFlag = false;
     let lastShownLevel = 1;
 
-    const repPositive = ["+1","+1","+2","+2","+3","+5"];
-    const repNeutral = ["0","0","0"]; // left 0, center 0, right 0
-    const repNegative = ["-1","-1","-2","-3","-5","X"];
+    // New reputation rows per user request
+    const repTop = ["0","+1","+1","+2","+2","+3","+5"];
+    const repMid = ["0"];
+    const repBot = ["0","-1","-1","-2","-3","-5","X"];
 
     const fameLevels = [
       {level:1, min:0,  max:2},
@@ -293,7 +295,7 @@
     const levelMessage = document.getElementById('level-message');
     const levelOk = document.getElementById('level-ok');
 
-    const overlayModal = document.getElementById('overlay');
+    const overlayModal = document.getElementById('overlay-modal');
     const crystalChoices = document.getElementById('crystal-choices');
     const cardChoices = document.getElementById('card-choices');
     const modalConfirm = document.getElementById('modal-confirm');
@@ -302,26 +304,26 @@
     let selectedCrystal = null;
     let selectedCardColor = null;
 
-    // Build reputation rows with row-specific classes
+    // Build reputation rows with the new exact content
     function buildRepRows() {
       repWrap.innerHTML = '';
 
       const topRow = document.createElement('div'); topRow.className = 'rep-row top';
-      repPositive.forEach(label => {
+      repTop.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => selectRepCell(el));
         topRow.appendChild(el);
       });
 
       const midRow = document.createElement('div'); midRow.className = 'rep-row mid';
-      repNeutral.forEach(label => {
+      repMid.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => selectRepCell(el));
         midRow.appendChild(el);
       });
 
       const botRow = document.createElement('div'); botRow.className = 'rep-row bot';
-      repNegative.forEach(label => {
+      repBot.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => selectRepCell(el));
         botRow.appendChild(el);
@@ -332,47 +334,10 @@
       repWrap.appendChild(botRow);
     }
 
-    // Select a single rep cell; only one cell may be selected at a time.
-    // Special behavior: clicking left '0' in mid row selects the corresponding bottom-row left cell.
-    // Clicking right '0' in mid row selects the corresponding top-row right cell.
+    // Single-select behavior; only one cell may be selected at a time.
     function selectRepCell(cellEl) {
       const all = repWrap.querySelectorAll('.rep-cell');
-      const midRow = repWrap.querySelector('.rep-row.mid');
-      const topRow = repWrap.querySelector('.rep-row.top');
-      const botRow = repWrap.querySelector('.rep-row.bot');
-
-      // compute index within its row
-      const parentRow = cellEl.parentElement;
-      const cellsInRow = Array.from(parentRow.querySelectorAll('.rep-cell'));
-      const idx = cellsInRow.indexOf(cellEl);
-
-      // Clear all selections first
       all.forEach(c => c.classList.remove('selected'));
-
-      // If clicked is in mid row and is "0" (textContent) and is leftmost (idx 0)
-      // then select bottom row left-most cell (botRow first cell)
-      if (parentRow.classList.contains('mid') && cellEl.textContent === '0') {
-        if (idx === 0) {
-          // left 0 -> move selection to bottom row first cell
-          const target = botRow.querySelectorAll('.rep-cell')[0];
-          if (target) target.classList.add('selected');
-          return;
-        }
-        // middle 0 -> select itself (center)
-        if (idx === 1) {
-          cellEl.classList.add('selected');
-          return;
-        }
-        // right 0 -> move selection to top row last cell
-        if (idx === 2) {
-          const topCells = topRow.querySelectorAll('.rep-cell');
-          const target = topCells[topCells.length - 1];
-          if (target) target.classList.add('selected');
-          return;
-        }
-      }
-
-      // Default: toggle selection on clicked cell (but ensure only one selected)
       cellEl.classList.add('selected');
     }
 
@@ -384,7 +349,6 @@
     }
 
     function handleLevelPrompts(newLevel) {
-      // only show prompt when leveling up to a level in the mapping and not shown previously
       if (newLevel > lastShownLevel && levelPrompts[newLevel]) {
         showLevelModal(newLevel, levelPrompts[newLevel]);
       }
@@ -415,7 +379,6 @@
       updateFameUI();
     }
 
-    // wired to numeric input
     fameInput.addEventListener('input', () => {
       setFame(fameInput.value);
     });
@@ -431,7 +394,7 @@
       hideLevelModal();
     });
 
-    // Crystal / Card functions (unchanged)
+    // Crystal / Card functions
     function changeCrystal(color, amount) {
       const key = color.toLowerCase();
       crystals[key] = Math.max(0, (crystals[key] || 0) + amount);
@@ -582,9 +545,9 @@
     // Init
     window.addEventListener('load', ()=>{
       buildRepRows();
-      // select middle row's center cell (index 1) by default
-      const midCells = repWrap.querySelectorAll('.rep-row.mid .rep-cell');
-      if (midCells && midCells[1]) midCells[1].classList.add('selected');
+      // select middle row's single 0 by default
+      const midCell = repWrap.querySelector('.rep-row.mid .rep-cell');
+      if (midCell) midCell.classList.add('selected');
 
       document.getElementById('card-red').textContent = cardCounts.Red;
       document.getElementById('card-blue').textContent = cardCounts.Blue;
