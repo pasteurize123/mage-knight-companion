@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Levels Achieved</title>
+  <title>Mage Knight Companion — Updated</title>
   <style>
     :root{
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
@@ -81,7 +81,7 @@
             </div>
           </div>
 
-          <!-- fame addition buttons and level adjust buttons in one row -->
+          <!-- fame addition buttons -->
           <div class="center" style="width:100%">
             <div>
               <button class="smallbtn fame-inc" data-inc="1">+1 Fame</button>
@@ -89,13 +89,6 @@
               <button class="smallbtn fame-inc" data-inc="3">+3 Fame</button>
               <button class="smallbtn fame-inc" data-inc="5">+5 Fame</button>
               <button class="smallbtn fame-inc" data-inc="10">+10 Fame</button>
-            </div>
-
-            <div style="width:18px"></div>
-
-            <div>
-              <button id="level-decrease" class="smallbtn">− Level</button>
-              <button id="level-increase" class="smallbtn">+ Level</button>
             </div>
           </div>
         </div>
@@ -157,6 +150,9 @@
 
         <div style="margin-top:8px">
           <div id="discard-output" class="output">Discard pile is empty.</div>
+          <div style="margin-top:8px;display:flex;justify-content:center">
+            <button id="reshuffle-btn" class="smallbtn">Reshuffle Deck</button>
+          </div>
         </div>
       </div>
     </section>
@@ -178,10 +174,7 @@
   </div>
 
   <script>
-    // Storage key
     const STORAGE_KEY = 'mk_companion_state_v1';
-
-    // Defaults
     const DEFAULT_CARDS = { Red: 4, Blue: 4, Green: 4, White: 4 };
     const DEFAULT_CRYSTALS = { red: 0, blue: 0, green: 0, white: 0 };
 
@@ -238,6 +231,7 @@
     const drawBtn = document.getElementById('draw-btn');
     const dummyOutput = document.getElementById('dummy-output');
     const discardOutput = document.getElementById('discard-output');
+    const reshuffleBtn = document.getElementById('reshuffle-btn');
 
     // Helpers
     function clampInt(v,min,max){ const n=Math.floor(Number(v)||0); return Math.max(min,Math.min(max,n)); }
@@ -289,7 +283,7 @@
       });
       repWrap.appendChild(top); repWrap.appendChild(mid); repWrap.appendChild(bot);
       if (repSelection) applyRepSelection(repSelection);
-      else { const midCell = repWrap.querySelector('.rep-row.mid .rep-cell'); if (midCell){ midCell.classList.add('selected'); repSelection={row:'mid',index:0}; } }
+      else { const midCell = repWrap.querySelector('.rep-row.mid .rep-cell'); if (midCell) { midCell.classList.add('selected'); repSelection={row:'mid',index:0}; } }
     }
     function selectRepCell(sel){
       const all = repWrap.querySelectorAll('.rep-cell'); all.forEach(c=>c.classList.remove('selected'));
@@ -326,8 +320,8 @@
       const level = getFameLevel(fame);
       playerLevelEl.textContent = level;
       fameInput.value = fame;
-      // record levels achieved; ensure Level 1 is always recorded first
-      if(achievedLevels.length===0) achievedLevels.push(1);
+      // ensure Level 1 present
+      if(!achievedLevels || achievedLevels.length===0) achievedLevels = [1];
       if(prevLevel !== null && level > prevLevel){
         for(let L=prevLevel+1; L<=level; L++){
           if(!achievedLevels.includes(L)) achievedLevels.push(L);
@@ -359,6 +353,24 @@
       updateDeckCount(); updateDiscardUI(); saveState();
     }
 
+    // Reshuffle: put discard into deck and reshuffle
+    function reshuffleDeck(){
+      if (!discardPile || discardPile.length === 0) {
+        alert('Discard pile is empty. Nothing to reshuffle.');
+        return;
+      }
+      // move discard into deck and shuffle
+      dummyDeck.push(...discardPile);
+      discardPile = [];
+      shuffle(dummyDeck);
+      updateDeckCount();
+      updateDiscardUI();
+      endRoundFlag = false;
+      drawBtn.textContent = 'Draw';
+      dummyOutput.textContent = 'Deck reshuffled from discard.';
+      saveState();
+    }
+
     // crystals & cards
     function changeCrystal(color,delta){ crystals[color] = Math.max(0,(crystals[color]||0)+delta); document.getElementById(color).textContent=crystals[color]; saveState(); }
     function changeCard(color,delta){
@@ -369,7 +381,7 @@
       updateDeckCount(); updateDiscardUI(); saveState();
     }
 
-    // fame setters and level adjusters
+    // fame setters
     function setFameOverride(value){
       const prev = fame;
       fame = clampInt(value,0,119);
@@ -378,31 +390,19 @@
     function addFame(delta){
       const prev = fame; fame = clampInt(fame + delta, 0, 119); updateFameUI(prev);
     }
-    function changeLevel(delta){
-      // move to next/prev level by setting fame to min (or max) threshold of target level
-      const currLevel = getFameLevel(fame);
-      let target = currLevel + delta;
-      if(target < 1) target = 1;
-      if(target > 10) target = 10;
-      // find new fame value within target level (set to target's min)
-      const lvlObj = FAME_LEVELS.find(x => x.level === target);
-      if(lvlObj){
-        const prev = fame; fame = lvlObj.min; updateFameUI(prev);
-      }
-    }
 
     // new game
     function newGame(){
+      if (!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
       clearSavedState();
       fame = 0;
       crystals = { ...DEFAULT_CRYSTALS };
       cardCounts = { ...DEFAULT_CARDS };
       dummyDeck = []; discardPile = []; endRoundFlag = false;
-      achievedLevels = [1]; // include Level 1 Start
+      achievedLevels = [1];
       repSelection = null;
       rebuildDeckFromCounts(); updateDiscardUI();
       buildRepRows();
-      // default selections and UI
       const midCell = repWrap.querySelector('.rep-row.mid .rep-cell'); if(midCell){ midCell.classList.add('selected'); repSelection={row:'mid',index:0}; }
       document.getElementById('red').textContent = crystals.red;
       document.getElementById('blue').textContent = crystals.blue;
@@ -419,7 +419,6 @@
     window.addEventListener('load', ()=>{
       buildRepRows();
       const ok = loadState();
-      // ensure Level 1 present
       if(!achievedLevels || achievedLevels.length===0) achievedLevels = [1];
       document.getElementById('red').textContent = crystals.red || 0;
       document.getElementById('blue').textContent = crystals.blue || 0;
@@ -440,10 +439,6 @@
       // fame inc buttons
       document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=> addFame(Number(btn.dataset.inc||0))));
 
-      // level adjust buttons
-      document.getElementById('level-increase').addEventListener('click', ()=> changeLevel(1));
-      document.getElementById('level-decrease').addEventListener('click', ()=> changeLevel(-1));
-
       // crystals buttons
       document.querySelectorAll('[data-crystal]').forEach(b => b.addEventListener('click', ()=>{
         const color = b.dataset.crystal; const act = b.dataset.act; changeCrystal(color, act==='inc'?1:-1);
@@ -454,16 +449,17 @@
         const color = b.dataset.color; const act = b.dataset.act; changeCard(color, act==='inc'?1:-1);
       }));
 
-      // draw
+      // draw and reshuffle
       drawBtn.addEventListener('click', onDrawClick);
+      reshuffleBtn.addEventListener('click', reshuffleDeck);
 
       // modal OK
       levelOk.addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
       // new game
-      newGameBtn.addEventListener('click', ()=>{ if(confirm('Start a new game? This will reset saved progress and values to defaults.')) newGame(); });
+      newGameBtn.addEventListener('click', newGame);
 
-      // best-effort save on unload
+      // save on unload
       window.addEventListener('beforeunload', saveState);
     });
 
