@@ -6,7 +6,7 @@
     body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
     h1 { color: #333; }
     .section { margin-bottom: 30px; }
-    button { margin: 5px; padding: 8px 12px; }
+    button { margin: 5px; padding: 6px 10px; }
     .output { background: #fff; padding: 10px; border-radius: 5px; }
   </style>
 </head>
@@ -26,13 +26,17 @@
   <div class="section">
     <h2>Crystals</h2>
     🔴 Red: <span id="red">0</span>
+    <button onclick="changeCrystal('red', 1)">➕</button>
+    <button onclick="changeCrystal('red', -1)">➖</button><br>
     🔵 Blue: <span id="blue">0</span>
+    <button onclick="changeCrystal('blue', 1)">➕</button>
+    <button onclick="changeCrystal('blue', -1)">➖</button><br>
     🟢 Green: <span id="green">0</span>
-    ⚪ White: <span id="white">0</span><br>
-    <button onclick="addCrystal('red')">+ Red Crystal</button>
-    <button onclick="addCrystal('blue')">+ Blue Crystal</button>
-    <button onclick="addCrystal('green')">+ Green Crystal</button>
-    <button onclick="addCrystal('white')">+ White Crystal</button>
+    <button onclick="changeCrystal('green', 1)">➕</button>
+    <button onclick="changeCrystal('green', -1)">➖</button><br>
+    ⚪ White: <span id="white">0</span>
+    <button onclick="changeCrystal('white', 1)">➕</button>
+    <button onclick="changeCrystal('white', -1)">➖</button>
   </div>
 
   <div class="section">
@@ -89,8 +93,8 @@
       document.getElementById("reputation").textContent = reputation;
     }
 
-    function addCrystal(color) {
-      crystals[color]++;
+    function changeCrystal(color, amount) {
+      crystals[color] = Math.max(0, crystals[color] + amount);
       document.getElementById(color).textContent = crystals[color];
     }
 
@@ -116,7 +120,7 @@
       // Check last card and draw extra cards equal to matching crystals
       let lastCard = drawn[drawn.length - 1];
       if (lastCard) {
-        let color = lastCard.split(" ")[0].toLowerCase(); // "Red Card" → "red"
+        let color = lastCard.split(" ")[0].toLowerCase();
         let extraDraws = crystals[color] || 0;
 
         for (let i = 0; i < extraDraws && dummyDeck.length > 0; i++) {
@@ -125,9 +129,7 @@
         }
       }
 
-      // Add drawn cards to discard pile
       discardPile.push(...drawn);
-
       document.getElementById("dummy-output").textContent = `Dummy draws: ${drawn.join(", ")}`;
       updateDeckCount();
       updateDiscardPile();
@@ -138,11 +140,10 @@
     }
 
     function updateDiscardPile() {
-      if (discardPile.length === 0) {
-        document.getElementById("discard-output").textContent = "Discard pile is empty.";
-      } else {
-        document.getElementById("discard-output").textContent = `Discard pile: ${discardPile.join(", ")}`;
-      }
+      document.getElementById("discard-output").textContent =
+        discardPile.length === 0
+          ? "Discard pile is empty."
+          : `Discard pile: ${discardPile.join(", ")}`;
     }
 
     initializeDeck();
