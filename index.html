@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Draw / End Round Behavior</title>
+  <title>Mage Knight Companion — Draw Behavior</title>
   <style>
     :root{
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
@@ -20,24 +20,17 @@
     input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center}
     .smallbtn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
     .muted{color:#666;font-size:13px}
-
-    /* Reputation track */
     .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:center}
     .rep-row{display:flex;gap:8px;justify-content:center;align-items:center}
     .rep-cell{min-width:var(--rep-min);padding:6px 10px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;user-select:none}
     .rep-row.top .rep-cell.selected{background:var(--gold);font-weight:700;color:#111}
     .rep-row.mid .rep-cell.selected{background:var(--yellow);font-weight:700;color:#111}
     .rep-row.bot .rep-cell.selected{background:var(--danger);font-weight:700;color:#fff}
-
-    /* Levels Achieved */
     .levels-list{background:#fff;padding:8px;border-radius:6px;min-height:36px;display:flex;gap:6px;flex-wrap:wrap}
     .level-pill{background:#eef;padding:6px 8px;border-radius:999px;font-weight:600;font-size:13px}
-
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:14px}
-
     .center{display:flex;align-items:center;justify-content:center;gap:8px}
     .center-column{display:flex;flex-direction:column;align-items:center;gap:6px}
-
     .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--overlay);z-index:60}
     .modal{background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
     .modal h3{margin:0 0 8px 0;font-size:16px}
@@ -45,7 +38,6 @@
     .choice-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
     .choice-btn{padding:8px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer}
     .choice-btn.selected{background:#eef6e9;border-color:#9fd49f}
-
     footer{display:flex;justify-content:center;padding:8px 0}
     @media (max-width:700px){ input[type=number]{width:90px} :root{--rep-min:34px} }
   </style>
@@ -55,7 +47,6 @@
 
   <div class="container">
 
-    <!-- Reputation -->
     <section class="panel" aria-labelledby="rep-title">
       <div class="panel-inner">
         <h2 id="rep-title">Reputation Track</h2>
@@ -63,20 +54,16 @@
       </div>
     </section>
 
-    <!-- Fame + Levels Achieved -->
     <section class="panel" aria-labelledby="fame-title">
       <div class="panel-inner">
         <h2 id="fame-title">Fame Track</h2>
-
         <div class="center-column" style="width:100%">
           <div class="center" style="width:100%;margin-bottom:6px">
             <div style="text-align:center">
               <label style="font-weight:700;display:block;margin-bottom:6px">Player Fame</label>
               <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
             </div>
-
             <div style="width:18px"></div>
-
             <div style="text-align:center">
               <label style="font-weight:700;display:block;margin-bottom:6px">Player Level</label>
               <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
@@ -101,7 +88,6 @@
       </div>
     </section>
 
-    <!-- Dummy player area (crystals/cards/ deck) -->
     <section class="panel" aria-labelledby="dummy-title">
       <div class="panel-inner">
         <h2 id="dummy-title">Dummy Player</h2>
@@ -163,7 +149,6 @@
     </footer>
   </div>
 
-  <!-- End round modal for choosing crystal/card when end of round occurs -->
   <div id="endround-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="endround-title">
       <h3 id="endround-title">End Round — Choose Additions</h3>
@@ -196,7 +181,6 @@
     </div>
   </div>
 
-  <!-- Level modal (combined prompts) -->
   <div id="level-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="lvl-title">
       <h3 id="lvl-title">Level Up</h3>
@@ -253,7 +237,7 @@
     let achievedLevels = []; // chronological
     let repSelection = null;
 
-    // DOM
+    // DOM refs
     const repWrap = document.getElementById('rep-wrap');
     const fameInput = document.getElementById('fame-input');
     const playerLevelEl = document.getElementById('player-level');
@@ -349,7 +333,7 @@
       });
     }
 
-    // Fame UI and prompt handling
+    // Fame handling
     function handleLevelPrompts(prevLevel,newLevel){
       const messages=[];
       for(let L=prevLevel+1; L<=newLevel; L++) if(LEVEL_PROMPTS[L]) messages.push(`Level ${L}: ${LEVEL_PROMPTS[L]}`);
@@ -357,7 +341,6 @@
       levelMessage.textContent = messages.join('\n');
       levelModal.style.display='flex'; levelModal.setAttribute('aria-hidden','false');
     }
-
     function updateFameUI(prevFame=null){
       const prevLevel = prevFame !== null ? getFameLevel(prevFame) : null;
       const level = getFameLevel(fame);
@@ -374,7 +357,7 @@
       saveState();
     }
 
-    // Deck & draw
+    // Deck & draw helpers
     function rebuildDeckFromCounts(){
       dummyDeck = [];
       Object.keys(cardCounts).forEach(color => { for(let i=0;i<cardCounts[color];i++) dummyDeck.push(`${color} Card`); });
@@ -385,11 +368,20 @@
     function updateDiscardUI(){ if(!discardPile||discardPile.length===0) discardOutput.textContent='Discard pile is empty.'; else {
       const syms = discardPile.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c); discardOutput.textContent = `Discard (${discardPile.length}): ${syms.join(' ')}`; } }
 
-    // Draw behaviour:
-    // - If deck empty at press: show descriptor, set End Round, and change button text.
-    // - If deck had cards: draw up to 3; apply extra draws from crystals; move draws to discard.
+    // Draw logic: only flip to End Round when the deck is empty at the moment the player presses Draw
     function drawCardsOnce(){
-      // If deck empty at start
+      // draw up to 3
+      const drawn = [];
+      for (let i = 0; i < 3 && dummyDeck.length > 0; i++) {
+        drawn.push(dummyDeck.pop());
+      }
+
+      // if nothing was drawn, return empty
+      return drawn;
+    }
+
+    function onDrawClick(){
+      // If the deck is empty at the moment of pressing Draw, flip to End Round and show descriptor
       if (dummyDeck.length === 0) {
         endRoundFlag = true;
         drawBtn.textContent = 'End Round';
@@ -398,11 +390,10 @@
         return;
       }
 
-      const drawn = [];
-      for (let i = 0; i < 3 && dummyDeck.length > 0; i++) {
-        drawn.push(dummyDeck.pop());
-      }
+      // Otherwise perform a normal draw
+      const drawn = drawCardsOnce();
 
+      // apply extra draws based on last card and crystals
       const last = drawn[drawn.length - 1];
       if (last) {
         const color = last.split(' ')[0].toLowerCase();
@@ -411,6 +402,8 @@
       }
 
       if (drawn.length === 0) {
+        // In practice this won't happen here because we checked deck length before drawing,
+        // but keep defensive behavior
         endRoundFlag = true;
         drawBtn.textContent = 'End Round';
         dummyOutput.textContent = 'Nil cards in deck. End of round announced';
@@ -418,33 +411,20 @@
         return;
       }
 
+      // move drawn to discard and update UI
       discardPile.push(...drawn);
       const syms = drawn.map(c => COLOR_SYMBOL[c.split(' ')[0]] || c);
       dummyOutput.textContent = syms.join(' ');
       updateDeckCount();
       updateDiscardUI();
 
-      // If deck now empty after drawing, signal end of round and update message/button
-      if (dummyDeck.length === 0) {
-        endRoundFlag = true;
-        drawBtn.textContent = 'End Round';
-        dummyOutput.textContent = 'Nil cards in deck. End of round announced';
-      }
+      // IMPORTANT: do NOT automatically change to End Round if the deck became empty as a result of this draw.
+      // The button only flips when the player presses Draw while the deck is already empty.
 
       saveState();
     }
 
-    function onDrawClick(){
-      if (endRoundFlag) {
-        // pressing End Round should open the end-round flow
-        openEndRoundModal();
-        return;
-      }
-      // Normal draw attempt
-      drawCardsOnce();
-    }
-
-    // End round modal functions
+    // End-round modal flow
     function openEndRoundModal(){
       selectedCrystal = null;
       selectedCard = null;
@@ -475,13 +455,10 @@
       endroundConfirm.disabled = !(selectedCrystal && selectedCard);
     });
 
-    endroundCancel.addEventListener('click', () => {
-      closeEndRoundModal();
-    });
+    endroundCancel.addEventListener('click', () => closeEndRoundModal());
 
     endroundConfirm.addEventListener('click', () => {
       if (!selectedCrystal || !selectedCard) return;
-      // add chosen crystal and card
       changeCrystal(selectedCrystal, 1);
       changeCard(selectedCard, 1);
 
@@ -495,7 +472,7 @@
       updateDeckCount();
       updateDiscardUI();
 
-      // reset end round state
+      // reset end round state and button
       endRoundFlag = false;
       drawBtn.textContent = 'Draw';
       dummyOutput.textContent = `End Round: added ${COLOR_SYMBOL[selectedCard] || selectedCard} and ${COLOR_SYMBOL[selectedCrystal] || selectedCrystal}. Deck reshuffled.`;
@@ -521,7 +498,7 @@
       saveState();
     }
 
-    // crystals & cards
+    // crystals & cards helpers
     function changeCrystal(color,delta){
       crystals[color] = Math.max(0,(crystals[color]||0)+delta);
       document.getElementById(color).textContent = crystals[color];
@@ -621,15 +598,13 @@
       reshuffleBtn.addEventListener('click', reshuffleDeck);
       newGameBtn.addEventListener('click', newGame);
 
-      // endround modal wired above
-      // level modal ok
+      // endround modal handling wired earlier; level modal ok
       document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
-      // save on unload
       window.addEventListener('beforeunload', saveState);
     });
 
-    // expose for debug
+    // expose for debugging
     window._mk_save = saveState;
     window._mk_load = loadState;
     window._mk_newGame = newGame;
