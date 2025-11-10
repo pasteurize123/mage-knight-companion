@@ -178,11 +178,11 @@
 
   </div>
 
-  <!-- Level prompt modal (used as a queue) -->
+  <!-- Single-level-up modal that shows all relevant prompts together -->
   <div id="level-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="level-title">
       <h3 id="level-title">Level Up</h3>
-      <p id="level-message"></p>
+      <div id="level-message" style="white-space:pre-wrap;font-size:14px;margin-top:8px"></div>
       <div class="modal-foot">
         <button id="level-ok" class="smallbtn">OK</button>
       </div>
@@ -222,9 +222,7 @@
     let discardPile = [];
     let endRoundFlag = false;
     let lastShownLevel = 1;
-    let levelQueue = [];
 
-    // Reputation rows per request
     const repTop = ["0","+1","+1","+2","+2","+3","+5"];
     const repMid = ["0"];
     const repBot = ["0","-1","-1","-2","-3","-5","X"];
@@ -310,12 +308,11 @@
       repWrap.appendChild(botRow);
     }
 
-    // Single select cell behavior
     function selectRepCell(cellEl) {
       const all = repWrap.querySelectorAll('.rep-cell');
       all.forEach(c => c.classList.remove('selected'));
 
-      // mid row logic: left 0 -> bottom left, right 0 -> top right, center 0 -> itself
+      // mid row logic: left 0 -> bottom left, center 0 -> itself, right 0 -> top right
       const parentRow = cellEl.parentElement;
       if (parentRow.classList.contains('mid')) {
         const idx = Array.from(parentRow.children).indexOf(cellEl);
@@ -340,21 +337,17 @@
       return 1;
     }
 
-    // When fame increases across multiple levels, queue all prompts between previous+1 and newLevel inclusive
+    // Show all relevant prompts in one modal when fame jumps multiple levels
     function handleLevelPrompts(prevLevel, newLevel) {
-      levelQueue = [];
+      const messages = [];
       for (let L = prevLevel + 1; L <= newLevel; L++) {
-        if (levelPrompts[L]) levelQueue.push({ level: L, msg: levelPrompts[L] });
+        if (levelPrompts[L]) messages.push(`Level ${L}: ${levelPrompts[L]}`);
       }
-      if (levelQueue.length > 0) showNextLevelPrompt();
-    }
-
-    function showNextLevelPrompt() {
-      if (levelQueue.length === 0) return hideLevelModal();
-      const next = levelQueue.shift();
-      levelMessage.textContent = `Level ${next.level}: ${next.msg}`;
+      if (messages.length === 0) return;
+      levelMessage.textContent = messages.join('\n');
       levelModal.style.display = 'flex';
       levelModal.setAttribute('aria-hidden', 'false');
+      lastShownLevel = Math.max(lastShownLevel, newLevel);
     }
 
     function hideLevelModal() {
@@ -368,15 +361,11 @@
       fameLevelEl.textContent = level;
       fameResult.innerHTML = `Level: <strong id="fame-level">${level}</strong>`;
       fameInput.value = fame;
-      if (level > prevLevel) {
-        handleLevelPrompts(prevLevel, level);
-        lastShownLevel = Math.max(lastShownLevel, level);
-      }
+      if (level > prevLevel) handleLevelPrompts(prevLevel, level);
     }
 
     function setFame(v) {
-      const newVal = Math.max(0, Math.min(119, Math.floor(Number(v) || 0)));
-      fame = newVal;
+      fame = Math.max(0, Math.min(119, Math.floor(Number(v) || 0)));
       updateFameUI();
     }
 
@@ -388,9 +377,7 @@
       });
     });
 
-    levelOk.addEventListener('click', () => {
-      showNextLevelPrompt();
-    });
+    levelOk.addEventListener('click', () => hideLevelModal());
 
     // Crystals and card functions (unchanged)
     function changeCrystal(color, amount) {
@@ -438,7 +425,6 @@
       dummyOutput.textContent = 'Deck initialized and shuffled.';
       setFame(0);
       lastShownLevel = 1;
-      levelQueue = [];
       hideLevelModal();
     }
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
@@ -538,7 +524,7 @@
       initializeDeck();
     });
 
-    // Expose for debug/buttons if needed
+    // Expose functions for debugging if needed
     window.changeCrystal = changeCrystal;
     window.changeCard = changeCard;
     window.resetDeck = resetDeck;
