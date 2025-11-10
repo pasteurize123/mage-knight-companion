@@ -10,11 +10,11 @@
       --panel-bg:#ececec;
       --box-bg:#ffffff;
       --cell:#e8e8e8;
-      --sel-rep:#bfe7c7;
-      --sel-fame:#ffdca3;
-      --gap:10px;
       --rep-min:44px;
       --overlay-bg: rgba(0,0,0,0.45);
+      --gold: #ffd700;
+      --orange: #ffb347;
+      --red: #ff6b6b;
     }
     *{box-sizing:border-box}
     body{
@@ -34,7 +34,10 @@
     .rep-wrap{display:flex;flex-direction:column;gap:8px;width:100%;align-items:center}
     .rep-row{display:flex;gap:8px;align-items:center;justify-content:center}
     .rep-row .rep-cell{flex:0 0 auto;min-width:var(--rep-min);padding:6px 10px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;font-size:13px;user-select:none}
-    .rep-cell.selected{background:var(--sel-rep);font-weight:700}
+    /* selected styles per row */
+    .rep-row.top .rep-cell.selected{background:var(--gold);color:#111;font-weight:700}
+    .rep-row.mid .rep-cell.selected{background:var(--orange);color:#111;font-weight:700}
+    .rep-row.bot .rep-cell.selected{background:var(--red);color:#fff;font-weight:700}
 
     .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .fame-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -93,14 +96,12 @@
 
         <div class="fame-row" role="group" aria-label="Fame input">
           <div class="fame-controls" style="flex:1">
-            <!-- Label changed from Tracked Fame to Fame -->
             <label for="fame-input" style="font-size:13px">Fame</label>
             <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
             <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
             <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
           </div>
 
-          <!-- Individual add-buttons (no subtract) -->
           <div style="display:flex;align-items:center;gap:6px">
             <button class="fame-btn" data-inc="1">+1</button>
             <button class="fame-btn" data-inc="2">+2</button>
@@ -220,13 +221,12 @@
 
   <script>
     // State
-    let fame = 0; // tracked fame value
-    // crystals belong to the dummy player
+    let fame = 0;
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 };
     let dummyDeck = [];
     let discardPile = [];
-    let endRoundFlag = false; // true when next action should be End Round flow
+    let endRoundFlag = false;
 
     const repPositive = ["+1","+1","+2","+2","+3","+5"];
     const repNeutral = ["0","0","0"];
@@ -271,27 +271,31 @@
     let selectedCrystal = null;
     let selectedCardColor = null;
 
-    // Build reputation rows
+    // Build reputation rows with row-specific classes
     function buildRepRows() {
       repWrap.innerHTML = '';
-      const topRow = document.createElement('div'); topRow.className = 'rep-row';
+
+      const topRow = document.createElement('div'); topRow.className = 'rep-row top';
       repPositive.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => selectRep(el, label));
         topRow.appendChild(el);
       });
-      const midRow = document.createElement('div'); midRow.className = 'rep-row';
+
+      const midRow = document.createElement('div'); midRow.className = 'rep-row mid';
       repNeutral.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => selectRep(el, label));
         midRow.appendChild(el);
       });
-      const botRow = document.createElement('div'); botRow.className = 'rep-row';
+
+      const botRow = document.createElement('div'); botRow.className = 'rep-row bot';
       repNegative.forEach(label => {
         const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => selectRep(el, label));
         botRow.appendChild(el);
       });
+
       repWrap.appendChild(topRow);
       repWrap.appendChild(midRow);
       repWrap.appendChild(botRow);
@@ -323,12 +327,10 @@
       updateFameUI();
     }
 
-    // wired to numeric input
     fameInput.addEventListener('input', () => {
       setFame(fameInput.value);
     });
 
-    // Individual add-buttons behavior
     fameButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const inc = parseInt(btn.dataset.inc || "0", 10);
@@ -336,27 +338,23 @@
       });
     });
 
-    // Crystals change (dummy player's crystals)
+    // Crystal / Card functions
     function changeCrystal(color, amount) {
       const key = color.toLowerCase();
       crystals[key] = Math.max(0, (crystals[key] || 0) + amount);
       document.getElementById(key).textContent = crystals[key];
     }
 
-    // Card counts: update counts and immediately add/remove from live deck
     function changeCard(color, amount) {
-      // update stored counts
       cardCounts[color] = Math.max(0, (cardCounts[color] || 0) + amount);
       document.getElementById(`card-${color.toLowerCase()}`).textContent = cardCounts[color];
 
-      // when incrementing: add one card of that color to the deck (insert at random position)
       if (amount > 0) {
         const cardName = `${color} Card`;
         const idx = Math.floor(Math.random() * (dummyDeck.length + 1));
         dummyDeck.splice(idx, 0, cardName);
       }
 
-      // when decrementing: remove one card of that color from deck or discard if present
       if (amount < 0) {
         const cardName = `${color} Card`;
         const i = dummyDeck.findIndex(c => c === cardName);
@@ -381,7 +379,6 @@
       updateDeckCount();
     }
 
-    // initialize/reset deck
     function initializeDeck() {
       rebuildDeckFromCounts();
       discardPile = [];
@@ -394,24 +391,19 @@
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
 
     function resetDeck(){ initializeDeck(); }
-
     function updateDrawButton(){ drawBtn.textContent = endRoundFlag ? 'End Round' : 'Draw'; }
 
-    // DRAW flow
     function onDrawClick(){
       if(endRoundFlag){
-        // End Round selected -> open modal forcing crystal + card addition, then reshuffle discard into deck
         openEndRoundModal();
         return;
       }
 
-      // Normal draw logic
       const drawn = [];
       for(let i=0;i<3 && dummyDeck.length>0;i++){
         drawn.push(dummyDeck.pop());
       }
 
-      // extra draws based on crystals matching last drawn color
       const last = drawn[drawn.length-1];
       if(last){
         const color = last.split(' ')[0].toLowerCase();
@@ -419,7 +411,6 @@
         for(let i=0;i<extra && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
       }
 
-      // If this draw produced zero drawn cards -> switch to End Round mode
       if(drawn.length === 0){
         endRoundFlag = true;
         updateDrawButton();
@@ -427,7 +418,6 @@
         return;
       }
 
-      // Otherwise, put drawn into discard and show symbols
       discardPile.push(...drawn);
       const drawnSymbols = drawn.map(c => {
         const color = c.split(' ')[0];
@@ -437,10 +427,8 @@
 
       updateDeckCount();
       updateDiscard();
-      // If deck emptied here, keep button as Draw; only a subsequent Draw that yields 0 will set endRoundFlag.
     }
 
-    // Modal flow for End Round
     function openEndRoundModal(){
       selectedCrystal = null;
       selectedCardColor = null;
@@ -469,23 +457,18 @@
     });
 
     modalCancel.addEventListener('click', () => {
-      // keep endRoundFlag true, just close modal
       closeModal();
     });
 
     modalConfirm.addEventListener('click', () => {
       if(!selectedCrystal || !selectedCardColor) return;
-      // 1) add one crystal to the dummy player
       changeCrystal(selectedCrystal, 1);
-      // 2) add one card of selected color to counts and immediately to deck
       changeCard(selectedCardColor, 1);
-      // 3) reshuffle discard into deck and clear discard
       if(discardPile.length > 0){
         dummyDeck.push(...discardPile);
         discardPile = [];
         shuffle(dummyDeck);
       }
-      // update UI
       updateDeckCount();
       updateDiscard();
       dummyOutput.textContent = `End Round: added ${colorSymbol[selectedCardColor] || selectedCardColor} and ${colorSymbol[selectedCrystal] || selectedCrystal}. Deck reshuffled.`;
