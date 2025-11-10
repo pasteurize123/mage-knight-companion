@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Draw / End Round Fixed</title>
+  <title>Mage Knight Companion — Draw / End Round Behavior</title>
   <style>
     :root{
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
@@ -363,7 +363,6 @@
       const level = getFameLevel(fame);
       playerLevelEl.textContent = level;
       fameInput.value = fame;
-      // ensure Level 1 present
       if(!achievedLevels || achievedLevels.length===0) achievedLevels = [1];
       if(prevLevel !== null && level > prevLevel){
         for(let L=prevLevel+1; L<=level; L++){
@@ -387,15 +386,14 @@
       const syms = discardPile.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c); discardOutput.textContent = `Discard (${discardPile.length}): ${syms.join(' ')}`; } }
 
     // Draw behaviour:
-    // - Draw up to 3 cards or until deck empty
-    // - If last drawn card has color and crystals give extra draws, draw those (from remaining deck)
-    // - If cannot draw (deck empty at start), set endRoundFlag and change button to 'End Round'
+    // - If deck empty at press: show descriptor, set End Round, and change button text.
+    // - If deck had cards: draw up to 3; apply extra draws from crystals; move draws to discard.
     function drawCardsOnce(){
+      // If deck empty at start
       if (dummyDeck.length === 0) {
-        // nothing to draw => enter end of round
         endRoundFlag = true;
         drawBtn.textContent = 'End Round';
-        dummyOutput.textContent = 'No cards to draw. End of round pending.';
+        dummyOutput.textContent = 'Nil cards in deck. End of round announced';
         saveState();
         return;
       }
@@ -405,7 +403,6 @@
         drawn.push(dummyDeck.pop());
       }
 
-      // apply extra draws if last drawn color and crystals provide extra
       const last = drawn[drawn.length - 1];
       if (last) {
         const color = last.split(' ')[0].toLowerCase();
@@ -416,7 +413,7 @@
       if (drawn.length === 0) {
         endRoundFlag = true;
         drawBtn.textContent = 'End Round';
-        dummyOutput.textContent = 'No cards drawn. End of round pending.';
+        dummyOutput.textContent = 'Nil cards in deck. End of round announced';
         saveState();
         return;
       }
@@ -427,10 +424,11 @@
       updateDeckCount();
       updateDiscardUI();
 
-      // If deck is now empty after drawing, prepare for end of round (button becomes End Round)
+      // If deck now empty after drawing, signal end of round and update message/button
       if (dummyDeck.length === 0) {
         endRoundFlag = true;
         drawBtn.textContent = 'End Round';
+        dummyOutput.textContent = 'Nil cards in deck. End of round announced';
       }
 
       saveState();
@@ -438,11 +436,11 @@
 
     function onDrawClick(){
       if (endRoundFlag) {
-        // open end round modal to choose crystal and card
+        // pressing End Round should open the end-round flow
         openEndRoundModal();
         return;
       }
-      // normal draw
+      // Normal draw attempt
       drawCardsOnce();
     }
 
@@ -453,7 +451,6 @@
       endroundConfirm.disabled = true;
       endroundModal.style.display = 'flex';
       endroundModal.setAttribute('aria-hidden', 'false');
-      // reset selection UI
       Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.remove('selected'));
       Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.remove('selected'));
     }
@@ -484,7 +481,7 @@
 
     endroundConfirm.addEventListener('click', () => {
       if (!selectedCrystal || !selectedCard) return;
-      // apply chosen crystal and card
+      // add chosen crystal and card
       changeCrystal(selectedCrystal, 1);
       changeCard(selectedCard, 1);
 
@@ -498,7 +495,7 @@
       updateDeckCount();
       updateDiscardUI();
 
-      // reset end round
+      // reset end round state
       endRoundFlag = false;
       drawBtn.textContent = 'Draw';
       dummyOutput.textContent = `End Round: added ${COLOR_SYMBOL[selectedCard] || selectedCard} and ${COLOR_SYMBOL[selectedCrystal] || selectedCrystal}. Deck reshuffled.`;
@@ -510,7 +507,6 @@
     // Reshuffle: put discard into deck and reshuffle (button under discard)
     function reshuffleDeck(){
       if (!discardPile || discardPile.length === 0) {
-        // no-op if empty
         dummyOutput.textContent = 'Discard pile is empty. Nothing to reshuffle.';
         return;
       }
@@ -625,8 +621,9 @@
       reshuffleBtn.addEventListener('click', reshuffleDeck);
       newGameBtn.addEventListener('click', newGame);
 
-      // endround modal buttons wired earlier; level modal ok
-      levelOk.addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
+      // endround modal wired above
+      // level modal ok
+      document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
       // save on unload
       window.addEventListener('beforeunload', saveState);
