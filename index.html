@@ -172,7 +172,7 @@
     let cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 };
     let dummyDeck = [];
     let discardPile = [];
-    let endTurnMode = false; // true when button should be "End Turn" (i.e. last draw returned 0 cards)
+    let endRoundMode = false; // true when button should be "End Round" (i.e. next draw would produce 0)
 
     const repPositive = ["+1","+1","+2","+2","+3","+5"];
     const repNeutral = ["0","0","0"];
@@ -276,7 +276,7 @@
     function initializeDeck() {
       rebuildDeckFromCounts();
       discardPile = [];
-      endTurnMode = false;
+      endRoundMode = false;
       updateDrawButton();
       updateDiscard();
       dummyOutput.textContent = 'Deck initialized and shuffled.';
@@ -288,30 +288,32 @@
     }
 
     function updateDrawButton(){
-      drawBtn.textContent = endTurnMode ? 'End Turn' : 'Draw';
+      drawBtn.textContent = endRoundMode ? 'End Round' : 'Draw';
     }
 
-    // Called by the Draw/End Turn button
+    // Called by the Draw/End Round button
     function onDrawClick(){
-      if(endTurnMode){
-        // End Turn: move discard into deck, shuffle, clear discard, revert button
+      if(endRoundMode){
+        // End Round: move discard into deck, shuffle, clear discard, revert button
         if(discardPile.length > 0){
           dummyDeck.push(...discardPile);
           discardPile = [];
           shuffle(dummyDeck);
         }
-        endTurnMode = false;
+        endRoundMode = false;
         updateDeckCount();
         updateDiscard();
         dummyOutput.textContent = 'Round ended. Deck reshuffled.';
         updateDrawButton();
         return;
       }
+
       // Normal draw
       const drawn = [];
       for(let i=0;i<3 && dummyDeck.length>0;i++){
         drawn.push(dummyDeck.pop());
       }
+
       // extra draws based on crystals matching last drawn color
       const last = drawn[drawn.length-1];
       if(last){
@@ -320,11 +322,11 @@
         for(let i=0;i<extra && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
       }
 
-      // If this draw produced zero drawn cards -> switch to End Turn mode
+      // If this draw produced zero drawn cards -> switch to End Round mode and change message
       if(drawn.length === 0){
-        endTurnMode = true;
+        endRoundMode = true;
         updateDrawButton();
-        dummyOutput.textContent = 'No cards drawn. Select End Turn to reshuffle.';
+        dummyOutput.textContent = 'No cards drawn. End of round announced.';
         return;
       }
 
@@ -337,7 +339,7 @@
       dummyOutput.textContent = drawnSymbols.join(' ');
 
       // If the draw emptied the deck (but at least one card was drawn), keep button as Draw.
-      // Only a subsequent Draw attempt (which would draw 0) will flip button to End Turn.
+      // Only a subsequent Draw attempt (which would draw 0) will flip button to End Round.
       updateDeckCount();
       updateDiscard();
     }
