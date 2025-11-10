@@ -44,7 +44,6 @@
     .fame-row-scroll { overflow-x: auto; padding-bottom:6px; }
     .fame-row-scroll::-webkit-scrollbar { height:10px; }
     .fame-row-scroll::-webkit-scrollbar-thumb { background:#c1c1c1; border-radius:6px; }
-    .track-controls { display:flex; gap:8px; align-items:center; }
   </style>
 </head>
 <body>
@@ -54,7 +53,7 @@
     <h2>Reputation Track</h2>
     <div class="rep-row">
       <div class="rep-grid" id="rep-grid" aria-hidden="false"></div>
-      <div style="min-width:80px; text-align:center;">Current: <strong id="rep-display">0</strong></div>
+      <div style="min-width:100px; text-align:center;">Current: <strong id="rep-display">0</strong></div>
     </div>
 
     <h2>Fame Track (by Level)</h2>
@@ -124,15 +123,15 @@
   <script>
     // State
     let fame = 0;
-    let reputationIndex = 7; // start at middle index (0..14) representing 0
+    let reputationIndex = 7; // middle (0) by default
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let dummyDeck = [];
     let discardPile = [];
 
-    // Reputation values fixed
+    // Reputation values
     const repValues = ["–X", "–5", "–3", "–2", "–1", "–1", "0", "0", "0", "+1", "+1", "+2", "+2", "+3", "+5"];
 
-    // Fame level brackets
+    // Fame level brackets (corrected)
     const fameLevels = [
       {level:1, min:0,  max:3  },
       {level:2, min:4,  max:7  },
@@ -155,7 +154,7 @@
     const fameDisplayEl = document.getElementById('fame-display');
     const repDisplayEl = document.getElementById('rep-display');
 
-    // Build reputation UI (clickable)
+    // Build reputation UI (clickable cells)
     repValues.forEach((v, idx) => {
       const c = document.createElement('div');
       c.className = 'rep-cell';
@@ -168,7 +167,7 @@
       repGrid.appendChild(c);
     });
 
-    // Build fame UI rows and keep references
+    // Build fame rows by level and keep references for positioning and highlighting
     const fameCellRefs = []; // {levelIndex, value, el}
     fameLevels.forEach((lvl, levelIndex) => {
       const rowWrap = document.createElement('div');
@@ -220,9 +219,8 @@
       return { levelIndex:0, level:1, indexInRow:0 };
     }
 
-    // position fame marker above the correct cell and highlight selected cell
+    // update fame marker and highlight selected cell
     function updateFameMarker() {
-      // clear previous selections
       fameCellRefs.forEach(r => r.el.classList.toggle('selected', r.value === fame));
       const ref = fameCellRefs.find(r => r.value === fame);
       if (!ref) return;
@@ -234,11 +232,10 @@
       const top = rowRect.top - containerRect.top;
       fameMarker.style.left = `${left}px`;
       fameMarker.style.top = `${top}px`;
-      // update displays
       const loc = locateFame(fame);
       fameLevelEl.textContent = loc.level;
       fameDisplayEl.textContent = fame;
-      // scroll the row to center the cell
+      // center the clicked cell horizontally in its scroll wrapper
       const scrollWrap = ref.el.closest('.fame-row-scroll');
       if (scrollWrap) {
         const cellCenter = (cellRect.left + cellRect.right) / 2;
@@ -249,32 +246,25 @@
       }
     }
 
-    // position reputation marker above selected rep cell and highlight selection
+    // update reputation marker and highlight selection
     function updateRepMarker() {
-      // clear previous selection
       Array.from(repGrid.children).forEach(c => c.classList.toggle('selected', Number(c.dataset.index) === reputationIndex));
       const repCell = repGrid.querySelector(`.rep-cell[data-index="${reputationIndex}"]`);
       if (!repCell) return;
       const gridRect = repGrid.getBoundingClientRect();
       const cellRect = repCell.getBoundingClientRect();
       const left = (cellRect.left + cellRect.right)/2 - gridRect.left;
-      // place repMarker above rep grid area
+      // place repMarker above rep grid area (position relative to levelsContainer top)
       const top = repGrid.getBoundingClientRect().top - levelsContainer.getBoundingClientRect().top - 28;
       repMarker.style.left = `${left}px`;
       repMarker.style.top = `${top}px`;
-      // update rep display (map index to repValues)
       repDisplayEl.textContent = repValues[reputationIndex];
     }
 
-    // controls
+    // controls for fame (small +/- kept for keyboard/quick adjustments)
     function changeFame(amount) {
       fame = Math.max(0, Math.min(119, fame + amount));
       updateFameMarker();
-    }
-
-    function changeReputation(amount) {
-      reputationIndex = Math.max(0, Math.min(repValues.length - 1, reputationIndex + amount));
-      updateRepMarker();
     }
 
     function changeCrystal(color, amount) {
@@ -282,7 +272,7 @@
       document.getElementById(color).textContent = crystals[color];
     }
 
-    // Deck functions
+    // Deck and draw logic
     function initializeDeck() {
       dummyDeck = [
         ...Array(4).fill("Red Card"),
@@ -321,7 +311,6 @@
 
     function drawDummyCards(){
       const drawn = [];
-      // draw 3
       for (let i=0;i<3 && dummyDeck.length>0;i++){
         drawn.push(dummyDeck.pop());
       }
@@ -333,7 +322,6 @@
           drawn.push(dummyDeck.pop());
         }
       }
-      // if deck empty and discard exists, reshuffle discard into deck AFTER the draw
       if (dummyDeck.length === 0 && discardPile.length > 0){
         const moved = discardPile.splice(0);
         dummyDeck.push(...moved);
@@ -350,19 +338,18 @@
       document.getElementById('discard-output').textContent = discardPile.length === 0 ? 'Discard pile is empty.' : `Discard pile (${discardPile.length}): ${discardPile.join(', ')}`;
     }
 
-    // initialize UI on load
+    // Initialize on load
     window.addEventListener('load', () => {
       initializeDeck();
-      // position markers after layout stabilizes
+      // initial marker placement (allow layout to settle)
       setTimeout(() => {
         updateFameMarker();
         updateRepMarker();
       }, 60);
     });
 
-    // expose functions for inline onclicks
+    // expose some functions for console or inline uses
     window.changeFame = changeFame;
-    window.changeReputation = changeReputation;
     window.changeCrystal = changeCrystal;
     window.addCard = addCard;
     window.resetDeck = resetDeck;
