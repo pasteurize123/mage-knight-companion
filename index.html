@@ -16,6 +16,8 @@
     .container{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
     .panel{background:var(--panel);border-radius:10px;padding:10px}
     .panel-inner{background:var(--card);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
+    /* Title sizing for Reputation, Fame, Dummy Player */
+    .panel-inner h2{font-size:16px;margin:0 0 12px}
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center}
     .smallbtn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
@@ -49,14 +51,14 @@
 
     <section class="panel" aria-labelledby="rep-title">
       <div class="panel-inner">
-        <h2 id="rep-title">Reputation Track</h2>
+        <h2 id="rep-title">Reputation</h2>
         <div id="rep-wrap" class="rep-wrap" aria-label="Reputation track"></div>
       </div>
     </section>
 
     <section class="panel" aria-labelledby="fame-title">
       <div class="panel-inner">
-        <h2 id="fame-title">Fame Track</h2>
+        <h2 id="fame-title">Fame</h2>
 
         <div class="center-column" style="width:100%">
           <div class="center" style="width:100%;margin-bottom:6px">
@@ -339,7 +341,7 @@
     }
 
     // Fame UI and prompt handling
-    function handleLevelPrompts(prevLevel,newLevel){
+    function handle_level_prompts(prevLevel,newLevel){
       const messages=[];
       for(let L=prevLevel+1; L<=newLevel; L++) if(LEVEL_PROMPTS[L]) messages.push(`Level ${L}: ${LEVEL_PROMPTS[L]}`);
       if(messages.length===0) return;
