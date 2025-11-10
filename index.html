@@ -115,8 +115,11 @@
 
       // Check last card and draw extra for matching crystals
       let lastCard = drawn[drawn.length - 1];
-      for (let color of ["red", "blue", "green", "white"]) {
-        if (crystals[color] > 0 && lastCard.toLowerCase().includes(color) && dummyDeck.length > 0) {
+      if (lastCard) {
+        let color = lastCard.split(" ")[0].toLowerCase(); // "Red Card" → "red"
+        let extraDraws = crystals[color] || 0;
+
+        for (let i = 0; i < extraDraws && dummyDeck.length > 0; i++) {
           let index = Math.floor(Math.random() * dummyDeck.length);
           drawn.push(dummyDeck.splice(index, 1)[0]);
         }
