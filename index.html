@@ -42,7 +42,7 @@
     <button onclick="addCard('Green')">+ Green Card</button>
     <button onclick="addCard('White')">+ White Card</button>
     <button onclick="resetDeck()">Reset Deck</button>
-    <p>Cards left: <span id="deck-count">16</span></p>
+    <p>Cards left in deck: <span id="deck-count">16</span></p>
   </div>
 
   <div class="section">
@@ -53,20 +53,30 @@
     </div>
   </div>
 
+  <div class="section">
+    <h2>Discard Pile</h2>
+    <div class="output">
+      <p id="discard-output">Discard pile is empty.</p>
+    </div>
+  </div>
+
   <script>
     let fame = 0;
     let reputation = 0;
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let dummyDeck = [];
+    let discardPile = [];
 
     function initializeDeck() {
       dummyDeck = [
-        ...Array(4).fill("Red"),
-        ...Array(4).fill("Blue"),
-        ...Array(4).fill("Green"),
-        ...Array(4).fill("White")
+        ...Array(4).fill("Red Card"),
+        ...Array(4).fill("Blue Card"),
+        ...Array(4).fill("Green Card"),
+        ...Array(4).fill("White Card")
       ];
+      discardPile = [];
       updateDeckCount();
+      updateDiscardPile();
     }
 
     function changeFame(amount) {
@@ -85,7 +95,7 @@
     }
 
     function addCard(color) {
-      dummyDeck.push(color);
+      dummyDeck.push(`${color} Card`);
       updateDeckCount();
     }
 
@@ -106,18 +116,30 @@
       // Check last card and draw extra for matching crystals
       let lastCard = drawn[drawn.length - 1];
       for (let color of ["red", "blue", "green", "white"]) {
-        if (crystals[color] > 0 && lastCard.toLowerCase() === color && dummyDeck.length > 0) {
+        if (crystals[color] > 0 && lastCard.toLowerCase().includes(color) && dummyDeck.length > 0) {
           let index = Math.floor(Math.random() * dummyDeck.length);
           drawn.push(dummyDeck.splice(index, 1)[0]);
         }
       }
 
+      // Add drawn cards to discard pile
+      discardPile.push(...drawn);
+
       document.getElementById("dummy-output").textContent = `Dummy draws: ${drawn.join(", ")}`;
       updateDeckCount();
+      updateDiscardPile();
     }
 
     function updateDeckCount() {
       document.getElementById("deck-count").textContent = dummyDeck.length;
+    }
+
+    function updateDiscardPile() {
+      if (discardPile.length === 0) {
+        document.getElementById("discard-output").textContent = "Discard pile is empty.";
+      } else {
+        document.getElementById("discard-output").textContent = `Discard pile: ${discardPile.join(", ")}`;
+      }
     }
 
     initializeDeck();
