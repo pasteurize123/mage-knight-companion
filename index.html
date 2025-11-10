@@ -37,8 +37,10 @@
     .rep-cell.selected{background:var(--sel-rep);font-weight:700}
 
     .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    input[type=number]{width:110px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
+    .fame-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    select, input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
     .fame-result{font-weight:700;font-size:16px;padding:6px 8px;background:#fff;border-radius:6px}
+    .fame-btn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px}
 
     .combined-grid{display:flex;flex-direction:column;gap:8px}
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -63,7 +65,7 @@
     @media (max-width:820px){ .cols{flex-direction:column} .col{min-width:0} }
     @media (max-width:420px){
       :root{--rep-min:32px}
-      input[type=number]{width:88px;padding:6px}
+      select, input[type=number]{width:90px;padding:6px}
       .fame-result{font-size:14px}
       .rep-cell{font-size:12px;padding:5px 6px}
       .smallbtn{font-size:12px;padding:5px 6px}
@@ -90,10 +92,29 @@
         <h2 id="fame-section">Fame Track</h2>
 
         <div class="fame-row" role="group" aria-label="Fame input">
-          <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
-          <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
-          <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
+          <div class="fame-controls" style="flex:1">
+            <!-- Manual numeric input still available -->
+            <label for="fame-input" style="font-size:13px">Tracked Fame</label>
+            <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
+            <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
+            <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
+          </div>
+
+          <!-- New controls: select increment and add/subtract buttons -->
+          <div style="display:flex;align-items:center;gap:8px">
+            <label for="fame-increment" style="font-size:13px">Amount</label>
+            <select id="fame-increment" aria-label="Fame increment">
+              <option value="1">+1</option>
+              <option value="2">+2</option>
+              <option value="3">+3</option>
+              <option value="5">+5</option>
+              <option value="10">+10</option>
+            </select>
+            <button id="fame-add" class="fame-btn" title="Add selected amount to tracked fame">Add</button>
+            <button id="fame-sub" class="fame-btn" title="Subtract selected amount from tracked fame">Subtract</button>
+          </div>
         </div>
+
       </div>
     </section>
 
@@ -204,7 +225,7 @@
 
   <script>
     // State
-    let fame = 0;
+    let fame = 0; // tracked fame value
     // crystals belong to the dummy player
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 };
@@ -240,6 +261,10 @@
     const fameInput = document.getElementById('fame-input');
     const fameResult = document.getElementById('fame-result');
     const fameDisplayEl = document.getElementById('fame-display');
+    const fameIncrement = document.getElementById('fame-increment');
+    const fameAddBtn = document.getElementById('fame-add');
+    const fameSubBtn = document.getElementById('fame-sub');
+
     const dummyOutput = document.getElementById('dummy-output');
     const discardOutput = document.getElementById('discard-output');
     const drawBtn = document.getElementById('draw-btn');
@@ -294,13 +319,31 @@
       for (const b of fameLevels) if (val >= b.min && val <= b.max) return b.level;
       return 1;
     }
-    function updateFameFromInput() {
-      const val = Math.max(0, Math.min(119, Math.floor(Number(fameInput.value) || 0)));
-      fame = val;
+    function updateFameUI() {
       const level = getFameLevel(fame);
       fameResult.textContent = `Level ${level}`;
       fameDisplayEl.textContent = fame;
+      fameInput.value = fame;
     }
+    function setFame(v) {
+      fame = Math.max(0, Math.min(119, Math.floor(Number(v) || 0)));
+      updateFameUI();
+    }
+
+    // wired to numeric input
+    fameInput.addEventListener('input', () => {
+      setFame(fameInput.value);
+    });
+
+    // Add/subtract using selected increment
+    fameAddBtn.addEventListener('click', () => {
+      const inc = Math.max(1, parseInt(fameIncrement.value || "1", 10));
+      setFame(fame + inc);
+    });
+    fameSubBtn.addEventListener('click', () => {
+      const inc = Math.max(1, parseInt(fameIncrement.value || "1", 10));
+      setFame(fame - inc);
+    });
 
     // Crystals change (dummy player's crystals)
     function changeCrystal(color, amount) {
@@ -355,6 +398,7 @@
       updateDrawButton();
       updateDiscard();
       dummyOutput.textContent = 'Deck initialized and shuffled.';
+      setFame(0); // optional: keep tracked fame initialised (remove if undesired)
     }
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
 
@@ -473,7 +517,6 @@
     }
 
     // Init
-    fameInput.addEventListener('input', updateFameFromInput);
     window.addEventListener('load', ()=>{
       buildRepRows();
       document.getElementById('card-red').textContent = cardCounts.Red;
@@ -483,7 +526,6 @@
       initializeDeck();
       const midCells = repWrap.querySelectorAll('.rep-row')[1]?.querySelectorAll('.rep-cell');
       if(midCells && midCells[1]) midCells[1].click();
-      setTimeout(()=>{ updateFameFromInput(); }, 40);
     });
 
     // expose for buttons
