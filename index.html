@@ -3,25 +3,64 @@
 <head>
   <title>Mage Knight Companion</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-    h1 { color: #333; }
-    .section { margin-bottom: 30px; }
-    button { margin: 5px; padding: 6px 10px; }
-    .output { background: #fff; padding: 10px; border-radius: 5px; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    h1 {
+      color: #333;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    button {
+      margin: 5px;
+      padding: 6px 10px;
+    }
+    .output {
+      background: #fff;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .track-container {
+      padding: 10px;
+      background: #eaeaea;
+      border-radius: 8px;
+    }
+    .fame-grid {
+      display: grid;
+      grid-template-columns: repeat(51, 30px);
+      gap: 2px;
+      margin-top: 10px;
+    }
+    .rep-grid {
+      display: grid;
+      grid-template-rows: repeat(15, 30px);
+      gap: 2px;
+      margin-top: 10px;
+      height: 450px;
+    }
+    .fame-cell, .rep-cell {
+      background: #ddd;
+      text-align: center;
+      font-size: 12px;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    .marker {
+      position: absolute;
+      font-size: 20px;
+      transition: all 0.3s ease;
+    }
+    .fame-track, .rep-track {
+      position: relative;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
   <h1>Mage Knight Dummy Player Companion</h1>
-
-  <div class="section">
-    <h2>Fame & Reputation</h2>
-    Fame: <span id="fame">0</span>
-    <button onclick="changeFame(1)">+1 Fame</button>
-    <button onclick="changeFame(-1)">-1 Fame</button><br><br>
-    Reputation: <span id="reputation">0</span>
-    <button onclick="changeReputation(1)">+1 Rep</button>
-    <button onclick="changeReputation(-1)">-1 Rep</button>
-  </div>
 
   <div class="section">
     <h2>Crystals</h2>
@@ -37,6 +76,27 @@
     ⚪ White: <span id="white">0</span>
     <button onclick="changeCrystal('white', 1)">➕</button>
     <button onclick="changeCrystal('white', -1)">➖</button>
+  </div>
+
+  <div class="section track-container">
+    <h2>Fame Track</h2>
+    <div class="fame-track">
+      <div id="fame-marker" class="marker">⭐</div>
+      <div class="fame-grid"></div>
+    </div>
+
+    <h2>Reputation Track</h2>
+    <div class="rep-track">
+      <div id="rep-marker" class="marker">🧭</div>
+      <div class="rep-grid"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <button onclick="changeFame(1)">+1 Fame</button>
+    <button onclick="changeFame(-1)">-1 Fame</button>
+    <button onclick="changeReputation(1)">+1 Rep</button>
+    <button onclick="changeReputation(-1)">-1 Rep</button>
   </div>
 
   <div class="section">
@@ -71,6 +131,49 @@
     let dummyDeck = [];
     let discardPile = [];
 
+    const fameGrid = document.querySelector(".fame-grid");
+    const repGrid = document.querySelector(".rep-grid");
+    const fameMarker = document.getElementById("fame-marker");
+    const repMarker = document.getElementById("rep-marker");
+
+    for (let i = 0; i <= 50; i++) {
+      const cell = document.createElement("div");
+      cell.className = "fame-cell";
+      cell.textContent = i;
+      fameGrid.appendChild(cell);
+    }
+
+    for (let i = -7; i <= 7; i++) {
+      const cell = document.createElement("div");
+      cell.className = "rep-cell";
+      cell.textContent = i;
+      repGrid.appendChild(cell);
+    }
+
+    function updateFameMarker() {
+      fameMarker.style.left = `${fame * 32}px`;
+    }
+
+    function updateRepMarker() {
+      const offset = (reputation + 7) * 32;
+      repMarker.style.top = `${offset}px`;
+    }
+
+    function changeFame(amount) {
+      fame = Math.max(0, Math.min(50, fame + amount));
+      updateFameMarker();
+    }
+
+    function changeReputation(amount) {
+      reputation = Math.max(-7, Math.min(7, reputation + amount));
+      updateRepMarker();
+    }
+
+    function changeCrystal(color, amount) {
+      crystals[color] = Math.max(0, crystals[color] + amount);
+      document.getElementById(color).textContent = crystals[color];
+    }
+
     function initializeDeck() {
       dummyDeck = [
         ...Array(4).fill("Red Card"),
@@ -81,21 +184,6 @@
       discardPile = [];
       updateDeckCount();
       updateDiscardPile();
-    }
-
-    function changeFame(amount) {
-      fame += amount;
-      document.getElementById("fame").textContent = fame;
-    }
-
-    function changeReputation(amount) {
-      reputation += amount;
-      document.getElementById("reputation").textContent = reputation;
-    }
-
-    function changeCrystal(color, amount) {
-      crystals[color] = Math.max(0, crystals[color] + amount);
-      document.getElementById(color).textContent = crystals[color];
     }
 
     function addCard(color) {
@@ -111,13 +199,11 @@
     function drawDummyCards() {
       let drawn = [];
 
-      // Draw minimum 3 cards
       for (let i = 0; i < 3 && dummyDeck.length > 0; i++) {
         let index = Math.floor(Math.random() * dummyDeck.length);
         drawn.push(dummyDeck.splice(index, 1)[0]);
       }
 
-      // Check last card and draw extra cards equal to matching crystals
       let lastCard = drawn[drawn.length - 1];
       if (lastCard) {
         let color = lastCard.split(" ")[0].toLowerCase();
@@ -147,6 +233,8 @@
     }
 
     initializeDeck();
+    updateFameMarker();
+    updateRepMarker();
   </script>
 </body>
 </html>
