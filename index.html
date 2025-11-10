@@ -113,7 +113,7 @@
         drawn.push(dummyDeck.splice(index, 1)[0]);
       }
 
-      // Check last card and draw extra for matching crystals
+      // Check last card and draw extra cards equal to matching crystals
       let lastCard = drawn[drawn.length - 1];
       if (lastCard) {
         let color = lastCard.split(" ")[0].toLowerCase(); // "Red Card" → "red"
