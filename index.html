@@ -9,29 +9,15 @@
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
       --rep-min:44px; --overlay: rgba(0,0,0,0.45);
       --gold:#ffd700; --yellow:#ffeb99; --danger:#ff6b6b;
-      --base-font:16px;
-      --title-font:18px;
+      --base-font:16px; --title-font:18px;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-      background:var(--bg);
-      color:#111;
-      padding:12px;
-      font-size:var(--base-font);
-      line-height:1.3;
+      margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+      background:var(--bg);color:#111;padding:12px;font-size:var(--base-font);line-height:1.3;
     }
-
-    h1{
-      font-size:var(--title-font);
-      margin:0 0 12px;
-      text-align:center;
-      font-weight:700;
-    }
-
+    h1{font-size:var(--title-font);margin:0 0 12px;text-align:center;font-weight:700}
     .container{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
     .panel{background:var(--panel);border-radius:10px;padding:10px}
     .panel-inner{background:var(--card);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
@@ -40,22 +26,17 @@
     input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center;font-size:1rem}
     .smallbtn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:1rem}
     .muted{color:#666;font-size:0.9375rem}
-
     .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:center}
     .rep-row{display:flex;gap:8px;justify-content:center;align-items:center}
     .rep-cell{min-width:var(--rep-min);padding:6px 10px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;user-select:none;font-size:0.9375rem}
     .rep-row.top .rep-cell.selected{background:var(--gold);font-weight:700;color:#111}
     .rep-row.mid .rep-cell.selected{background:var(--yellow);font-weight:700;color:#111}
     .rep-row.bot .rep-cell.selected{background:var(--danger);font-weight:700;color:#fff}
-
     .levels-list{background:#fff;padding:8px;border-radius:6px;min-height:36px;display:flex;gap:6px;flex-wrap:wrap;font-size:0.9375rem}
     .level-pill{background:#eef;padding:6px 8px;border-radius:999px;font-weight:600;font-size:0.9375rem}
-
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:1rem}
-
     .center{display:flex;align-items:center;justify-content:center;gap:8px}
     .center-column{display:flex;flex-direction:column;align-items:center;gap:6px}
-
     .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--overlay);z-index:60}
     .modal{background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
     .modal h3{margin:0 0 8px 0;font-size:1rem}
@@ -64,17 +45,9 @@
     .choice-btn{padding:8px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:1rem}
     .choice-btn.selected{background:#eef6e9;border-color:#9fd49f}
     footer{display:flex;justify-content:center;padding:8px 0}
-
-    /* Match crystals layout for cards */
     .mini-group{display:flex;align-items:center;gap:8px}
-    .mini-group .count{min-width:28px;text-align:center;font-weight:700}
     .icon-label{display:flex;align-items:center;gap:6px}
-
-    @media (max-width:700px){
-      input[type=number]{width:90px}
-      :root{--rep-min:34px}
-      .mini-group{gap:6px}
-    }
+    @media (max-width:700px){ input[type=number]{width:90px} :root{--rep-min:34px} .mini-group{gap:6px} }
   </style>
 </head>
 <body>
@@ -99,9 +72,7 @@
               <label style="font-weight:700;display:block;margin-bottom:6px">Player Fame</label>
               <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
             </div>
-
             <div style="width:18px"></div>
-
             <div style="text-align:center">
               <label style="font-weight:700;display:block;margin-bottom:6px">Player Level</label>
               <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
@@ -136,19 +107,13 @@
             <div class="row" style="align-items:center">
               <div class="mini-group icon-label">🔴 <strong id="red">0</strong></div>
               <div class="mini-group"><button class="smallbtn" data-crystal="red" data-act="inc">+</button><button class="smallbtn" data-crystal="red" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">🔵 <strong id="blue">0</strong></div>
               <div class="mini-group"><button class="smallbtn" data-crystal="blue" data-act="inc">+</button><button class="smallbtn" data-crystal="blue" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">🟢 <strong id="green">0</strong></div>
               <div class="mini-group"><button class="smallbtn" data-crystal="green" data-act="inc">+</button><button class="smallbtn" data-crystal="green" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">⚪ <strong id="white">0</strong></div>
               <div class="mini-group"><button class="smallbtn" data-crystal="white" data-act="inc">+</button><button class="smallbtn" data-crystal="white" data-act="dec">−</button></div>
             </div>
@@ -159,19 +124,13 @@
             <div class="row" style="align-items:center">
               <div class="mini-group icon-label">🔴 <strong id="card-red">4</strong></div>
               <div class="mini-group"><button class="smallbtn card-btn" data-color="Red" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Red" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">🔵 <strong id="card-blue">4</strong></div>
               <div class="mini-group"><button class="smallbtn card-btn" data-color="Blue" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Blue" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">🟢 <strong id="card-green">4</strong></div>
               <div class="mini-group"><button class="smallbtn card-btn" data-color="Green" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Green" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">⚪ <strong id="card-white">4</strong></div>
               <div class="mini-group"><button class="smallbtn card-btn" data-color="White" data-act="inc">+</button><button class="smallbtn card-btn" data-color="White" data-act="dec">−</button></div>
             </div>
@@ -199,12 +158,10 @@
     </footer>
   </div>
 
-  <!-- End round modal -->
   <div id="endround-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="endround-title">
       <h3 id="endround-title">End Round — Choose Additions</h3>
       <p>Choose one crystal and one card to add to the dummy player. This will then reshuffle the discard into the deck.</p>
-
       <div style="margin-top:8px">
         <div style="font-weight:600;margin-bottom:6px;font-size:0.9375rem">Choose crystal</div>
         <div id="crystal-choices" class="choice-row">
@@ -214,7 +171,6 @@
           <button class="choice-btn" data-val="white">⚪</button>
         </div>
       </div>
-
       <div style="margin-top:8px">
         <div style="font-weight:600;margin-bottom:6px;font-size:0.9375rem">Choose card</div>
         <div id="card-choices" class="choice-row">
@@ -224,7 +180,6 @@
           <button class="choice-btn" data-val="White">⚪</button>
         </div>
       </div>
-
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
         <button id="endround-cancel" class="smallbtn">Cancel</button>
         <button id="endround-confirm" class="smallbtn" disabled>Confirm</button>
@@ -232,7 +187,6 @@
     </div>
   </div>
 
-  <!-- Level modal -->
   <div id="level-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="lvl-title">
       <h3 id="lvl-title">Level Up</h3>
@@ -244,24 +198,17 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'mk_companion_state_v1';
+    const STORAGE_KEY = 'mk_companion_state_v2';
     const DEFAULT_CARDS = { Red: 4, Blue: 4, Green: 4, White: 4 };
-    const DEFAULT_CRYSTALS = { red: 0, blue: 0, green: 0, white: 0 };
 
     const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
     const REP_MID = ["0"];
     const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
 
     const FAME_LEVELS = [
-      {level:1, min:0,  max:2},
-      {level:2, min:3,  max:7},
-      {level:3, min:8,  max:14},
-      {level:4, min:15, max:23},
-      {level:5, min:24, max:34},
-      {level:6, min:35, max:47},
-      {level:7, min:48, max:62},
-      {level:8, min:63, max:79},
-      {level:9, min:80, max:98},
+      {level:1, min:0,  max:2},{level:2, min:3,  max:7},{level:3, min:8,  max:14},
+      {level:4, min:15, max:23},{level:5, min:24, max:34},{level:6, min:35, max:47},
+      {level:7, min:48, max:62},{level:8, min:63, max:79},{level:9, min:80, max:98},
       {level:10,min:99, max:119}
     ];
 
@@ -281,12 +228,12 @@
 
     // State
     let fame = 0;
-    let crystals = { ...DEFAULT_CRYSTALS };
+    let crystals = { red:0, blue:0, green:0, white:0 };
     let cardCounts = { ...DEFAULT_CARDS };
     let dummyDeck = [];
     let discardPile = [];
     let endRoundFlag = false;
-    let achievedLevels = []; // synced to current player level
+    let achievedLevels = [1];
     let repSelection = null;
 
     // DOM refs
@@ -296,7 +243,6 @@
     const levelsList = document.getElementById('levels-list');
     const levelModal = document.getElementById('level-modal');
     const levelMessage = document.getElementById('level-message');
-    const levelOk = document.getElementById('level-ok');
     const newGameBtn = document.getElementById('new-game');
     const drawBtn = document.getElementById('draw-btn');
     const dummyOutput = document.getElementById('dummy-output');
@@ -309,18 +255,11 @@
     const endroundConfirm = document.getElementById('endround-confirm');
     const endroundCancel = document.getElementById('endround-cancel');
 
-    let selectedCrystal = null;
-    let selectedCard = null;
-
     // Helpers
     function clampInt(v,min,max){ const n=Math.floor(Number(v)||0); return Math.max(min,Math.min(max,n)); }
-    function getFameLevel(v){
-      const val = clampInt(v,0,119);
-      for (const b of FAME_LEVELS) if (val >= b.min && val <= b.max) return b.level;
-      return 1;
-    }
+    function getFameLevel(v){ const val = clampInt(v,0,119); for (const b of FAME_LEVELS) if (val >= b.min && val <= b.max) return b.level; return 1; }
 
-    // Persistence
+    // Persistence functions
     function saveState(){
       try {
         const s = { fame, crystals, cardCounts, dummyDeck, discardPile, endRoundFlag, achievedLevels, repSelection };
@@ -345,98 +284,73 @@
     }
     function clearSavedState(){ try { localStorage.removeItem(STORAGE_KEY); } catch(e){} }
 
-    // Random initial crystals: two of one colour, one of another
-    function initStartingCrystals(){
-      const keys = ['red','blue','green','white'];
-      const first = keys[Math.floor(Math.random()*keys.length)];
-      let second = keys[Math.floor(Math.random()*keys.length)];
-      while(second === first) second = keys[Math.floor(Math.random()*keys.length)];
-      crystals = { red:0, blue:0, green:0, white:0 };
-      crystals[first] = 2;
-      crystals[second] = 1;
-      // update DOM counters
-      document.getElementById('red').textContent = crystals.red;
-      document.getElementById('blue').textContent = crystals.blue;
-      document.getElementById('green').textContent = crystals.green;
-      document.getElementById('white').textContent = crystals.white;
-      saveState();
-    }
+    // Debounced saver + immediate persist helper
+    function debounce(fn, wait = 80){ let t=null; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), wait); }; }
+    const saveStateDebounced = debounce(saveState, 60);
+    function persistAll(){ try{ saveStateDebounced(); }catch(e){ saveState(); } }
 
     // Reputation UI
     function buildRepRows(){
       repWrap.innerHTML = '';
       const top=document.createElement('div'); top.className='rep-row top';
       REP_TOP.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label;
-        c.addEventListener('click', ()=>{ selectRepCell({row:'top',index:i}); saveState(); }); top.appendChild(c);
+        c.addEventListener('click', ()=>{ selectRepCell({row:'top',index:i}); persistAll(); }); top.appendChild(c);
       });
       const mid=document.createElement('div'); mid.className='rep-row mid';
       REP_MID.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label;
-        c.addEventListener('click', ()=>{ selectRepCell({row:'mid',index:i}); saveState(); }); mid.appendChild(c);
+        c.addEventListener('click', ()=>{ selectRepCell({row:'mid',index:i}); persistAll(); }); mid.appendChild(c);
       });
       const bot=document.createElement('div'); bot.className='rep-row bot';
       REP_BOT.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label;
-        c.addEventListener('click', ()=>{ selectRepCell({row:'bot',index:i}); saveState(); }); bot.appendChild(c);
+        c.addEventListener('click', ()=>{ selectRepCell({row:'bot',index:i}); persistAll(); }); bot.appendChild(c);
       });
       repWrap.appendChild(top); repWrap.appendChild(mid); repWrap.appendChild(bot);
-      if (repSelection) applyRepSelection(repSelection);
-      else { const midCell = repWrap.querySelector('.rep-row.mid .rep-cell'); if (midCell) { midCell.classList.add('selected'); repSelection={row:'mid',index:0}; } }
+      if (repSelection) applyRepSelection(repSelection); else { const midCell=repWrap.querySelector('.rep-row.mid .rep-cell'); if (midCell){ midCell.classList.add('selected'); repSelection={row:'mid',index:0}; persistAll(); } }
     }
     function selectRepCell(sel){
       const all = repWrap.querySelectorAll('.rep-cell'); all.forEach(c=>c.classList.remove('selected'));
       const rowEl = repWrap.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return;
-      const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]){ cells[sel.index].classList.add('selected'); repSelection={...sel}; }
+      const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]){ cells[sel.index].classList.add('selected'); repSelection={...sel}; persistAll(); }
     }
-    function applyRepSelection(sel){ if(!sel) return; const rowEl=repWrap.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return;
-      const cells=rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected');
-    }
+    function applyRepSelection(sel){ if(!sel) return; const rowEl=repWrap.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells=rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
 
     // Levels UI
     function renderLevels(){
       levelsList.innerHTML='';
       if(!achievedLevels || achievedLevels.length===0){ levelsList.textContent='None yet'; return; }
-      achievedLevels.forEach(L=>{
-        const pill=document.createElement('div'); pill.className='level-pill';
-        const prompt = LEVEL_PROMPTS[L] ? ` — ${LEVEL_PROMPTS[L]}` : '';
-        pill.textContent = `Level ${L}${prompt}`;
-        levelsList.appendChild(pill);
-      });
+      achievedLevels.forEach(L=>{ const pill=document.createElement('div'); pill.className='level-pill'; const prompt = LEVEL_PROMPTS[L] ? ` — ${LEVEL_PROMPTS[L]}` : ''; pill.textContent = `Level ${L}${prompt}`; levelsList.appendChild(pill); });
     }
 
-    // Fame UI and prompt handling
+    // Fame handling
     function handleLevelPrompts(prevLevel,newLevel){
       const messages=[];
       for(let L=prevLevel+1; L<=newLevel; L++) if(LEVEL_PROMPTS[L]) messages.push(`Level ${L}: ${LEVEL_PROMPTS[L]}`);
       if(messages.length===0) return;
-      levelMessage.textContent = messages.join('\n');
-      levelModal.style.display='flex'; levelModal.setAttribute('aria-hidden','false');
+      document.getElementById('level-message').textContent = messages.join('\n');
+      document.getElementById('level-modal').style.display='flex';
+      document.getElementById('level-modal').setAttribute('aria-hidden','false');
     }
-
     function updateFameUI(prevFame=null){
       const prevLevel = prevFame !== null ? getFameLevel(prevFame) : null;
       const level = getFameLevel(fame);
-
       playerLevelEl.textContent = level;
       fameInput.value = fame;
-
       achievedLevels = [];
       for (let i = 1; i <= level; i++) achievedLevels.push(i);
-
       if (prevLevel !== null && level > prevLevel) handleLevelPrompts(prevLevel, level);
-
       renderLevels();
-      saveState();
+      persistAll();
     }
 
     // Deck & draw
     function rebuildDeckFromCounts(){
       dummyDeck = [];
       Object.keys(cardCounts).forEach(color => { for(let i=0;i<cardCounts[color];i++) dummyDeck.push(`${color} Card`); });
-      shuffle(dummyDeck); updateDeckCount(); saveState();
+      shuffle(dummyDeck); updateDeckCount(); persistAll();
     }
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
     function updateDeckCount(){ document.getElementById('deck-count').textContent = dummyDeck.length; }
-    function updateDiscardUI(){ if(!discardPile||discardPile.length===0) discardOutput.textContent='Discard pile is empty.'; else {
-      const syms = discardPile.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c); discardOutput.textContent = `Discard (${discardPile.length}): ${syms.join(' ')}`; } }
+    function updateDiscardUI(){ if(!discardPile||discardPile.length===0) discardOutput.textContent='Discard pile is empty.'; else { const syms = discardPile.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c); discardOutput.textContent = `Discard (${discardPile.length}): ${syms.join(' ')}`; } }
 
     // Draw logic
     function drawCardsOnce(){
@@ -444,238 +358,127 @@
       for (let i = 0; i < 3 && dummyDeck.length > 0; i++) drawn.push(dummyDeck.pop());
       return drawn;
     }
-
-    function announceEndRoundMessage(){
-      dummyOutput.textContent = 'Nil cards drawn. End of round announced.';
-    }
-
+    function announceEndRoundMessage(){ dummyOutput.textContent = 'Nil cards drawn. End of round announced.'; }
     function onDrawClick(){
       if (dummyDeck.length === 0) {
-        endRoundFlag = true;
-        drawBtn.textContent = 'End Round';
-        announceEndRoundMessage();
-        saveState();
-        return;
+        endRoundFlag = true; drawBtn.textContent = 'End Round'; announceEndRoundMessage(); persistAll(); return;
       }
-
       const drawn = drawCardsOnce();
-
       const last = drawn[drawn.length - 1];
       if (last) {
         const color = last.split(' ')[0].toLowerCase();
         const extra = crystals[color] || 0;
         for (let i = 0; i < extra && dummyDeck.length > 0; i++) drawn.push(dummyDeck.pop());
       }
-
-      if (drawn.length === 0) {
-        endRoundFlag = true;
-        drawBtn.textContent = 'End Round';
-        announceEndRoundMessage();
-        saveState();
-        return;
-      }
-
+      if (drawn.length === 0) { endRoundFlag = true; drawBtn.textContent = 'End Round'; announceEndRoundMessage(); persistAll(); return; }
       discardPile.push(...drawn);
       const syms = drawn.map(c => COLOR_SYMBOL[c.split(' ')[0]] || c);
       dummyOutput.textContent = syms.join(' ');
-      updateDeckCount();
-      updateDiscardUI();
-
-      saveState();
+      updateDeckCount(); updateDiscardUI();
+      persistAll();
     }
 
-    // End-round modal
-    function openEndRoundModal(){
-      selectedCrystal = null;
-      selectedCard = null;
-      endroundConfirm.disabled = true;
-      endroundModal.style.display = 'flex';
-      endroundModal.setAttribute('aria-hidden', 'false');
-      Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.remove('selected'));
-      Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.remove('selected'));
-    }
-    function closeEndRoundModal(){
-      endroundModal.style.display = 'none';
-      endroundModal.setAttribute('aria-hidden', 'true');
-    }
+    // End-round modal flow
+    function openEndRoundModal(){ selectedCrystal=null; selectedCard=null; endroundConfirm.disabled=true; endroundModal.style.display='flex'; endroundModal.setAttribute('aria-hidden','false'); Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.remove('selected')); Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.remove('selected')); }
+    function closeEndRoundModal(){ endroundModal.style.display='none'; endroundModal.setAttribute('aria-hidden','true'); }
 
-    crystalChoices.addEventListener('click', (e) => {
-      const btn = e.target.closest('.choice-btn');
-      if (!btn) return;
-      selectedCrystal = btn.dataset.val;
-      Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.toggle('selected', b === btn));
-      endroundConfirm.disabled = !(selectedCrystal && selectedCard);
-    });
+    crystalChoices.addEventListener('click', (e)=>{ const btn = e.target.closest('.choice-btn'); if(!btn) return; selectedCrystal = btn.dataset.val; Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.toggle('selected', b===btn)); endroundConfirm.disabled = !(selectedCrystal && selectedCard); });
+    cardChoices.addEventListener('click', (e)=>{ const btn = e.target.closest('.choice-btn'); if(!btn) return; selectedCard = btn.dataset.val; Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.toggle('selected', b===btn)); endroundConfirm.disabled = !(selectedCrystal && selectedCard); });
 
-    cardChoices.addEventListener('click', (e) => {
-      const btn = e.target.closest('.choice-btn');
-      if (!btn) return;
-      selectedCard = btn.dataset.val;
-      Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.toggle('selected', b === btn));
-      endroundConfirm.disabled = !(selectedCrystal && selectedCard);
-    });
-
-    endroundCancel.addEventListener('click', () => closeEndRoundModal());
-
-    endroundConfirm.addEventListener('click', () => {
+    endroundCancel.addEventListener('click', ()=>closeEndRoundModal());
+    endroundConfirm.addEventListener('click', ()=>{
       if (!selectedCrystal || !selectedCard) return;
-      changeCrystal(selectedCrystal, 1);
-      changeCard(selectedCard, 1);
-
-      if (discardPile.length > 0) {
-        dummyDeck.push(...discardPile);
-        discardPile = [];
-        shuffle(dummyDeck);
-      }
-
-      updateDeckCount();
-      updateDiscardUI();
-
-      endRoundFlag = false;
-      drawBtn.textContent = 'Draw';
+      changeCrystal(selectedCrystal, 1); changeCard(selectedCard, 1);
+      if (discardPile.length > 0) { dummyDeck.push(...discardPile); discardPile = []; shuffle(dummyDeck); }
+      updateDeckCount(); updateDiscardUI();
+      endRoundFlag = false; drawBtn.textContent = 'Draw';
       dummyOutput.textContent = `End Round: added ${COLOR_SYMBOL[selectedCard] || selectedCard} and ${COLOR_SYMBOL[selectedCrystal] || selectedCrystal}. Deck reshuffled.`;
-
-      saveState();
-      closeEndRoundModal();
+      persistAll(); closeEndRoundModal();
     });
 
     // Reshuffle
     function reshuffleDeck(){
-      if (!discardPile || discardPile.length === 0) {
-        dummyOutput.textContent = 'Discard pile is empty. Nothing to reshuffle.';
-        return;
-      }
-      dummyDeck.push(...discardPile);
-      discardPile = [];
-      shuffle(dummyDeck);
-      updateDeckCount();
-      updateDiscardUI();
-      endRoundFlag = false;
-      drawBtn.textContent = 'Draw';
-      dummyOutput.textContent = 'Deck reshuffled from discard.';
-      saveState();
+      if (!discardPile || discardPile.length === 0) { dummyOutput.textContent = 'Discard pile is empty. Nothing to reshuffle.'; return; }
+      dummyDeck.push(...discardPile); discardPile = []; shuffle(dummyDeck); updateDeckCount(); updateDiscardUI(); endRoundFlag=false; drawBtn.textContent='Draw'; dummyOutput.textContent='Deck reshuffled from discard.'; persistAll();
     }
 
     // crystals & cards
     function changeCrystal(color,delta){
       crystals[color] = Math.max(0,(crystals[color]||0)+delta);
       document.getElementById(color).textContent = crystals[color];
-      saveState();
+      persistAll();
     }
     function changeCard(color,delta){
       cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta);
       document.getElementById(`card-${color.toLowerCase()}`).textContent = cardCounts[color];
-      if(delta>0){
-        const name=`${color} Card`;
-        const pos=Math.floor(Math.random()*(dummyDeck.length+1));
-        dummyDeck.splice(pos,0,name);
-      } else {
-        const name=`${color} Card`;
-        const idx=dummyDeck.indexOf(name);
-        if(idx!==-1) dummyDeck.splice(idx,1);
-        else {
-          const dj=discardPile.indexOf(name);
-          if(dj!==-1) discardPile.splice(dj,1);
-        }
+      if(delta>0){ const name=`${color} Card`; const pos=Math.floor(Math.random()*(dummyDeck.length+1)); dummyDeck.splice(pos,0,name); } else {
+        const name=`${color} Card`; const idx=dummyDeck.indexOf(name); if(idx!==-1) dummyDeck.splice(idx,1); else { const dj=discardPile.indexOf(name); if(dj!==-1) discardPile.splice(dj,1); }
       }
-      updateDeckCount();
-      updateDiscardUI();
-      saveState();
+      updateDeckCount(); updateDiscardUI(); persistAll();
     }
 
     // fame setters
-    function setFameOverride(value){
-      const prev = fame;
-      fame = clampInt(value,0,119);
-      updateFameUI(prev);
-    }
-    function addFame(delta){
-      const prev = fame; fame = clampInt(fame + delta, 0, 119); updateFameUI(prev);
+    function setFameOverride(value){ const prev=fame; fame = clampInt(value,0,119); updateFameUI(prev); }
+    function addFame(delta){ const prev=fame; fame = clampInt(fame+delta,0,119); updateFameUI(prev); }
+
+    // Random initial crystals: two of one colour, one of another
+    function initStartingCrystals(){
+      const keys = ['red','blue','green','white'];
+      const first = keys[Math.floor(Math.random()*keys.length)];
+      let second = keys[Math.floor(Math.random()*keys.length)];
+      while(second === first) second = keys[Math.floor(Math.random()*keys.length)];
+      crystals = { red:0, blue:0, green:0, white:0 };
+      crystals[first] = 2; crystals[second] = 1;
+      document.getElementById('red').textContent = crystals.red; document.getElementById('blue').textContent = crystals.blue;
+      document.getElementById('green').textContent = crystals.green; document.getElementById('white').textContent = crystals.white;
+      persistAll();
     }
 
-    // NEW GAME - full reset including deck and randomized starting crystals
+    // NEW GAME
     function newGame(){
       if (!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
       clearSavedState();
-      fame = 0;
-      cardCounts = { ...DEFAULT_CARDS };
-      dummyDeck = [];
-      discardPile = [];
-      endRoundFlag = false;
-      achievedLevels = [1];
-      repSelection = null;
-
-      // initialize randomized starting crystals
-      initStartingCrystals();
-
-      // rebuild deck from default card counts
-      rebuildDeckFromCounts();
-
-      // update card UI
-      document.getElementById('card-red').textContent = cardCounts.Red;
-      document.getElementById('card-blue').textContent = cardCounts.Blue;
-      document.getElementById('card-green').textContent = cardCounts.Green;
-      document.getElementById('card-white').textContent = cardCounts.White;
-
-      updateDeckCount();
-      updateDiscardUI();
-      buildRepRows();
-
-      const midCell = repWrap.querySelector('.rep-row.mid .rep-cell');
-      if (midCell) { midCell.classList.add('selected'); repSelection = {row:'mid', index:0}; }
-
-      endRoundFlag = false;
-      drawBtn.textContent = 'Draw';
-      dummyOutput.textContent = 'Drawn symbols appear here';
-
-      fame = 0;
-      updateFameUI(null);
-      renderLevels();
-      saveState();
+      fame = 0; cardCounts = { ...DEFAULT_CARDS }; dummyDeck = []; discardPile = []; endRoundFlag = false; achievedLevels=[1]; repSelection=null;
+      initStartingCrystals(); rebuildDeckFromCounts();
+      document.getElementById('card-red').textContent = cardCounts.Red; document.getElementById('card-blue').textContent = cardCounts.Blue;
+      document.getElementById('card-green').textContent = cardCounts.Green; document.getElementById('card-white').textContent = cardCounts.White;
+      updateDeckCount(); updateDiscardUI(); buildRepRows(); endRoundFlag=false; drawBtn.textContent='Draw'; dummyOutput.textContent='Drawn symbols appear here';
+      fame = 0; updateFameUI(null); renderLevels(); persistAll();
     }
 
-    // Prevent refresh/reload so app state remains unaffected
-    function disableRefreshBehavior() {
-      // Block keyboard shortcuts: F5 and Ctrl/Cmd+R
-      window.addEventListener('keydown', (e) => {
-        const key = e.key || e.keyIdentifier || '';
-        const isF5 = key === 'F5';
-        const isCmdR = (key === 'r' || key === 'R') && (e.ctrlKey || e.metaKey);
-        if (isF5 || isCmdR) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }, { passive: false });
+    // Prevent immediate reload via F5 / Ctrl/Cmd+R while ensuring state saved first.
+    window.addEventListener('keydown', (e)=>{
+      const key = e.key || '';
+      const isF5 = key === 'F5';
+      const isCmdR = (key === 'r' || key === 'R') && (e.ctrlKey || e.metaKey);
+      if (isF5 || isCmdR){
+        // persist and swallow the reload keystroke (no notification)
+        try { saveState(); } catch(e){}
+        e.preventDefault(); e.stopImmediatePropagation();
+      }
+    }, { passive:false });
 
-      // Intercept beforeunload to require confirmation before leaving / refreshing.
-      // This prevents accidental refresh from destroying in-memory state unless user confirms.
-      window.addEventListener('beforeunload', (e) => {
-        // Standard pattern to trigger a confirmation dialog in most browsers.
-        e.preventDefault();
-        e.returnValue = '';
-      });
-    }
+    // Save on visibility change / pagehide to persist before refresh/navigation (silent)
+    window.addEventListener('visibilitychange', ()=>{ if (document.visibilityState === 'hidden') persistAll(); });
+    window.addEventListener('pagehide', persistAll);
 
     // init wiring
     window.addEventListener('load', ()=>{
       buildRepRows();
       const ok = loadState();
-
       if(!ok){
-        // fresh start: randomized starting crystals
         initStartingCrystals();
         cardCounts = { ...DEFAULT_CARDS };
         rebuildDeckFromCounts();
         achievedLevels = [1];
-        saveState();
+        persistAll();
       } else {
-        // loaded state: ensure deck exists
-        if(!Array.isArray(dummyDeck) || dummyDeck.length===0) rebuildDeckFromCounts();
-        // ensure crystal counters in DOM reflect loaded state
+        // ensure DOM reflects loaded state
         document.getElementById('red').textContent = crystals.red || 0;
         document.getElementById('blue').textContent = crystals.blue || 0;
         document.getElementById('green').textContent = crystals.green || 0;
         document.getElementById('white').textContent = crystals.white || 0;
+        if(!Array.isArray(dummyDeck) || dummyDeck.length===0) rebuildDeckFromCounts();
       }
 
       document.getElementById('card-red').textContent = cardCounts.Red;
@@ -683,45 +486,23 @@
       document.getElementById('card-green').textContent = cardCounts.Green;
       document.getElementById('card-white').textContent = cardCounts.White;
 
-      updateDeckCount(); updateDiscardUI();
-      updateFameUI(null); renderLevels();
+      updateDeckCount(); updateDiscardUI(); updateFameUI(null); renderLevels();
 
-      // fame input override behavior
       fameInput.addEventListener('change', ()=> setFameOverride(fameInput.value));
       fameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); setFameOverride(fameInput.value); fameInput.blur(); } });
 
-      // fame inc buttons
       document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=> addFame(Number(btn.dataset.inc||0))));
+      document.querySelectorAll('[data-crystal]').forEach(b => b.addEventListener('click', ()=>{ const color=b.dataset.crystal; const act=b.dataset.act; changeCrystal(color, act==='inc'?1:-1); }));
+      document.querySelectorAll('.card-btn').forEach(b => b.addEventListener('click', ()=>{ const color=b.dataset.color; const act=b.dataset.act; changeCard(color, act==='inc'?1:-1); }));
 
-      // crystals buttons
-      document.querySelectorAll('[data-crystal]').forEach(b => b.addEventListener('click', ()=>{
-        const color = b.dataset.crystal; const act = b.dataset.act; changeCrystal(color, act==='inc'?1:-1);
-      }));
-
-      // card buttons
-      document.querySelectorAll('.card-btn').forEach(b => b.addEventListener('click', ()=>{
-        const color = b.dataset.color; const act = b.dataset.act; changeCard(color, act==='inc'?1:-1);
-      }));
-
-      // draw/reshuffle/new game wiring
-      drawBtn.addEventListener('click', (e)=>{
-        if (endRoundFlag && drawBtn.textContent === 'End Round') {
-          openEndRoundModal();
-          return;
-        }
-        onDrawClick();
-      });
+      drawBtn.addEventListener('click', (e)=>{ if (endRoundFlag && drawBtn.textContent === 'End Round'){ openEndRoundModal(); return; } onDrawClick(); });
       reshuffleBtn.addEventListener('click', reshuffleDeck);
       newGameBtn.addEventListener('click', newGame);
 
-      // level modal ok
       document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
-      // ensure app resists accidental refresh - call after wiring
-      disableRefreshBehavior();
-
-      // final save on unload (kept for state persistence when user confirms navigation)
-      window.addEventListener('beforeunload', saveState);
+      // persist periodically to reduce chance of race with user actions and refresh
+      setInterval(persistAll, 2000);
     });
 
     // expose for debug
