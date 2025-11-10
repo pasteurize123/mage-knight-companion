@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mage Knight Companion</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .tracker { margin-bottom: 20px; }
+    button { margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Mage Knight Companion</h1>
+
+  <div class="tracker">
+    <h2>Fame: <span id="fame">0</span></h2>
+    <button onclick="changeFame(1)">+1 Fame</button>
+    <button onclick="changeFame(-1)">-1 Fame</button>
+  </div>
+
+  <div class="tracker">
+    <h2>Reputation: <span id="reputation">0</span></h2>
+    <button onclick="changeReputation(1)">+1 Rep</button>
+    <button onclick="changeReputation(-1)">-1 Rep</button>
+  </div>
+
+  <div class="tracker">
+    <h2>Dummy Player</h2>
+    <button onclick="drawDummyCard()">Draw Card</button>
+    <p id="dummy-output"></p>
+  </div>
+
+  <script>
+    let fame = 0;
+    let reputation = 0;
+    const dummyDeck = ["Red", "Blue", "Green", "White", "Gold", "Black"];
+
+    function changeFame(amount) {
+      fame += amount;
+      document.getElementById("fame").textContent = fame;
+    }
+
+    function changeReputation(amount) {
+      reputation += amount;
+      document.getElementById("reputation").textContent = reputation;
+    }
+
+    function drawDummyCard() {
+      const card = dummyDeck[Math.floor(Math.random() * dummyDeck.length)];
+      document.getElementById("dummy-output").textContent = `Dummy draws: ${card}`;
+    }
+  </script>
+</body>
+</html>
