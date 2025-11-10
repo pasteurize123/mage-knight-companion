@@ -66,8 +66,9 @@
     .inline-item{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 
     .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--overlay-bg);z-index:50}
-    .modal{background:#fff;border-radius:10px;padding:16px;max-width:420px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
+    .modal{background:#fff;border-radius:10px;padding:16px;max-width:480px;width:94%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
     .modal h3{margin:0 0 8px 0;font-size:16px}
+    .modal p{margin:8px 0;font-size:14px}
     .choice-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
     .choice-btn{padding:8px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px}
     .choice-btn.selected{background:#eef6e9;border-color:#9fd49f}
@@ -197,7 +198,18 @@
 
   </div>
 
-  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <!-- Level prompt modal -->
+  <div id="level-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="level-title">
+      <h3 id="level-title">Level Up</h3>
+      <p id="level-message"></p>
+      <div class="modal-foot">
+        <button id="level-ok" class="smallbtn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true" style="display:none">
     <div class="modal" role="document">
       <h3 id="modal-title">End Round — Choose Additions</h3>
 
@@ -231,9 +243,10 @@
     let dummyDeck = [];
     let discardPile = [];
     let endRoundFlag = false;
+    let lastShownLevel = 1;
 
     const repPositive = ["+1","+1","+2","+2","+3","+5"];
-    const repNeutral = ["0","0","0"];
+    const repNeutral = ["0","0","0"]; // left 0, center 0, right 0
     const repNegative = ["-1","-1","-2","-3","-5","X"];
 
     const fameLevels = [
@@ -248,6 +261,18 @@
       {level:9, min:80, max:98},
       {level:10,min:99, max:119}
     ];
+
+    const levelPrompts = {
+      2: "Draw skill and advanced action",
+      3: "Flip level token to command token",
+      4: "Draw skill and advanced action",
+      5: "Flip level token to command token",
+      6: "Draw skill and advanced action",
+      7: "Flip level token to command token",
+      8: "Draw skill and advanced action",
+      9: "Flip level token to command token",
+      10: "Draw skill and advanced action"
+    };
 
     const colorSymbol = {
       Red: '🔴', Blue: '🔵', Green: '🟢', White: '⚪',
@@ -264,7 +289,11 @@
     const discardOutput = document.getElementById('discard-output');
     const drawBtn = document.getElementById('draw-btn');
 
-    const overlay = document.getElementById('overlay');
+    const levelModal = document.getElementById('level-modal');
+    const levelMessage = document.getElementById('level-message');
+    const levelOk = document.getElementById('level-ok');
+
+    const overlayModal = document.getElementById('overlay');
     const crystalChoices = document.getElementById('crystal-choices');
     const cardChoices = document.getElementById('card-choices');
     const modalConfirm = document.getElementById('modal-confirm');
@@ -303,27 +332,83 @@
       repWrap.appendChild(botRow);
     }
 
-    // Select a single rep cell; only one cell may be selected at a time
+    // Select a single rep cell; only one cell may be selected at a time.
+    // Special behavior: clicking left '0' in mid row selects the corresponding bottom-row left cell.
+    // Clicking right '0' in mid row selects the corresponding top-row right cell.
     function selectRepCell(cellEl) {
       const all = repWrap.querySelectorAll('.rep-cell');
+      const midRow = repWrap.querySelector('.rep-row.mid');
+      const topRow = repWrap.querySelector('.rep-row.top');
+      const botRow = repWrap.querySelector('.rep-row.bot');
+
+      // compute index within its row
+      const parentRow = cellEl.parentElement;
+      const cellsInRow = Array.from(parentRow.querySelectorAll('.rep-cell'));
+      const idx = cellsInRow.indexOf(cellEl);
+
+      // Clear all selections first
       all.forEach(c => c.classList.remove('selected'));
-      // toggle selection for the clicked cell
-      if (!cellEl.classList.contains('selected')) {
-        cellEl.classList.add('selected');
+
+      // If clicked is in mid row and is "0" (textContent) and is leftmost (idx 0)
+      // then select bottom row left-most cell (botRow first cell)
+      if (parentRow.classList.contains('mid') && cellEl.textContent === '0') {
+        if (idx === 0) {
+          // left 0 -> move selection to bottom row first cell
+          const target = botRow.querySelectorAll('.rep-cell')[0];
+          if (target) target.classList.add('selected');
+          return;
+        }
+        // middle 0 -> select itself (center)
+        if (idx === 1) {
+          cellEl.classList.add('selected');
+          return;
+        }
+        // right 0 -> move selection to top row last cell
+        if (idx === 2) {
+          const topCells = topRow.querySelectorAll('.rep-cell');
+          const target = topCells[topCells.length - 1];
+          if (target) target.classList.add('selected');
+          return;
+        }
       }
+
+      // Default: toggle selection on clicked cell (but ensure only one selected)
+      cellEl.classList.add('selected');
     }
 
-    // Fame helpers
+    // Fame helpers and level prompt handling
     function getFameLevel(v) {
       const val = Math.max(0, Math.min(119, Math.floor(Number(v) || 0)));
       for (const b of fameLevels) if (val >= b.min && val <= b.max) return b.level;
       return 1;
     }
+
+    function handleLevelPrompts(newLevel) {
+      // only show prompt when leveling up to a level in the mapping and not shown previously
+      if (newLevel > lastShownLevel && levelPrompts[newLevel]) {
+        showLevelModal(newLevel, levelPrompts[newLevel]);
+      }
+      lastShownLevel = Math.max(lastShownLevel, newLevel);
+    }
+
+    function showLevelModal(level, message) {
+      levelMessage.textContent = `Level ${level}: ${message}`;
+      levelModal.style.display = 'flex';
+      levelModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideLevelModal() {
+      levelModal.style.display = 'none';
+      levelModal.setAttribute('aria-hidden', 'true');
+    }
+
     function updateFameUI() {
       const level = getFameLevel(fame);
+      const prevLevel = Number(fameLevelEl.textContent || 1);
       fameLevelEl.textContent = level;
       fameResult.innerHTML = `Level: <strong id="fame-level">${level}</strong>`;
       fameInput.value = fame;
+      if (level !== prevLevel) handleLevelPrompts(level);
     }
     function setFame(v) {
       fame = Math.max(0, Math.min(119, Math.floor(Number(v) || 0)));
@@ -342,6 +427,11 @@
       });
     });
 
+    levelOk.addEventListener('click', () => {
+      hideLevelModal();
+    });
+
+    // Crystal / Card functions (unchanged)
     function changeCrystal(color, amount) {
       const key = color.toLowerCase();
       crystals[key] = Math.max(0, (crystals[key] || 0) + amount);
@@ -390,6 +480,7 @@
       updateDiscard();
       dummyOutput.textContent = 'Deck initialized and shuffled.';
       setFame(0);
+      lastShownLevel = 1;
     }
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
 
@@ -433,12 +524,12 @@
       selectedCrystal = null;
       selectedCardColor = null;
       modalConfirm.disabled = true;
-      overlay.style.display = 'flex';
-      overlay.setAttribute('aria-hidden', 'false');
+      overlayModal.style.display = 'flex';
+      overlayModal.setAttribute('aria-hidden', 'false');
       Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.remove('selected'));
       Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.remove('selected'));
     }
-    function closeModal(){ overlay.style.display = 'none'; overlay.setAttribute('aria-hidden', 'true'); }
+    function closeModal(){ overlayModal.style.display = 'none'; overlayModal.setAttribute('aria-hidden', 'true'); }
 
     crystalChoices.addEventListener('click', (e) => {
       const btn = e.target.closest('.choice-btn');
@@ -456,9 +547,7 @@
       modalConfirm.disabled = !(selectedCrystal && selectedCardColor);
     });
 
-    modalCancel.addEventListener('click', () => {
-      closeModal();
-    });
+    modalCancel.addEventListener('click', () => { closeModal(); });
 
     modalConfirm.addEventListener('click', () => {
       if(!selectedCrystal || !selectedCardColor) return;
