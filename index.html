@@ -25,14 +25,27 @@
 
   <div class="tracker">
     <h2>Dummy Player</h2>
-    <button onclick="drawDummyCard()">Draw Card</button>
+    <p>Crystals: 
+      🔴 <span id="red">0</span> 
+      🔵 <span id="blue">0</span> 
+      🟢 <span id="green">0</span> 
+      ⚪ <span id="white">0</span>
+    </p>
+    <button onclick="addCrystal('red')">+ Red</button>
+    <button onclick="addCrystal('blue')">+ Blue</button>
+    <button onclick="addCrystal('green')">+ Green</button>
+    <button onclick="addCrystal('white')">+ White</button>
+    <br><br>
+    <button onclick="drawDummyCards()">Draw Dummy Cards</button>
     <p id="dummy-output"></p>
+    <p id="deck-count"></p>
   </div>
 
   <script>
     let fame = 0;
     let reputation = 0;
-    const dummyDeck = ["Red", "Blue", "Green", "White", "Gold", "Black"];
+    let crystals = { red: 0, blue: 0, green: 0, white: 0 };
+    let dummyDeck = Array.from({ length: 16 }, (_, i) => `Card ${i + 1}`);
 
     function changeFame(amount) {
       fame += amount;
@@ -44,9 +57,22 @@
       document.getElementById("reputation").textContent = reputation;
     }
 
-    function drawDummyCard() {
-      const card = dummyDeck[Math.floor(Math.random() * dummyDeck.length)];
-      document.getElementById("dummy-output").textContent = `Dummy draws: ${card}`;
+    function addCrystal(color) {
+      crystals[color]++;
+      document.getElementById(color).textContent = crystals[color];
+    }
+
+    function drawDummyCards() {
+      let extra = crystals.red + crystals.blue + crystals.green + crystals.white;
+      let drawCount = 2 + extra;
+      let drawn = [];
+
+      for (let i = 0; i < drawCount && dummyDeck.length > 0; i++) {
+        drawn.push(dummyDeck.shift());
+      }
+
+      document.getElementById("dummy-output").textContent = `Dummy draws: ${drawn.join(", ")}`;
+      document.getElementById("deck-count").textContent = `Cards left in deck: ${dummyDeck.length}`;
     }
   </script>
 </body>
