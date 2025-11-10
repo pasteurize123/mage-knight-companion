@@ -342,7 +342,6 @@
       });
     });
 
-    // Crystal / Card functions (unchanged)
     function changeCrystal(color, amount) {
       const key = color.toLowerCase();
       crystals[key] = Math.max(0, (crystals[key] || 0) + amount);
@@ -494,6 +493,10 @@
     // Init
     window.addEventListener('load', ()=>{
       buildRepRows();
+      // select middle row's center cell (index 1) by default
+      const midCells = repWrap.querySelectorAll('.rep-row.mid .rep-cell');
+      if (midCells && midCells[1]) midCells[1].classList.add('selected');
+
       document.getElementById('card-red').textContent = cardCounts.Red;
       document.getElementById('card-blue').textContent = cardCounts.Blue;
       document.getElementById('card-green').textContent = cardCounts.Green;
