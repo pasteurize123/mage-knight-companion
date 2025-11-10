@@ -93,25 +93,20 @@
 
         <div class="fame-row" role="group" aria-label="Fame input">
           <div class="fame-controls" style="flex:1">
-            <!-- Manual numeric input still available -->
-            <label for="fame-input" style="font-size:13px">Tracked Fame</label>
+            <!-- Label changed from Tracked Fame to Fame -->
+            <label for="fame-input" style="font-size:13px">Fame</label>
             <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
             <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
             <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
           </div>
 
-          <!-- New controls: select increment and add/subtract buttons -->
-          <div style="display:flex;align-items:center;gap:8px">
-            <label for="fame-increment" style="font-size:13px">Amount</label>
-            <select id="fame-increment" aria-label="Fame increment">
-              <option value="1">+1</option>
-              <option value="2">+2</option>
-              <option value="3">+3</option>
-              <option value="5">+5</option>
-              <option value="10">+10</option>
-            </select>
-            <button id="fame-add" class="fame-btn" title="Add selected amount to tracked fame">Add</button>
-            <button id="fame-sub" class="fame-btn" title="Subtract selected amount from tracked fame">Subtract</button>
+          <!-- Individual add-buttons (no subtract) -->
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="fame-btn" data-inc="1">+1</button>
+            <button class="fame-btn" data-inc="2">+2</button>
+            <button class="fame-btn" data-inc="3">+3</button>
+            <button class="fame-btn" data-inc="5">+5</button>
+            <button class="fame-btn" data-inc="10">+10</button>
           </div>
         </div>
 
@@ -261,9 +256,7 @@
     const fameInput = document.getElementById('fame-input');
     const fameResult = document.getElementById('fame-result');
     const fameDisplayEl = document.getElementById('fame-display');
-    const fameIncrement = document.getElementById('fame-increment');
-    const fameAddBtn = document.getElementById('fame-add');
-    const fameSubBtn = document.getElementById('fame-sub');
+    const fameButtons = document.querySelectorAll('.fame-btn');
 
     const dummyOutput = document.getElementById('dummy-output');
     const discardOutput = document.getElementById('discard-output');
@@ -335,14 +328,12 @@
       setFame(fameInput.value);
     });
 
-    // Add/subtract using selected increment
-    fameAddBtn.addEventListener('click', () => {
-      const inc = Math.max(1, parseInt(fameIncrement.value || "1", 10));
-      setFame(fame + inc);
-    });
-    fameSubBtn.addEventListener('click', () => {
-      const inc = Math.max(1, parseInt(fameIncrement.value || "1", 10));
-      setFame(fame - inc);
+    // Individual add-buttons behavior
+    fameButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const inc = parseInt(btn.dataset.inc || "0", 10);
+        if (!isNaN(inc) && inc > 0) setFame(fame + inc);
+      });
     });
 
     // Crystals change (dummy player's crystals)
@@ -398,7 +389,7 @@
       updateDrawButton();
       updateDiscard();
       dummyOutput.textContent = 'Deck initialized and shuffled.';
-      setFame(0); // optional: keep tracked fame initialised (remove if undesired)
+      setFame(0);
     }
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
 
