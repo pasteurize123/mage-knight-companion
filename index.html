@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Updated</title>
+  <title>Mage Knight Companion — Draw / End Round Fixed</title>
   <style>
     :root{
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
@@ -42,6 +42,9 @@
     .modal{background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
     .modal h3{margin:0 0 8px 0;font-size:16px}
     .modal p{margin:8px 0;font-size:14px;white-space:pre-wrap}
+    .choice-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+    .choice-btn{padding:8px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer}
+    .choice-btn.selected{background:#eef6e9;border-color:#9fd49f}
 
     footer{display:flex;justify-content:center;padding:8px 0}
     @media (max-width:700px){ input[type=number]{width:90px} :root{--rep-min:34px} }
@@ -60,13 +63,12 @@
       </div>
     </section>
 
-    <!-- Fame + Levels Achieved (centered input, player level display and buttons) -->
+    <!-- Fame + Levels Achieved -->
     <section class="panel" aria-labelledby="fame-title">
       <div class="panel-inner">
         <h2 id="fame-title">Fame Track</h2>
 
         <div class="center-column" style="width:100%">
-          <!-- centered fame input and controls -->
           <div class="center" style="width:100%;margin-bottom:6px">
             <div style="text-align:center">
               <label style="font-weight:700;display:block;margin-bottom:6px">Player Fame</label>
@@ -81,7 +83,6 @@
             </div>
           </div>
 
-          <!-- fame addition buttons -->
           <div class="center" style="width:100%">
             <div>
               <button class="smallbtn fame-inc" data-inc="1">+1 Fame</button>
@@ -162,6 +163,39 @@
     </footer>
   </div>
 
+  <!-- End round modal for choosing crystal/card when end of round occurs -->
+  <div id="endround-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="endround-title">
+      <h3 id="endround-title">End Round — Choose Additions</h3>
+      <p>Choose one crystal and one card to add to the dummy player. This will then reshuffle the discard into the deck</p>
+
+      <div style="margin-top:8px">
+        <div style="font-weight:600;margin-bottom:6px">Choose crystal</div>
+        <div id="crystal-choices" class="choice-row">
+          <button class="choice-btn" data-val="red">🔴</button>
+          <button class="choice-btn" data-val="blue">🔵</button>
+          <button class="choice-btn" data-val="green">🟢</button>
+          <button class="choice-btn" data-val="white">⚪</button>
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div style="font-weight:600;margin-bottom:6px">Choose card</div>
+        <div id="card-choices" class="choice-row">
+          <button class="choice-btn" data-val="Red">🔴</button>
+          <button class="choice-btn" data-val="Blue">🔵</button>
+          <button class="choice-btn" data-val="Green">🟢</button>
+          <button class="choice-btn" data-val="White">⚪</button>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+        <button id="endround-cancel" class="smallbtn">Cancel</button>
+        <button id="endround-confirm" class="smallbtn" disabled>Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Level modal (combined prompts) -->
   <div id="level-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="lvl-title">
@@ -232,6 +266,15 @@
     const dummyOutput = document.getElementById('dummy-output');
     const discardOutput = document.getElementById('discard-output');
     const reshuffleBtn = document.getElementById('reshuffle-btn');
+
+    const endroundModal = document.getElementById('endround-modal');
+    const crystalChoices = document.getElementById('crystal-choices');
+    const cardChoices = document.getElementById('card-choices');
+    const endroundConfirm = document.getElementById('endround-confirm');
+    const endroundCancel = document.getElementById('endround-cancel');
+
+    let selectedCrystal = null;
+    let selectedCard = null;
 
     // Helpers
     function clampInt(v,min,max){ const n=Math.floor(Number(v)||0); return Math.max(min,Math.min(max,n)); }
@@ -343,23 +386,134 @@
     function updateDiscardUI(){ if(!discardPile||discardPile.length===0) discardOutput.textContent='Discard pile is empty.'; else {
       const syms = discardPile.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c); discardOutput.textContent = `Discard (${discardPile.length}): ${syms.join(' ')}`; } }
 
-    function onDrawClick(){
-      if(endRoundFlag){ dummyOutput.textContent='End round pending.'; return; }
-      const drawn=[]; for(let i=0;i<3 && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
-      const last = drawn[drawn.length-1];
-      if(last){ const color = last.split(' ')[0].toLowerCase(); const extra = crystals[color]||0; for(let i=0;i<extra && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop()); }
-      if(drawn.length===0){ endRoundFlag=true; drawBtn.textContent='End Round'; dummyOutput.textContent='No cards drawn. End of round.'; saveState(); return; }
-      discardPile.push(...drawn); const syms = drawn.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c); dummyOutput.textContent = syms.join(' ');
-      updateDeckCount(); updateDiscardUI(); saveState();
-    }
-
-    // Reshuffle: put discard into deck and reshuffle
-    function reshuffleDeck(){
-      if (!discardPile || discardPile.length === 0) {
-        alert('Discard pile is empty. Nothing to reshuffle.');
+    // Draw behaviour:
+    // - Draw up to 3 cards or until deck empty
+    // - If last drawn card has color and crystals give extra draws, draw those (from remaining deck)
+    // - If cannot draw (deck empty at start), set endRoundFlag and change button to 'End Round'
+    function drawCardsOnce(){
+      if (dummyDeck.length === 0) {
+        // nothing to draw => enter end of round
+        endRoundFlag = true;
+        drawBtn.textContent = 'End Round';
+        dummyOutput.textContent = 'No cards to draw. End of round pending.';
+        saveState();
         return;
       }
-      // move discard into deck and shuffle
+
+      const drawn = [];
+      for (let i = 0; i < 3 && dummyDeck.length > 0; i++) {
+        drawn.push(dummyDeck.pop());
+      }
+
+      // apply extra draws if last drawn color and crystals provide extra
+      const last = drawn[drawn.length - 1];
+      if (last) {
+        const color = last.split(' ')[0].toLowerCase();
+        const extra = crystals[color] || 0;
+        for (let i = 0; i < extra && dummyDeck.length > 0; i++) drawn.push(dummyDeck.pop());
+      }
+
+      if (drawn.length === 0) {
+        endRoundFlag = true;
+        drawBtn.textContent = 'End Round';
+        dummyOutput.textContent = 'No cards drawn. End of round pending.';
+        saveState();
+        return;
+      }
+
+      discardPile.push(...drawn);
+      const syms = drawn.map(c => COLOR_SYMBOL[c.split(' ')[0]] || c);
+      dummyOutput.textContent = syms.join(' ');
+      updateDeckCount();
+      updateDiscardUI();
+
+      // If deck is now empty after drawing, prepare for end of round (button becomes End Round)
+      if (dummyDeck.length === 0) {
+        endRoundFlag = true;
+        drawBtn.textContent = 'End Round';
+      }
+
+      saveState();
+    }
+
+    function onDrawClick(){
+      if (endRoundFlag) {
+        // open end round modal to choose crystal and card
+        openEndRoundModal();
+        return;
+      }
+      // normal draw
+      drawCardsOnce();
+    }
+
+    // End round modal functions
+    function openEndRoundModal(){
+      selectedCrystal = null;
+      selectedCard = null;
+      endroundConfirm.disabled = true;
+      endroundModal.style.display = 'flex';
+      endroundModal.setAttribute('aria-hidden', 'false');
+      // reset selection UI
+      Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.remove('selected'));
+      Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.remove('selected'));
+    }
+    function closeEndRoundModal(){
+      endroundModal.style.display = 'none';
+      endroundModal.setAttribute('aria-hidden', 'true');
+    }
+
+    crystalChoices.addEventListener('click', (e) => {
+      const btn = e.target.closest('.choice-btn');
+      if (!btn) return;
+      selectedCrystal = btn.dataset.val;
+      Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.toggle('selected', b === btn));
+      endroundConfirm.disabled = !(selectedCrystal && selectedCard);
+    });
+
+    cardChoices.addEventListener('click', (e) => {
+      const btn = e.target.closest('.choice-btn');
+      if (!btn) return;
+      selectedCard = btn.dataset.val;
+      Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b => b.classList.toggle('selected', b === btn));
+      endroundConfirm.disabled = !(selectedCrystal && selectedCard);
+    });
+
+    endroundCancel.addEventListener('click', () => {
+      closeEndRoundModal();
+    });
+
+    endroundConfirm.addEventListener('click', () => {
+      if (!selectedCrystal || !selectedCard) return;
+      // apply chosen crystal and card
+      changeCrystal(selectedCrystal, 1);
+      changeCard(selectedCard, 1);
+
+      // move discard into deck and reshuffle
+      if (discardPile.length > 0) {
+        dummyDeck.push(...discardPile);
+        discardPile = [];
+        shuffle(dummyDeck);
+      }
+
+      updateDeckCount();
+      updateDiscardUI();
+
+      // reset end round
+      endRoundFlag = false;
+      drawBtn.textContent = 'Draw';
+      dummyOutput.textContent = `End Round: added ${COLOR_SYMBOL[selectedCard] || selectedCard} and ${COLOR_SYMBOL[selectedCrystal] || selectedCrystal}. Deck reshuffled.`;
+
+      saveState();
+      closeEndRoundModal();
+    });
+
+    // Reshuffle: put discard into deck and reshuffle (button under discard)
+    function reshuffleDeck(){
+      if (!discardPile || discardPile.length === 0) {
+        // no-op if empty
+        dummyOutput.textContent = 'Discard pile is empty. Nothing to reshuffle.';
+        return;
+      }
       dummyDeck.push(...discardPile);
       discardPile = [];
       shuffle(dummyDeck);
@@ -372,13 +526,30 @@
     }
 
     // crystals & cards
-    function changeCrystal(color,delta){ crystals[color] = Math.max(0,(crystals[color]||0)+delta); document.getElementById(color).textContent=crystals[color]; saveState(); }
+    function changeCrystal(color,delta){
+      crystals[color] = Math.max(0,(crystals[color]||0)+delta);
+      document.getElementById(color).textContent = crystals[color];
+      saveState();
+    }
     function changeCard(color,delta){
       cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta);
       document.getElementById(`card-${color.toLowerCase()}`).textContent = cardCounts[color];
-      if(delta>0){ const name=`${color} Card`; const pos=Math.floor(Math.random()*(dummyDeck.length+1)); dummyDeck.splice(pos,0,name); }
-      else { const name=`${color} Card`; const idx=dummyDeck.indexOf(name); if(idx!==-1) dummyDeck.splice(idx,1); else { const dj=discardPile.indexOf(name); if(dj!==-1) discardPile.splice(dj,1); } }
-      updateDeckCount(); updateDiscardUI(); saveState();
+      if(delta>0){
+        const name=`${color} Card`;
+        const pos=Math.floor(Math.random()*(dummyDeck.length+1));
+        dummyDeck.splice(pos,0,name);
+      } else {
+        const name=`${color} Card`;
+        const idx=dummyDeck.indexOf(name);
+        if(idx!==-1) dummyDeck.splice(idx,1);
+        else {
+          const dj=discardPile.indexOf(name);
+          if(dj!==-1) discardPile.splice(dj,1);
+        }
+      }
+      updateDeckCount();
+      updateDiscardUI();
+      saveState();
     }
 
     // fame setters
@@ -449,15 +620,13 @@
         const color = b.dataset.color; const act = b.dataset.act; changeCard(color, act==='inc'?1:-1);
       }));
 
-      // draw and reshuffle
+      // draw, reshuffle, new game
       drawBtn.addEventListener('click', onDrawClick);
       reshuffleBtn.addEventListener('click', reshuffleDeck);
-
-      // modal OK
-      levelOk.addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
-
-      // new game
       newGameBtn.addEventListener('click', newGame);
+
+      // endround modal buttons wired earlier; level modal ok
+      levelOk.addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
       // save on unload
       window.addEventListener('beforeunload', saveState);
