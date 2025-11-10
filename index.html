@@ -27,9 +27,9 @@
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
     }
+
     h1{font-size:18px;margin:0 0 12px;text-align:center}
     h2,h3{font-size:16px;margin:0}
-    h3{font-weight:400;color:inherit}
     .container{display:flex;flex-direction:column;gap:12px;max-width:900px;margin:0 auto}
     .boxed { background:var(--panel-bg); border-radius:10px; padding:10px; }
     .box-inner { background:var(--box-bg); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:10px; }
@@ -84,7 +84,6 @@
   <h1>Mage Knight Companion</h1>
 
   <div class="container">
-
     <section class="boxed" aria-labelledby="rep-section">
       <div class="box-inner">
         <h2 id="rep-section">Reputation Track</h2>
@@ -95,6 +94,7 @@
     <section class="boxed" aria-labelledby="fame-section">
       <div class="box-inner">
         <h2 id="fame-section">Fame Track</h2>
+
         <div class="fame-row" role="group" aria-label="Fame input">
           <div class="fame-controls" style="flex:1;align-items:center">
             <h3 style="margin:0 8px 0 0">Fame</h3>
@@ -123,7 +123,9 @@
               <div class="inline-item">
                 <div style="font-size:18px">🔴 <span class="stat" id="red">0</span></div>
                 <div><button class="smallbtn" onclick="changeCrystal('red',1)">+</button><button class="smallbtn" onclick="changeCrystal('red',-1)">−</button></div>
+
                 <div style="width:12px"></div>
+
                 <div style="font-size:18px">🔵 <span class="stat" id="blue">0</span></div>
                 <div><button class="smallbtn" onclick="changeCrystal('blue',1)">+</button><button class="smallbtn" onclick="changeCrystal('blue',-1)">−</button></div>
               </div>
@@ -131,7 +133,9 @@
               <div class="inline-item">
                 <div style="font-size:18px">🟢 <span class="stat" id="green">0</span></div>
                 <div><button class="smallbtn" onclick="changeCrystal('green',1)">+</button><button class="smallbtn" onclick="changeCrystal('green',-1)">−</button></div>
+
                 <div style="width:12px"></div>
+
                 <div style="font-size:18px">⚪ <span class="stat" id="white">0</span></div>
                 <div><button class="smallbtn" onclick="changeCrystal('white',1)">+</button><button class="smallbtn" onclick="changeCrystal('white',-1)">−</button></div>
               </div>
@@ -142,7 +146,9 @@
               <div class="inline-item">
                 <div style="font-size:18px">🔴 <span class="stat" id="card-red">4</span></div>
                 <div><button class="smallbtn" onclick="changeCard('Red',1)">+</button><button class="smallbtn" onclick="changeCard('Red',-1)">−</button></div>
+
                 <div style="width:12px"></div>
+
                 <div style="font-size:18px">🔵 <span class="stat" id="card-blue">4</span></div>
                 <div><button class="smallbtn" onclick="changeCard('Blue',1)">+</button><button class="smallbtn" onclick="changeCard('Blue',-1)">−</button></div>
               </div>
@@ -150,7 +156,9 @@
               <div class="inline-item">
                 <div style="font-size:18px">🟢 <span class="stat" id="card-green">4</span></div>
                 <div><button class="smallbtn" onclick="changeCard('Green',1)">+</button><button class="smallbtn" onclick="changeCard('Green',-1)">−</button></div>
+
                 <div style="width:12px"></div>
+
                 <div style="font-size:18px">⚪ <span class="stat" id="card-white">4</span></div>
                 <div><button class="smallbtn" onclick="changeCard('White',1)">+</button><button class="smallbtn" onclick="changeCard('White',-1)">−</button></div>
               </div>
@@ -168,6 +176,7 @@
 
           <div style="margin-top:6px">
             <div id="discard-output" class="output">Discard pile is empty.</div>
+
             <div style="margin-top:8px;display:flex;justify-content:center">
               <button class="smallbtn" onclick="resetDeck()">Reset Deck</button>
             </div>
@@ -175,10 +184,9 @@
         </div>
       </div>
     </section>
-
   </div>
 
-  <!-- Single-level-up modal that shows all relevant prompts together -->
+  <!-- Level modal (same as before) -->
   <div id="level-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="level-title">
       <h3 id="level-title">Level Up</h3>
@@ -189,7 +197,6 @@
     </div>
   </div>
 
-  <!-- End round choices modal -->
   <div id="overlay-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true" style="display:none">
     <div class="modal" role="document">
       <h3 id="modal-title">End Round — Choose Additions</h3>
@@ -311,23 +318,6 @@
     function selectRepCell(cellEl) {
       const all = repWrap.querySelectorAll('.rep-cell');
       all.forEach(c => c.classList.remove('selected'));
-
-      // mid row logic: left 0 -> bottom left, center 0 -> itself, right 0 -> top right
-      const parentRow = cellEl.parentElement;
-      if (parentRow.classList.contains('mid')) {
-        const idx = Array.from(parentRow.children).indexOf(cellEl);
-        if (idx === 0) {
-          const botTarget = repWrap.querySelector('.rep-row.bot .rep-cell');
-          if (botTarget) { botTarget.classList.add('selected'); return; }
-        }
-        if (idx === 1) { cellEl.classList.add('selected'); return; }
-        if (idx === 2) {
-          const topCells = repWrap.querySelectorAll('.rep-row.top .rep-cell');
-          const topTarget = topCells[topCells.length - 1];
-          if (topTarget) { topTarget.classList.add('selected'); return; }
-        }
-      }
-
       cellEl.classList.add('selected');
     }
 
@@ -337,7 +327,7 @@
       return 1;
     }
 
-    // Show all relevant prompts in one modal when fame jumps multiple levels
+    // When fame increases across multiple levels, show all relevant prompts in the single modal
     function handleLevelPrompts(prevLevel, newLevel) {
       const messages = [];
       for (let L = prevLevel + 1; L <= newLevel; L++) {
@@ -365,15 +355,41 @@
     }
 
     function setFame(v) {
-      fame = Math.max(0, Math.min(119, Math.floor(Number(v) || 0)));
+      const newVal = Math.max(0, Math.min(119, Math.floor(Number(v) || 0)));
+      fame = newVal;
       updateFameUI();
     }
 
-    fameInput.addEventListener('input', () => setFame(fameInput.value));
+    // NEW: make sure typing replaces the current fame value (override behavior).
+    // - 'change' fires when input loses focus after edit
+    // - 'keydown' handler handles Enter to apply instantly
+    fameInput.addEventListener('change', () => {
+      // override current fame with what's in the input
+      setFame(fameInput.value);
+    });
+
+    fameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        setFame(fameInput.value);
+        // blur so change event won't re-fire later and to give immediate feedback
+        fameInput.blur();
+      }
+      // allow normal editing for other keys
+    });
+
+    // Keep existing live input behavior (optional). If you prefer not to update while typing,
+    // comment out the following listener. It will still be set by change/Enter above.
+    fameInput.addEventListener('input', () => {
+      // If you'd rather only apply on Enter or blur, comment out this line:
+      // setFame(fameInput.value);
+    });
+
+    // Increment buttons still add to the current fame value
     fameButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const inc = parseInt(btn.dataset.inc || "0", 10);
-        if (!isNaN(inc) && inc > 0) setFame(fame + inc);
+        if (!isNaN(inc)) setFame(fame + inc);
       });
     });
 
@@ -524,7 +540,7 @@
       initializeDeck();
     });
 
-    // Expose functions for debugging if needed
+    // Expose for debug/buttons if needed
     window.changeCrystal = changeCrystal;
     window.changeCard = changeCard;
     window.resetDeck = resetDeck;
