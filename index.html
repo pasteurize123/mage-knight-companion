@@ -287,7 +287,7 @@
     let dummyDeck = [];
     let discardPile = [];
     let endRoundFlag = false;
-    let achievedLevels = [];
+    let achievedLevels = []; // synced to current player level
     let repSelection = null;
 
     // DOM refs
@@ -345,6 +345,23 @@
       } catch(e){ return false; }
     }
     function clearSavedState(){ try { localStorage.removeItem(STORAGE_KEY); } catch(e){} }
+
+    // Random initial crystals: two of one colour, one of another
+    function initStartingCrystals(){
+      const keys = ['red','blue','green','white'];
+      const first = keys[Math.floor(Math.random()*keys.length)];
+      let second = keys[Math.floor(Math.random()*keys.length)];
+      while(second === first) second = keys[Math.floor(Math.random()*keys.length)];
+      crystals = { red:0, blue:0, green:0, white:0 };
+      crystals[first] = 2;
+      crystals[second] = 1;
+      // update DOM counters
+      document.getElementById('red').textContent = crystals.red;
+      document.getElementById('blue').textContent = crystals.blue;
+      document.getElementById('green').textContent = crystals.green;
+      document.getElementById('white').textContent = crystals.white;
+      saveState();
+    }
 
     // Reputation UI
     function buildRepRows(){
@@ -577,35 +594,41 @@
       const prev = fame; fame = clampInt(fame + delta, 0, 119); updateFameUI(prev);
     }
 
-    // NEW GAME
+    // NEW GAME - full reset including deck and randomized starting crystals
     function newGame(){
       if (!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
       clearSavedState();
       fame = 0;
-      crystals = { ...DEFAULT_CRYSTALS };
       cardCounts = { ...DEFAULT_CARDS };
       dummyDeck = [];
       discardPile = [];
       endRoundFlag = false;
       achievedLevels = [1];
       repSelection = null;
+
+      // initialize randomized starting crystals
+      initStartingCrystals();
+
+      // rebuild deck from default card counts
       rebuildDeckFromCounts();
-      document.getElementById('red').textContent = crystals.red;
-      document.getElementById('blue').textContent = crystals.blue;
-      document.getElementById('green').textContent = crystals.green;
-      document.getElementById('white').textContent = crystals.white;
+
+      // update card UI
       document.getElementById('card-red').textContent = cardCounts.Red;
       document.getElementById('card-blue').textContent = cardCounts.Blue;
       document.getElementById('card-green').textContent = cardCounts.Green;
       document.getElementById('card-white').textContent = cardCounts.White;
+
       updateDeckCount();
       updateDiscardUI();
       buildRepRows();
+
       const midCell = repWrap.querySelector('.rep-row.mid .rep-cell');
       if (midCell) { midCell.classList.add('selected'); repSelection = {row:'mid', index:0}; }
+
       endRoundFlag = false;
       drawBtn.textContent = 'Draw';
       dummyOutput.textContent = 'Drawn symbols appear here';
+
       fame = 0;
       updateFameUI(null);
       renderLevels();
@@ -616,40 +639,67 @@
     window.addEventListener('load', ()=>{
       buildRepRows();
       const ok = loadState();
-      if(!achievedLevels || achievedLevels.length===0) achievedLevels = [1];
-      document.getElementById('red').textContent = crystals.red || 0;
-      document.getElementById('blue').textContent = crystals.blue || 0;
-      document.getElementById('green').textContent = crystals.green || 0;
-      document.getElementById('white').textContent = crystals.white || 0;
+
+      if(!ok){
+        // fresh start: randomized starting crystals
+        initStartingCrystals();
+        cardCounts = { ...DEFAULT_CARDS };
+        rebuildDeckFromCounts();
+        achievedLevels = [1];
+        saveState();
+      } else {
+        // loaded state: ensure deck exists
+        if(!Array.isArray(dummyDeck) || dummyDeck.length===0) rebuildDeckFromCounts();
+        // ensure crystal counters in DOM reflect loaded state
+        document.getElementById('red').textContent = crystals.red || 0;
+        document.getElementById('blue').textContent = crystals.blue || 0;
+        document.getElementById('green').textContent = crystals.green || 0;
+        document.getElementById('white').textContent = crystals.white || 0;
+      }
+
       document.getElementById('card-red').textContent = cardCounts.Red;
       document.getElementById('card-blue').textContent = cardCounts.Blue;
       document.getElementById('card-green').textContent = cardCounts.Green;
       document.getElementById('card-white').textContent = cardCounts.White;
-      if(!ok){ rebuildDeckFromCounts(); achievedLevels = [1]; saveState(); }
-      else { if(!Array.isArray(dummyDeck) || dummyDeck.length===0) rebuildDeckFromCounts(); }
-      updateDeckCount(); updateDiscardUI();
-      updateFameUI(null);
-      renderLevels();
 
+      updateDeckCount(); updateDiscardUI();
+      updateFameUI(null); renderLevels();
+
+      // fame input override behavior
       fameInput.addEventListener('change', ()=> setFameOverride(fameInput.value));
       fameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); setFameOverride(fameInput.value); fameInput.blur(); } });
 
+      // fame inc buttons
       document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=> addFame(Number(btn.dataset.inc||0))));
-      document.querySelectorAll('[data-crystal]').forEach(b => b.addEventListener('click', ()=>{ const color = b.dataset.crystal; const act = b.dataset.act; changeCrystal(color, act==='inc'?1:-1); }));
-      document.querySelectorAll('.card-btn').forEach(b => b.addEventListener('click', ()=>{ const color = b.dataset.color; const act = b.dataset.act; changeCard(color, act==='inc'?1:-1); }));
 
+      // crystals buttons
+      document.querySelectorAll('[data-crystal]').forEach(b => b.addEventListener('click', ()=>{
+        const color = b.dataset.crystal; const act = b.dataset.act; changeCrystal(color, act==='inc'?1:-1);
+      }));
+
+      // card buttons
+      document.querySelectorAll('.card-btn').forEach(b => b.addEventListener('click', ()=>{
+        const color = b.dataset.color; const act = b.dataset.act; changeCard(color, act==='inc'?1:-1);
+      }));
+
+      // draw/reshuffle/new game wiring
       drawBtn.addEventListener('click', (e)=>{
-        if (endRoundFlag && drawBtn.textContent === 'End Round') { openEndRoundModal(); return; }
+        if (endRoundFlag && drawBtn.textContent === 'End Round') {
+          openEndRoundModal();
+          return;
+        }
         onDrawClick();
       });
       reshuffleBtn.addEventListener('click', reshuffleDeck);
       newGameBtn.addEventListener('click', newGame);
 
+      // level modal ok
       document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
+
       window.addEventListener('beforeunload', saveState);
     });
 
-    // debug
+    // expose for debug
     window._mk_save = saveState;
     window._mk_load = loadState;
     window._mk_newGame = newGame;
