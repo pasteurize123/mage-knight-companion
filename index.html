@@ -103,6 +103,7 @@
 
         <div class="combined-grid">
           <div class="cols">
+            <!-- Crystals now belong to the Dummy Player -->
             <div class="col" aria-labelledby="crystal-title">
               <h3 id="crystal-title">Crystals</h3>
               <div class="inline-item">
@@ -149,8 +150,8 @@
               </div>
             </div>
 
-            <div class="col" aria-labelledby="deck-title">
-              <h3 id="deck-title">Deck & Discard</h3>
+            <div class="col">
+              <!-- title removed as requested -->
               <div style="margin-top:8px;font-size:13px">Cards in deck: <strong id="deck-count">0</strong></div>
             </div>
           </div>
@@ -161,7 +162,7 @@
           </div>
 
           <div style="margin-top:6px">
-            <div style="font-weight:700;margin-bottom:6px">Discard Pile</div>
+            <!-- removed "Discard Pile" title as requested -->
             <div id="discard-output" class="output">Discard pile is empty.</div>
 
             <div style="margin-top:8px;display:flex;justify-content:center">
@@ -180,7 +181,7 @@
     <div class="modal" role="document">
       <h3 id="modal-title">End Round — Choose Additions</h3>
 
-      <div style="margin-bottom:6px">Choose one crystal to add to the player</div>
+      <div style="margin-bottom:6px">Choose one crystal to add to the dummy player</div>
       <div class="choice-row" id="crystal-choices">
         <button class="choice-btn" data-val="red">🔴</button>
         <button class="choice-btn" data-val="blue">🔵</button>
@@ -206,6 +207,7 @@
   <script>
     // State
     let fame = 0;
+    // crystals belong to the dummy player
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 };
     let dummyDeck = [];
@@ -302,7 +304,7 @@
       fameDisplayEl.textContent = fame;
     }
 
-    // Crystals change
+    // Crystals change (dummy player's crystals)
     function changeCrystal(color, amount) {
       const key = color.toLowerCase();
       crystals[key] = Math.max(0, (crystals[key] || 0) + amount);
@@ -440,7 +442,7 @@
 
     modalConfirm.addEventListener('click', () => {
       if(!selectedCrystal || !selectedCardColor) return;
-      // 1) add one crystal to player
+      // 1) add one crystal to the dummy player
       changeCrystal(selectedCrystal, 1);
       // 2) add one card of selected color to counts and immediately to deck
       changeCard(selectedCardColor, 1);
