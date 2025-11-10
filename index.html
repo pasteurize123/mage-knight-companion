@@ -29,14 +29,12 @@
 
     .boxed { background:var(--panel-bg); border-radius:10px; padding:10px; }
     .box-inner { background:var(--box-bg); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:10px; }
-    /* Make heading elements visually match and not bold */
     h2{font-size:14px;margin:0}
-    h3{font-size:13px;margin:0 0 6px 0;font-weight:400;color:inherit} /* unbold headings */
+    h3{font-size:13px;margin:0 0 6px 0;font-weight:400;color:inherit}
 
     .rep-wrap{display:flex;flex-direction:column;gap:8px;width:100%;align-items:center}
     .rep-row{display:flex;gap:8px;align-items:center;justify-content:center}
     .rep-row .rep-cell{flex:0 0 auto;min-width:var(--rep-min);padding:6px 10px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;font-size:13px;user-select:none}
-    /* selected styles per row */
     .rep-row.top .rep-cell.selected{background:var(--gold);color:#111;font-weight:700}
     .rep-row.mid .rep-cell.selected{background:var(--orange);color:#111;font-weight:700}
     .rep-row.bot .rep-cell.selected{background:var(--red);color:#fff;font-weight:700}
@@ -44,7 +42,8 @@
     .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .fame-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     select, input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
-    .fame-result{font-weight:400;font-size:14px;padding:6px 8px;background:#fff;border-radius:6px}
+    /* Fame box bolded */
+    .fame-result{font-weight:700;font-size:14px;padding:6px 8px;background:#fff;border-radius:6px}
     .fame-btn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px}
 
     .combined-grid{display:flex;flex-direction:column;gap:8px}
@@ -57,7 +56,6 @@
 
     .inline-item{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 
-    /* modal / overlay */
     .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--overlay-bg);z-index:50}
     .modal{background:#fff;border-radius:10px;padding:16px;max-width:420px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
     .modal h3{margin:0 0 8px 0;font-size:16px}
@@ -96,13 +94,11 @@
         <h2 id="fame-section">Fame Track</h2>
 
         <div class="fame-row" role="group" aria-label="Fame input">
-          <div class="fame-controls" style="flex:1">
-            <!-- Label changed to use same heading formatting as crystals/cards -->
+          <div class="fame-controls" style="flex:1;align-items:center">
             <h3 style="margin:0 8px 0 0">Fame</h3>
             <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
-            <!-- Level will render as "Level: X" with X bolded -->
-            <div class="fame-result" id="fame-result" aria-live="polite">Level: <strong>1</strong></div>
-            <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
+            <div class="fame-result" id="fame-result" aria-live="polite">Level: <strong id="fame-level">1</strong></div>
+            <!-- removed the separate Fame: X display as requested -->
           </div>
 
           <div style="display:flex;align-items:center;gap:6px">
@@ -123,7 +119,6 @@
 
         <div class="combined-grid">
           <div class="cols">
-            <!-- Crystals now belong to the Dummy Player -->
             <div class="col" aria-labelledby="crystal-title">
               <h3 id="crystal-title">Crystals</h3>
               <div class="inline-item">
@@ -194,7 +189,6 @@
 
   </div>
 
-  <!-- Modal used when End Round triggered -->
   <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document">
       <h3 id="modal-title">End Round — Choose Additions</h3>
@@ -223,7 +217,6 @@
   </div>
 
   <script>
-    // State
     let fame = 0;
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 };
@@ -253,12 +246,11 @@
       red: '🔴', blue: '🔵', green: '🟢', white: '⚪'
     };
 
-    // DOM refs
     const repWrap = document.getElementById('rep-wrap');
     const repDisplayEl = document.getElementById('rep-display');
     const fameInput = document.getElementById('fame-input');
     const fameResult = document.getElementById('fame-result');
-    const fameDisplayEl = document.getElementById('fame-display');
+    const fameLevelEl = document.getElementById('fame-level');
     const fameButtons = document.querySelectorAll('.fame-btn');
 
     const dummyOutput = document.getElementById('dummy-output');
@@ -274,7 +266,6 @@
     let selectedCrystal = null;
     let selectedCardColor = null;
 
-    // Build reputation rows with row-specific classes
     function buildRepRows() {
       repWrap.innerHTML = '';
 
@@ -313,7 +304,6 @@
       repDisplayEl.textContent = label;
     }
 
-    // Fame helpers
     function getFameLevel(v) {
       const val = Math.max(0, Math.min(119, Math.floor(Number(v) || 0)));
       for (const b of fameLevels) if (val >= b.min && val <= b.max) return b.level;
@@ -321,9 +311,8 @@
     }
     function updateFameUI() {
       const level = getFameLevel(fame);
-      // Level: X with X bolded
-      fameResult.innerHTML = `Level: <strong>${level}</strong>`;
-      fameDisplayEl.textContent = fame;
+      fameLevelEl.textContent = level;
+      fameResult.innerHTML = `Level: <strong id="fame-level">${level}</strong>`;
       fameInput.value = fame;
     }
     function setFame(v) {
@@ -342,7 +331,6 @@
       });
     });
 
-    // Crystal / Card functions
     function changeCrystal(color, amount) {
       const key = color.toLowerCase();
       crystals[key] = Math.max(0, (crystals[key] || 0) + amount);
@@ -398,15 +386,10 @@
     function updateDrawButton(){ drawBtn.textContent = endRoundFlag ? 'End Round' : 'Draw'; }
 
     function onDrawClick(){
-      if(endRoundFlag){
-        openEndRoundModal();
-        return;
-      }
+      if(endRoundFlag){ openEndRoundModal(); return; }
 
       const drawn = [];
-      for(let i=0;i<3 && dummyDeck.length>0;i++){
-        drawn.push(dummyDeck.pop());
-      }
+      for(let i=0;i<3 && dummyDeck.length>0;i++){ drawn.push(dummyDeck.pop()); }
 
       const last = drawn[drawn.length-1];
       if(last){
@@ -460,9 +443,7 @@
       modalConfirm.disabled = !(selectedCrystal && selectedCardColor);
     });
 
-    modalCancel.addEventListener('click', () => {
-      closeModal();
-    });
+    modalCancel.addEventListener('click', () => { closeModal(); });
 
     modalConfirm.addEventListener('click', () => {
       if(!selectedCrystal || !selectedCardColor) return;
@@ -483,18 +464,11 @@
 
     function updateDeckCount(){ document.getElementById('deck-count').textContent = dummyDeck.length; }
     function updateDiscard(){
-      if(discardPile.length===0){
-        discardOutput.textContent = 'Discard pile is empty.';
-        return;
-      }
-      const syms = discardPile.map(c => {
-        const color = c.split(' ')[0];
-        return colorSymbol[color] || c;
-      });
+      if(discardPile.length===0){ discardOutput.textContent = 'Discard pile is empty.'; return; }
+      const syms = discardPile.map(c => { const color = c.split(' ')[0]; return colorSymbol[color] || c; });
       discardOutput.textContent = `Discard (${discardPile.length}): ${syms.join(' ')}`;
     }
 
-    // Init
     window.addEventListener('load', ()=>{
       buildRepRows();
       document.getElementById('card-red').textContent = cardCounts.Red;
@@ -506,7 +480,6 @@
       if(midCells && midCells[1]) midCells[1].click();
     });
 
-    // expose for buttons
     window.changeCrystal = changeCrystal;
     window.changeCard = changeCard;
     window.resetDeck = resetDeck;
