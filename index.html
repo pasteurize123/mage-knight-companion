@@ -48,7 +48,6 @@
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:13px;overflow:hidden}
     .stat{font-weight:700}
 
-    /* make Cards match Crystals layout */
     .inline-item{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 
     @media (max-width:820px){ .cols{flex-direction:column} .col{min-width:0} }
@@ -95,7 +94,6 @@
 
         <div class="combined-grid">
           <div class="cols">
-            <!-- Crystals column -->
             <div class="col" aria-labelledby="crystal-title">
               <h3 id="crystal-title">Crystals</h3>
               <div class="inline-item">
@@ -119,7 +117,6 @@
               </div>
             </div>
 
-            <!-- Cards column (now matching Crystals format) -->
             <div class="col" aria-labelledby="cards-title">
               <h3 id="cards-title">Cards</h3>
               <div class="inline-item">
@@ -143,25 +140,27 @@
               </div>
             </div>
 
-            <!-- Deck & Discard column -->
             <div class="col" aria-labelledby="deck-title">
               <h3 id="deck-title">Deck & Discard</h3>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button class="smallbtn" onclick="resetDeck()">Reset Deck</button>
-                <button class="smallbtn" onclick="reshuffleDiscardIntoDeck()">Reshuffle Discard</button>
+                <!-- reshuffle removed -->
               </div>
               <div style="margin-top:8px;font-size:13px">Cards in deck: <strong id="deck-count">0</strong></div>
             </div>
           </div>
 
           <div class="row" style="margin-top:6px;align-items:center">
-            <button class="smallbtn" onclick="drawDummyCards()">Draw</button>
+            <button id="draw-btn" class="smallbtn" onclick="onDrawClick()">Draw</button>
             <div id="dummy-output" class="output" style="flex:1;margin-left:8px">Drawn symbols will appear here.</div>
           </div>
 
           <div style="margin-top:6px">
             <div style="font-weight:700;margin-bottom:6px">Discard Pile</div>
             <div id="discard-output" class="output">Discard pile is empty.</div>
+
+            <div style="margin-top:8px;display:flex;justify-content:center">
+              <button class="smallbtn" onclick="resetDeck()">Reset Deck</button>
+            </div>
           </div>
 
         </div>
@@ -177,6 +176,7 @@
     let cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 };
     let dummyDeck = [];
     let discardPile = [];
+    let endRoundMode = false; // when true, Draw button shows "End Round"
 
     const repPositive = ["+1","+1","+2","+2","+3","+5"];
     const repNeutral = ["0","0","0"];
@@ -207,6 +207,7 @@
     const fameDisplayEl = document.getElementById('fame-display');
     const dummyOutput = document.getElementById('dummy-output');
     const discardOutput = document.getElementById('discard-output');
+    const drawBtn = document.getElementById('draw-btn');
 
     function buildRepRows() {
       repWrap.innerHTML = '';
@@ -260,6 +261,7 @@
       const key = color.toLowerCase();
       crystals[key] = Math.max(0, (crystals[key] || 0) + amount);
       document.getElementById(key).textContent = crystals[key];
+      // crystals do not affect deck unless you want them to
     }
 
     function changeCard(color, amount) {
@@ -279,34 +281,78 @@
     function initializeDeck() {
       rebuildDeckFromCounts();
       discardPile = [];
+      endRoundMode = false;
+      updateDrawButton();
       updateDiscard();
       dummyOutput.textContent = 'Deck initialized and shuffled.';
     }
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
-    function resetDeck(){ initializeDeck(); }
-    function reshuffleDiscardIntoDeck(){ if(discardPile.length===0) return; dummyDeck.push(...discardPile); discardPile = []; shuffle(dummyDeck); updateDeckCount(); updateDiscard(); }
+
+    function resetDeck(){
+      // rebuild deck from cardCounts and clear discard
+      initializeDeck();
+    }
+
+    function updateDrawButton(){
+      if(endRoundMode){
+        drawBtn.textContent = 'End Round';
+      } else {
+        drawBtn.textContent = 'Draw';
+      }
+    }
+
+    function onDrawClick(){
+      if(endRoundMode){
+        // End Round clicked -> reshuffle discard into deck and return to Draw
+        // Move discard into deck, shuffle, clear discard
+        if(discardPile.length > 0){
+          dummyDeck.push(...discardPile);
+          discardPile = [];
+          shuffle(dummyDeck);
+        }
+        endRoundMode = false;
+        updateDeckCount();
+        updateDiscard();
+        dummyOutput.textContent = 'Round ended. Deck reshuffled.';
+        updateDrawButton();
+        return;
+      }
+      // Regular draw behavior
+      drawDummyCards();
+    }
 
     function drawDummyCards(){
       const drawn = [];
-      for(let i=0;i<3 && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
+      for(let i=0;i<3 && dummyDeck.length>0;i++){
+        drawn.push(dummyDeck.pop());
+      }
+
+      // apply extra draws based on crystals matching last drawn color
       const last = drawn[drawn.length-1];
       if(last){
         const color = last.split(' ')[0].toLowerCase();
         const extra = crystals[color] || 0;
         for(let i=0;i<extra && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
       }
-      if(dummyDeck.length===0 && discardPile.length>0){
-        const moved = discardPile.splice(0);
-        dummyDeck.push(...moved);
-        shuffle(dummyDeck);
+
+      // If this draw consumed the final cards (deck now empty), do NOT reshuffle.
+      // Instead set endRoundMode so button becomes "End Round"
+      if(dummyDeck.length === 0){
+        endRoundMode = true;
+        updateDrawButton();
       }
+
       discardPile.push(...drawn);
+
+      // Show symbols instead of names
       const drawnSymbols = drawn.map(c => {
         const color = c.split(' ')[0];
         return colorSymbol[color] || c;
       });
       dummyOutput.textContent = drawnSymbols.length===0 ? 'No cards drawn (deck empty).' : drawnSymbols.join(' ');
-      updateDeckCount(); updateDiscard();
+
+      updateDeckCount();
+      updateDiscard();
     }
 
     function updateDeckCount(){ document.getElementById('deck-count').textContent = dummyDeck.length; }
@@ -336,12 +382,13 @@
       setTimeout(()=>{ updateFameFromInput(); }, 40);
     });
 
-    // Expose to buttons
+    // Expose for buttons
     window.changeCrystal = changeCrystal;
     window.changeCard = changeCard;
     window.resetDeck = resetDeck;
     window.drawDummyCards = drawDummyCards;
-    window.reshuffleDiscardIntoDeck = reshuffleDiscardIntoDeck;
+    window.reshuffleDiscardIntoDeck = function(){}; // removed/disabled
+    window.onDrawClick = onDrawClick;
   </script>
 </body>
 </html>
