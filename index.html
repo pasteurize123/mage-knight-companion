@@ -3,49 +3,71 @@
 <head>
   <title>Mage Knight Companion</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .tracker { margin-bottom: 20px; }
-    button { margin-right: 10px; }
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    h1 { color: #333; }
+    .section { margin-bottom: 30px; }
+    button { margin: 5px; padding: 8px 12px; }
+    .output { background: #fff; padding: 10px; border-radius: 5px; }
   </style>
 </head>
 <body>
-  <h1>Mage Knight Companion</h1>
+  <h1>Mage Knight Dummy Player Companion</h1>
 
-  <div class="tracker">
-    <h2>Fame: <span id="fame">0</span></h2>
+  <div class="section">
+    <h2>Fame & Reputation</h2>
+    Fame: <span id="fame">0</span>
     <button onclick="changeFame(1)">+1 Fame</button>
-    <button onclick="changeFame(-1)">-1 Fame</button>
-  </div>
-
-  <div class="tracker">
-    <h2>Reputation: <span id="reputation">0</span></h2>
+    <button onclick="changeFame(-1)">-1 Fame</button><br><br>
+    Reputation: <span id="reputation">0</span>
     <button onclick="changeReputation(1)">+1 Rep</button>
     <button onclick="changeReputation(-1)">-1 Rep</button>
   </div>
 
-  <div class="tracker">
-    <h2>Dummy Player</h2>
-    <p>Crystals: 
-      🔴 <span id="red">0</span> 
-      🔵 <span id="blue">0</span> 
-      🟢 <span id="green">0</span> 
-      ⚪ <span id="white">0</span>
-    </p>
-    <button onclick="addCrystal('red')">+ Red</button>
-    <button onclick="addCrystal('blue')">+ Blue</button>
-    <button onclick="addCrystal('green')">+ Green</button>
-    <button onclick="addCrystal('white')">+ White</button>
-    <br><br>
+  <div class="section">
+    <h2>Crystals</h2>
+    🔴 Red: <span id="red">0</span>
+    🔵 Blue: <span id="blue">0</span>
+    🟢 Green: <span id="green">0</span>
+    ⚪ White: <span id="white">0</span><br>
+    <button onclick="addCrystal('red')">+ Red Crystal</button>
+    <button onclick="addCrystal('blue')">+ Blue Crystal</button>
+    <button onclick="addCrystal('green')">+ Green Crystal</button>
+    <button onclick="addCrystal('white')">+ White Crystal</button>
+  </div>
+
+  <div class="section">
+    <h2>Dummy Deck</h2>
+    <button onclick="addCard('Red')">+ Red Card</button>
+    <button onclick="addCard('Blue')">+ Blue Card</button>
+    <button onclick="addCard('Green')">+ Green Card</button>
+    <button onclick="addCard('White')">+ White Card</button>
+    <button onclick="resetDeck()">Reset Deck</button>
+    <p>Cards left: <span id="deck-count">16</span></p>
+  </div>
+
+  <div class="section">
+    <h2>Draw Cards</h2>
     <button onclick="drawDummyCards()">Draw Dummy Cards</button>
-    <p id="dummy-output"></p>
-    <p id="deck-count"></p>
+    <div class="output">
+      <p id="dummy-output">Drawn cards will appear here.</p>
+    </div>
   </div>
 
   <script>
     let fame = 0;
     let reputation = 0;
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
-    let dummyDeck = Array.from({ length: 16 }, (_, i) => `Card ${i + 1}`);
+    let dummyDeck = [];
+
+    function initializeDeck() {
+      dummyDeck = [
+        ...Array(4).fill("Red"),
+        ...Array(4).fill("Blue"),
+        ...Array(4).fill("Green"),
+        ...Array(4).fill("White")
+      ];
+      updateDeckCount();
+    }
 
     function changeFame(amount) {
       fame += amount;
@@ -62,18 +84,43 @@
       document.getElementById(color).textContent = crystals[color];
     }
 
+    function addCard(color) {
+      dummyDeck.push(color);
+      updateDeckCount();
+    }
+
+    function resetDeck() {
+      initializeDeck();
+      document.getElementById("dummy-output").textContent = "Deck reset to 16 cards.";
+    }
+
     function drawDummyCards() {
-      let extra = crystals.red + crystals.blue + crystals.green + crystals.white;
-      let drawCount = 2 + extra;
       let drawn = [];
 
-      for (let i = 0; i < drawCount && dummyDeck.length > 0; i++) {
-        drawn.push(dummyDeck.shift());
+      // Draw minimum 3 cards
+      for (let i = 0; i < 3 && dummyDeck.length > 0; i++) {
+        let index = Math.floor(Math.random() * dummyDeck.length);
+        drawn.push(dummyDeck.splice(index, 1)[0]);
+      }
+
+      // Check last card and draw extra for matching crystals
+      let lastCard = drawn[drawn.length - 1];
+      for (let color of ["red", "blue", "green", "white"]) {
+        if (crystals[color] > 0 && lastCard.toLowerCase() === color && dummyDeck.length > 0) {
+          let index = Math.floor(Math.random() * dummyDeck.length);
+          drawn.push(dummyDeck.splice(index, 1)[0]);
+        }
       }
 
       document.getElementById("dummy-output").textContent = `Dummy draws: ${drawn.join(", ")}`;
-      document.getElementById("deck-count").textContent = `Cards left in deck: ${dummyDeck.length}`;
+      updateDeckCount();
     }
+
+    function updateDeckCount() {
+      document.getElementById("deck-count").textContent = dummyDeck.length;
+    }
+
+    initializeDeck();
   </script>
 </body>
 </html>
