@@ -42,7 +42,6 @@
     .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .fame-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     select, input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
-    /* Fame box bolded */
     .fame-result{font-weight:700;font-size:14px;padding:6px 8px;background:#fff;border-radius:6px}
     .fame-btn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px}
 
@@ -52,7 +51,9 @@
     .col{background:var(--box-bg);border-radius:8px;padding:8px;min-width:160px;flex:1}
     .smallbtn{font-size:13px;padding:6px 8px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:13px;overflow:hidden}
-    .stat{font-weight:700}
+
+    /* Make the small numeric labels (crystals, card counts, deck count) uniform */
+    .stat{font-weight:700;font-size:13px;line-height:1;min-width:20px;display:inline-block;text-align:center}
 
     .inline-item{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 
@@ -71,6 +72,7 @@
       .fame-result{font-size:14px}
       .rep-cell{font-size:12px;padding:5px 6px}
       .smallbtn{font-size:12px;padding:5px 6px}
+      .stat{font-size:12px}
     }
   </style>
 </head>
@@ -98,7 +100,7 @@
             <h3 style="margin:0 8px 0 0">Fame</h3>
             <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
             <div class="fame-result" id="fame-result" aria-live="polite">Level: <strong id="fame-level">1</strong></div>
-            <!-- removed the separate Fame: X display as requested -->
+            <!-- removed separate "Fame: X" display -->
           </div>
 
           <div style="display:flex;align-items:center;gap:6px">
@@ -166,7 +168,7 @@
             </div>
 
             <div class="col">
-              <div style="margin-top:8px;font-size:13px">Cards in deck: <strong id="deck-count">0</strong></div>
+              <div style="margin-top:8px;font-size:13px">Cards in deck: <strong id="deck-count" class="stat">0</strong></div>
             </div>
           </div>
 
