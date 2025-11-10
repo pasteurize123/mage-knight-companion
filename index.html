@@ -2,115 +2,150 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Mage Knight Companion — Clickable Tracks</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mage Knight Companion — Mobile Friendly</title>
   <style>
     :root{
-      --rep-cell-w: 60px;
-      --rep-gap: 6px;
-      --fame-cell-w: 36px;
-      --fame-gap: 6px;
-      --level-gap: 12px;
+      --bg: #f4f4f4;
+      --panel: #ececec;
+      --cell: #e0e0e0;
+      --accent: #ffdca3;
+      --rep-accent: #bfe7c7;
     }
 
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 18px; background: #f4f4f4; color:#222; }
-    h1 { margin: 0 0 12px 0; font-size: 20px; }
-    h2 { margin: 8px 0; font-size: 16px; }
-    .section { margin-bottom: 18px; }
-    button { margin: 4px; padding: 6px 10px; font-size: 13px; }
-    .output { background: #fff; padding: 10px; border-radius: 6px; min-height:40px; }
-    .track-container { background: #ececec; padding: 10px; border-radius: 8px; }
+    /* Base */
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:var(--bg);
+      color:#222;
+      padding:12px;
+    }
+    h1{font-size:18px;margin:0 0 10px}
+    h2{font-size:15px;margin:10px 0}
+
+    /* Panels & layout */
+    .panel{background:var(--panel);border-radius:10px;padding:10px;margin-bottom:12px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    button{padding:6px 8px;font-size:13px;border-radius:6px;border:1px solid #cfcfcf;background:white}
+    .small{font-size:13px}
+    .output{background:#fff;padding:8px;border-radius:8px;min-height:40px;font-size:13px}
 
     /* Reputation track */
-    .rep-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-    .rep-grid { display: grid; grid-auto-flow: column; gap: var(--rep-gap); align-items: center; position: relative; }
-    .rep-cell { width: var(--rep-cell-w); background:#ddd; padding:6px; text-align:center; border-radius:6px; font-size:13px; cursor:pointer; user-select:none; }
-    .rep-cell.selected { background:#bfe7c7; }
+    .rep-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .rep-grid{display:grid;grid-auto-flow:column;gap:6px;align-items:center}
+    .rep-cell{
+      width:50px;height:34px;background:#ddd;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:12px;cursor:pointer;
+      user-select:none;padding:4px;text-align:center
+    }
+    .rep-cell.selected{background:var(--rep-accent)}
 
-    /* Fame track grouped by level rows */
-    .levels { display: flex; flex-direction: column; gap: var(--level-gap); position: relative; padding-bottom: 8px; }
-    .level-row { display: flex; gap: var(--fame-gap); align-items: center; }
-    .level-label { width: 72px; font-weight:600; font-size:13px; }
-    .fame-cell { width: var(--fame-cell-w); min-width: var(--fame-cell-w); background:#e0e0e0; padding:6px; text-align:center; border-radius:6px; font-size:12px; cursor:pointer; user-select:none; }
-    .fame-cell.selected { background:#ffdca3; }
+    /* Fame track by level */
+    .levels{display:flex;flex-direction:column;gap:10px}
+    .level-row{display:flex;gap:8px;align-items:center}
+    .level-label{width:64px;font-weight:600;font-size:13px;flex:0 0 auto}
+    .fame-row-scroll{overflow-x:auto;flex:1}
+    .fame-cells{display:flex;gap:6px;padding-bottom:6px;align-items:center}
+    .fame-cell{
+      min-width:30px;height:30px;flex:0 0 auto;background:var(--cell);display:flex;align-items:center;justify-content:center;border-radius:6px;
+      font-size:12px;cursor:pointer;user-select:none;padding:4px
+    }
+    .fame-cell.selected{background:var(--accent)}
 
-    /* small helpers */
-    .controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .crystal-row { margin-bottom:6px; }
-    .legend { margin-top:8px; font-size:14px; }
-    .fame-row-scroll { overflow-x: auto; padding-bottom:6px; }
-    .fame-row-scroll::-webkit-scrollbar { height:10px; }
-    .fame-row-scroll::-webkit-scrollbar-thumb { background:#c1c1c1; border-radius:6px; }
-    .track-controls { display:flex; gap:8px; align-items:center; }
+    /* info */
+    .legend{font-size:13px;margin-top:8px;display:flex;justify-content:space-between;align-items:center}
+    .legend strong{font-weight:700}
+
+    /* crystals & deck */
+    .crystal-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:14px}
+    .crystal-row button{padding:4px 6px;font-size:13px}
+
+    /* responsive tweaks for small screens */
+    @media (max-width:420px){
+      :root{--fame-gap:4px}
+      .rep-cell{width:44px;height:30px;font-size:11px}
+      .level-label{width:56px;font-size:12px}
+      .fame-cell{min-width:28px;height:28px;font-size:11px}
+      .panel{padding:8px}
+      button{padding:6px 8px;font-size:12px}
+      .legend{font-size:12px}
+    }
+
+    /* reduce horizontal whitespace when very narrow */
+    @media (max-width:340px){
+      .rep-grid{gap:4px}
+      .fame-cells{gap:4px}
+      .level-label{width:48px}
+    }
   </style>
 </head>
 <body>
-  <h1>Mage Knight Dummy Player Companion</h1>
+  <h1>Mage Knight Companion</h1>
 
-  <div class="track-container section">
+  <div class="panel">
     <h2>Reputation Track</h2>
     <div class="rep-row">
       <div class="rep-grid" id="rep-grid" aria-hidden="false"></div>
-      <div style="min-width:100px; text-align:center;">Current: <strong id="rep-display">0</strong></div>
+      <div style="min-width:80px;text-align:center;font-size:13px">Current: <strong id="rep-display">0</strong></div>
     </div>
 
     <h2>Fame Track (by Level)</h2>
-    <div style="position:relative;">
+    <div style="position:relative">
       <div class="levels" id="levels-container"></div>
     </div>
 
     <div class="legend">
-      Fame Level: <strong id="fame-level">1</strong> &nbsp;|&nbsp; Fame: <strong id="fame-display">0</strong>
-      <span style="float:right">
-        <span class="track-controls">
-          <button onclick="changeFame(-1)">−</button>
-          <button onclick="changeFame(1)">+</button>
-        </span>
-      </span>
+      <div>Fame Level: <strong id="fame-level">1</strong></div>
+      <div>Fame: <strong id="fame-display">0</strong></div>
     </div>
   </div>
 
-  <div class="section">
+  <div class="panel">
     <h2>Crystals</h2>
-    <div class="crystal-row">🔴 Red: <span id="red">0</span>
-      <button onclick="changeCrystal('red', 1)">➕</button>
-      <button onclick="changeCrystal('red', -1)">➖</button>
+    <div class="crystal-row">
+      <div>🔴 Red: <strong id="red">0</strong></div>
+      <div class="controls"><button onclick="changeCrystal('red',1)">+ </button><button onclick="changeCrystal('red',-1)">−</button></div>
     </div>
-    <div class="crystal-row">🔵 Blue: <span id="blue">0</span>
-      <button onclick="changeCrystal('blue', 1)">➕</button>
-      <button onclick="changeCrystal('blue', -1)">➖</button>
+    <div class="crystal-row">
+      <div>🔵 Blue: <strong id="blue">0</strong></div>
+      <div class="controls"><button onclick="changeCrystal('blue',1)">+ </button><button onclick="changeCrystal('blue',-1)">−</button></div>
     </div>
-    <div class="crystal-row">🟢 Green: <span id="green">0</span>
-      <button onclick="changeCrystal('green', 1)">➕</button>
-      <button onclick="changeCrystal('green', -1)">➖</button>
+    <div class="crystal-row">
+      <div>🟢 Green: <strong id="green">0</strong></div>
+      <div class="controls"><button onclick="changeCrystal('green',1)">+ </button><button onclick="changeCrystal('green',-1)">−</button></div>
     </div>
-    <div class="crystal-row">⚪ White: <span id="white">0</span>
-      <button onclick="changeCrystal('white', 1)">➕</button>
-      <button onclick="changeCrystal('white', -1)">➖</button>
+    <div class="crystal-row">
+      <div>⚪ White: <strong id="white">0</strong></div>
+      <div class="controls"><button onclick="changeCrystal('white',1)">+ </button><button onclick="changeCrystal('white',-1)">−</button></div>
     </div>
   </div>
 
-  <div class="section">
+  <div class="panel">
     <h2>Dummy Deck</h2>
-    <div class="controls">
-      <button onclick="addCard('Red')">+ Red Card</button>
-      <button onclick="addCard('Blue')">+ Blue Card</button>
-      <button onclick="addCard('Green')">+ Green Card</button>
-      <button onclick="addCard('White')">+ White Card</button>
-      <button onclick="resetDeck()">Reset Deck</button>
-      <button onclick="reshuffleDiscardIntoDeck()">Reshuffle Discard Into Deck</button>
-      <div style="margin-left:6px">Cards left: <strong id="deck-count">0</strong></div>
+    <div class="row" style="align-items:center">
+      <div class="controls">
+        <button onclick="addCard('Red')">+ Red</button>
+        <button onclick="addCard('Blue')">+ Blue</button>
+        <button onclick="addCard('Green')">+ Green</button>
+        <button onclick="addCard('White')">+ White</button>
+        <button onclick="resetDeck()">Reset</button>
+        <button onclick="reshuffleDiscardIntoDeck()">Reshuffle</button>
+      </div>
+      <div style="margin-left:auto;font-size:13px">Cards: <strong id="deck-count">0</strong></div>
     </div>
   </div>
 
-  <div class="section">
+  <div class="panel">
     <h2>Draw</h2>
-    <div class="controls">
+    <div class="row">
       <button onclick="drawDummyCards()">Draw Dummy Cards</button>
-      <div id="dummy-output" class="output">Drawn cards will appear here.</div>
+      <div id="dummy-output" class="output" style="flex:1;margin-left:6px">Drawn cards will appear here.</div>
     </div>
   </div>
 
-  <div class="section">
+  <div class="panel">
     <h2>Discard Pile</h2>
     <div id="discard-output" class="output">Discard pile is empty.</div>
   </div>
@@ -118,25 +153,25 @@
   <script>
     // State
     let fame = 0;
-    let reputationIndex = 7; // middle (0) by default
-    let crystals = { red: 0, blue: 0, green: 0, white: 0 };
+    let reputationIndex = 7; // middle (0)
+    let crystals = { red:0, blue:0, green:0, white:0 };
     let dummyDeck = [];
     let discardPile = [];
 
     // Reputation values
-    const repValues = ["–X", "–5", "–3", "–2", "–1", "–1", "0", "0", "0", "+1", "+1", "+2", "+2", "+3", "+5"];
+    const repValues = ["–X","–5","–3","–2","–1","–1","0","0","0","+1","+1","+2","+2","+3","+5"];
 
-    // Fame level brackets (updated per your latest request)
+    // Updated fame brackets
     const fameLevels = [
-      {level:1, min:0,  max:2  },
-      {level:2, min:3,  max:7  },
-      {level:3, min:8,  max:14 },
-      {level:4, min:15, max:23 },
-      {level:5, min:24, max:34 },
-      {level:6, min:35, max:47 },
-      {level:7, min:48, max:62 },
-      {level:8, min:63, max:79 },
-      {level:9, min:80, max:98 },
+      {level:1, min:0,  max:2},
+      {level:2, min:3,  max:7},
+      {level:3, min:8,  max:14},
+      {level:4, min:15, max:23},
+      {level:5, min:24, max:34},
+      {level:6, min:35, max:47},
+      {level:7, min:48, max:62},
+      {level:8, min:63, max:79},
+      {level:9, min:80, max:98},
       {level:10,min:99, max:119}
     ];
 
@@ -147,187 +182,146 @@
     const fameDisplayEl = document.getElementById('fame-display');
     const repDisplayEl = document.getElementById('rep-display');
 
-    // Build reputation UI (clickable cells)
+    // Build reputation UI (clickable)
     repValues.forEach((v, idx) => {
-      const c = document.createElement('div');
-      c.className = 'rep-cell';
-      c.textContent = v;
-      c.dataset.index = idx;
-      c.addEventListener('click', () => {
-        reputationIndex = idx;
-        updateRepUI();
-      });
-      repGrid.appendChild(c);
+      const cell = document.createElement('div');
+      cell.className = 'rep-cell';
+      cell.textContent = v;
+      cell.dataset.index = idx;
+      cell.addEventListener('click', () => { reputationIndex = idx; updateRepUI(); });
+      repGrid.appendChild(cell);
     });
 
-    // Build fame rows by level and keep references for highlighting
-    const fameCellRefs = []; // {levelIndex, value, el}
-    fameLevels.forEach((lvl, levelIndex) => {
-      const rowWrap = document.createElement('div');
-      rowWrap.className = 'level-row';
-
+    // Build fame rows (clickable)
+    const fameCellRefs = [];
+    fameLevels.forEach((lvl, li) => {
+      const row = document.createElement('div');
+      row.className = 'level-row';
       const label = document.createElement('div');
       label.className = 'level-label';
       label.textContent = `Level ${lvl.level}`;
-      rowWrap.appendChild(label);
+      row.appendChild(label);
 
-      const scrollWrap = document.createElement('div');
-      scrollWrap.className = 'fame-row-scroll';
-      scrollWrap.style.flex = '1';
-      scrollWrap.style.overflowX = 'auto';
+      const scroll = document.createElement('div');
+      scroll.className = 'fame-row-scroll';
+      scroll.style.flex = '1';
+      const container = document.createElement('div');
+      container.className = 'fame-cells';
 
-      const cellsContainer = document.createElement('div');
-      cellsContainer.style.display = 'flex';
-      cellsContainer.style.gap = 'var(--fame-gap)';
-      cellsContainer.style.alignItems = 'center';
-      cellsContainer.style.paddingBottom = '6px';
-
-      for (let v = lvl.min; v <= lvl.max; v++) {
+      for(let v = lvl.min; v <= lvl.max; v++){
         const cell = document.createElement('div');
         cell.className = 'fame-cell';
         cell.textContent = v;
         cell.dataset.value = v;
-        cell.addEventListener('click', () => {
-          fame = v;
-          updateFameUI();
-        });
-        cellsContainer.appendChild(cell);
-        fameCellRefs.push({ levelIndex, value: v, el: cell });
+        cell.addEventListener('click', () => { fame = v; updateFameUI(); });
+        container.appendChild(cell);
+        fameCellRefs.push({levelIndex:li,value:v,el:cell});
       }
 
-      scrollWrap.appendChild(cellsContainer);
-      rowWrap.appendChild(scrollWrap);
-      levelsContainer.appendChild(rowWrap);
+      scroll.appendChild(container);
+      row.appendChild(scroll);
+      levelsContainer.appendChild(row);
     });
 
-    // locate fame position and level
-    function locateFame(value) {
+    // helpers
+    function locateFame(value){
       value = Math.max(0, Math.min(119, value));
       for (let i=0;i<fameLevels.length;i++){
         const lvl = fameLevels[i];
-        if (value >= lvl.min && value <= lvl.max) {
-          return { levelIndex: i, level: lvl.level, min: lvl.min, max: lvl.max, indexInRow: value - lvl.min };
-        }
+        if (value >= lvl.min && value <= lvl.max) return {levelIndex:i,level:lvl.level,min:lvl.min,max:lvl.max,indexInRow:value-lvl.min};
       }
-      return { levelIndex:0, level:1, indexInRow:0 };
+      return {levelIndex:0,level:1,indexInRow:0};
     }
 
-    // update fame UI: highlight selected cell, update displays, scroll to center
-    function updateFameUI() {
+    function updateFameUI(){
       fameCellRefs.forEach(r => r.el.classList.toggle('selected', r.value === fame));
       const ref = fameCellRefs.find(r => r.value === fame);
       if (!ref) return;
       const loc = locateFame(fame);
       fameLevelEl.textContent = loc.level;
       fameDisplayEl.textContent = fame;
-      // center the clicked cell horizontally in its scroll wrapper
-      const cellRect = ref.el.getBoundingClientRect();
+      // center clicked cell in its scroll wrapper
       const scrollWrap = ref.el.closest('.fame-row-scroll');
-      if (scrollWrap) {
+      if (scrollWrap){
+        const cellRect = ref.el.getBoundingClientRect();
         const wrapRect = scrollWrap.getBoundingClientRect();
-        const cellCenter = (cellRect.left + cellRect.right) / 2;
+        const cellCenter = (cellRect.left + cellRect.right)/2;
         const relative = cellCenter - wrapRect.left;
         const target = relative - wrapRect.width/2;
         scrollWrap.scrollLeft += target;
       }
     }
 
-    // update reputation UI: highlight selection and update display
-    function updateRepUI() {
+    function updateRepUI(){
       Array.from(repGrid.children).forEach(c => c.classList.toggle('selected', Number(c.dataset.index) === reputationIndex));
       repDisplayEl.textContent = repValues[reputationIndex];
     }
 
-    // controls for fame (small +/- kept for keyboard/quick adjustments)
-    function changeFame(amount) {
-      fame = Math.max(0, Math.min(119, fame + amount));
-      updateFameUI();
-    }
-
-    function changeCrystal(color, amount) {
+    // crystals
+    function changeCrystal(color, amount){
       crystals[color] = Math.max(0, crystals[color] + amount);
       document.getElementById(color).textContent = crystals[color];
     }
 
-    // Deck and draw logic
-    function initializeDeck() {
-      dummyDeck = [
-        ...Array(4).fill("Red Card"),
-        ...Array(4).fill("Blue Card"),
-        ...Array(4).fill("Green Card"),
-        ...Array(4).fill("White Card")
-      ];
+    // deck & draw logic
+    function initializeDeck(){
+      dummyDeck = [...Array(4).fill("Red Card"), ...Array(4).fill("Blue Card"), ...Array(4).fill("Green Card"), ...Array(4).fill("White Card")];
       discardPile = [];
-      shuffleArray(dummyDeck);
+      shuffle(dummyDeck);
       updateDeckCount();
       updateDiscardPile();
       document.getElementById('dummy-output').textContent = 'Deck initialized and shuffled.';
     }
 
-    function shuffleArray(a){
-      for (let i=a.length-1;i>0;i--){
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
         const j = Math.floor(Math.random()*(i+1));
         [a[i],a[j]]=[a[j],a[i]];
       }
     }
 
-    function addCard(color){
-      dummyDeck.push(`${color} Card`);
-      updateDeckCount();
-    }
+    function addCard(color){ dummyDeck.push(color + ' Card'); updateDeckCount(); }
     function resetDeck(){ initializeDeck(); }
-
     function reshuffleDiscardIntoDeck(){
-      if (discardPile.length === 0) { alert('Discard pile is empty.'); return; }
+      if (discardPile.length===0){ alert('Discard empty'); return; }
       dummyDeck.push(...discardPile);
       discardPile = [];
-      shuffleArray(dummyDeck);
+      shuffle(dummyDeck);
       updateDeckCount();
       updateDiscardPile();
     }
 
     function drawDummyCards(){
       const drawn = [];
-      for (let i=0;i<3 && dummyDeck.length>0;i++){
-        drawn.push(dummyDeck.pop());
-      }
+      for(let i=0;i<3 && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
       const last = drawn[drawn.length-1];
       if (last){
         const color = last.split(' ')[0].toLowerCase();
         const extra = crystals[color] || 0;
-        for (let i=0;i<extra && dummyDeck.length>0;i++){
-          drawn.push(dummyDeck.pop());
-        }
+        for(let i=0;i<extra && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
       }
-      // if deck emptied and discard exists, reshuffle AFTER this draw (current drawn go to discard)
-      if (dummyDeck.length === 0 && discardPile.length > 0){
+      if (dummyDeck.length===0 && discardPile.length>0){
         const moved = discardPile.splice(0);
         dummyDeck.push(...moved);
-        shuffleArray(dummyDeck);
+        shuffle(dummyDeck);
       }
       discardPile.push(...drawn);
-      document.getElementById('dummy-output').textContent = drawn.length === 0 ? 'No cards drawn (deck empty).' : `Dummy draws: ${drawn.join(', ')}`;
+      document.getElementById('dummy-output').textContent = drawn.length===0 ? 'No cards drawn (deck empty).' : `Dummy draws: ${drawn.join(', ')}`;
       updateDeckCount();
       updateDiscardPile();
     }
 
     function updateDeckCount(){ document.getElementById('deck-count').textContent = dummyDeck.length; }
-    function updateDiscardPile(){
-      document.getElementById('discard-output').textContent = discardPile.length === 0 ? 'Discard pile is empty.' : `Discard pile (${discardPile.length}): ${discardPile.join(', ')}`;
-    }
+    function updateDiscardPile(){ document.getElementById('discard-output').textContent = discardPile.length===0 ? 'Discard pile is empty.' : `Discard pile (${discardPile.length}): ${discardPile.join(', ')}`; }
 
-    // Initialize on load
+    // initialize
     window.addEventListener('load', () => {
       initializeDeck();
-      // initial UI updates after layout settles
-      setTimeout(() => {
-        updateFameUI();
-        updateRepUI();
-      }, 60);
+      // initial UI update shortly after layout ready
+      setTimeout(()=>{ updateFameUI(); updateRepUI(); }, 60);
     });
 
-    // Expose a few functions for inline buttons
-    window.changeFame = changeFame;
+    // expose useful functions for inline buttons
     window.changeCrystal = changeCrystal;
     window.addCard = addCard;
     window.resetDeck = resetDeck;
