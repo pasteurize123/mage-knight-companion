@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Reputation 3 Rows</title>
+  <title>Mage Knight Companion — Centered Reputation</title>
   <style>
     :root{
       --bg:#f4f4f4;
@@ -29,16 +29,13 @@
     button{padding:6px 8px;border-radius:8px;border:1px solid #ccc;background:#fff;font-size:13px}
     .output{background:var(--panel);padding:8px;border-radius:8px;min-height:40px;font-size:13px;overflow:hidden}
 
-    /* Reputation 3 rows layout */
-    .rep-wrap{display:flex;flex-direction:column;gap:6px;width:100%}
+    /* Reputation 3 rows layout, centered */
+    .rep-wrap{display:flex;flex-direction:column;gap:6px;width:100%;align-items:center}
     .rep-row{display:flex;gap:6px;align-items:center;justify-content:center}
     .rep-row .rep-cell{flex:0 0 auto;min-width:var(--rep-min);padding:6px 8px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;font-size:13px;user-select:none}
-    .rep-row.positive{justify-content:flex-end}
-    .rep-row.neutral{justify-content:center}
-    .rep-row.negative{justify-content:flex-start}
     .rep-cell.selected{background:var(--sel-rep);font-weight:700}
 
-    /* Fame input */
+    /* Fame input (descriptor removed) */
     .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
     input[type=number]{width:110px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
     .fame-result{font-weight:700;font-size:16px;padding:6px 8px;background:#fff;border-radius:6px}
@@ -72,13 +69,12 @@
       <!-- rows inserted by JS -->
     </div>
 
-    <div style="margin-top:8px;text-align:right;font-size:13px">Selected: <strong id="rep-display">0</strong></div>
+    <div style="margin-top:8px;text-align:center;font-size:13px">Selected: <strong id="rep-display">0</strong></div>
 
     <hr style="border:none;height:8px;background:transparent">
 
-    <h2 style="margin:6px 0 8px 0;font-size:14px">Fame (enter number)</h2>
+    <!-- Fame descriptor removed; only input and result remain -->
     <div class="fame-row">
-      <label for="fame-input" style="font-weight:600">Fame</label>
       <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
       <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
       <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
@@ -143,15 +139,12 @@
   <script>
     // State
     let fame = 0;
-    let reputationIndex = 6; // start at middle neutral 0 (middle row)
+    let reputationIndex = 6; // start at middle neutral 0
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let dummyDeck = [];
     let discardPile = [];
 
     // Reputation layout requested:
-    // top (positive): +1, +1, +2, +2, +3, +5
-    // middle (neutral): 0, 0, 0
-    // bottom (negative): -1, -1, -2, -3, -5, X
     const repPositive = ["+1","+1","+2","+2","+3","+5"];
     const repNeutral = ["0","0","0"];
     const repNegative = ["-1","-1","-2","-3","-5","X"];
@@ -180,23 +173,20 @@
     function buildRepRows() {
       repWrap.innerHTML = '';
 
-      // Top: positive (align right)
       const topRow = document.createElement('div');
-      topRow.className = 'rep-row positive';
+      topRow.className = 'rep-row';
       repPositive.forEach((label, idx) => {
         const el = document.createElement('div');
         el.className = 'rep-cell';
         el.textContent = label;
-        // compute index mapping so we can track a single linear index if needed:
         el.dataset.slot = `pos-${idx}`;
         el.addEventListener('click', () => selectRep(el, label));
         topRow.appendChild(el);
       });
       repWrap.appendChild(topRow);
 
-      // Middle: neutral (center)
       const midRow = document.createElement('div');
-      midRow.className = 'rep-row neutral';
+      midRow.className = 'rep-row';
       repNeutral.forEach((label, idx) => {
         const el = document.createElement('div');
         el.className = 'rep-cell';
@@ -207,9 +197,8 @@
       });
       repWrap.appendChild(midRow);
 
-      // Bottom: negative (align left)
       const botRow = document.createElement('div');
-      botRow.className = 'rep-row negative';
+      botRow.className = 'rep-row';
       repNegative.forEach((label, idx) => {
         const el = document.createElement('div');
         el.className = 'rep-cell';
@@ -229,7 +218,6 @@
       clearRepSelection();
       el.classList.add('selected');
       repDisplayEl.textContent = label;
-      // optional: set reputationIndex to a logical numeric index if you need (not required now)
     }
 
     // Fame helpers
@@ -253,7 +241,7 @@
       document.getElementById(color).textContent = crystals[color];
     }
 
-    // deck & draw logic
+    // deck & draw
     function initializeDeck() {
       dummyDeck = [
         ...Array(4).fill("Red Card"),
@@ -320,7 +308,7 @@
       initializeDeck();
       // select middle neutral center by default
       const midCells = repWrap.querySelectorAll('.rep-row')[1].querySelectorAll('.rep-cell');
-      if (midCells.length) { midCells[1]?.click?.(); } // select second neutral 0 if available
+      if (midCells.length) { midCells[1]?.click?.(); }
       setTimeout(() => { updateFameFromInput(); }, 40);
     });
 
