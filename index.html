@@ -3,98 +3,103 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Responsive Reputation</title>
+  <title>Mage Knight Companion — Single-line Reputation</title>
   <style>
     :root{
-      --bg:#f4f4f4;
-      --panel:#ffffff;
-      --track-bg:#ececec;
-      --cell:#e6e6e6;
-      --sel-rep:#bfe7c7;
-      --sel-fame:#ffdca3;
-      --gap:8px;
-      --rep-min:46px; /* adjust to fit more columns on small screens */
-      --fame-min:30px;
+      --bg: #f4f4f4;
+      --panel: #ffffff;
+      --track-bg: #ececec;
+      --cell: #e6e6e6;
+      --sel-rep: #bfe7c7;
+      --sel-fame: #ffdca3;
+      --gap: 6px;
     }
+
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:var(--bg);color:#111;padding:12px}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background:var(--bg);
+      color:#111;
+      padding:12px;
+    }
+
     h1{font-size:18px;margin:0 0 10px}
     .panel{background:var(--track-bg);border-radius:10px;padding:10px;margin-bottom:12px}
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     button{padding:6px 8px;border-radius:8px;border:1px solid #ccc;background:#fff;font-size:13px}
     .output{background:var(--panel);padding:8px;border-radius:8px;min-height:40px;font-size:13px;overflow:hidden}
 
-    /* Reputation: responsive wrapping grid so it always fits */
-    .rep-grid {
-      display:grid;
+    /* Reputation single-line: flex row, cells share width equally and never wrap */
+    .rep-line {
+      display:flex;
       gap:6px;
-      grid-template-columns: repeat(auto-fit, minmax(var(--rep-min), 1fr));
       width:100%;
       align-items:center;
+      white-space:nowrap;
+      overflow:hidden;
     }
     .rep-cell{
-      background:var(--cell);
+      flex:1 1 0;            /* grow and shrink equally */
+      min-width:0;           /* allow shrinking below content width */
       padding:6px 4px;
+      background:var(--cell);
       border-radius:6px;
       text-align:center;
       cursor:pointer;
-      font-size:13px;
+      font-size:12px;
+      line-height:1;
+      box-sizing:border-box;
+      overflow:hidden;
+      text-overflow:ellipsis;
       user-select:none;
     }
     .rep-cell.selected{background:var(--sel-rep);font-weight:700}
 
     /* Fame input */
-    .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
     input[type=number]{width:110px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
     .fame-result{font-weight:700;font-size:16px;padding:6px 8px;background:#fff;border-radius:6px}
 
-    /* Fame level rows removed — using input only */
-
-    /* Crystals & deck */
+    /* crystals & deck */
     .cr-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:14px}
-    .small{font-size:13px}
-    .compact{font-size:12px;padding:5px 6px}
+    .compact{font-size:12px;padding:5px 6px;border-radius:6px}
 
+    /* responsive tightening */
     @media (max-width:420px){
-      :root{--rep-min:40px;--fame-min:28px}
-      input[type=number]{width:88px;padding:6px}
+      input[type=number]{width:88px;padding:6px;font-size:13px}
       .fame-result{font-size:14px}
-      .rep-cell{font-size:12px;padding:5px}
+      .rep-cell{font-size:11px;padding:5px 3px}
       button{padding:5px 6px;font-size:12px}
     }
-
-    @media (max-width:330px){
-      :root{--rep-min:34px}
-      .rep-cell{font-size:11px;padding:4px}
+    @media (max-width:340px){
+      .rep-cell{font-size:10.5px;padding:4px 3px}
     }
 
-    /* info row */
-    .legend{display:flex;justify-content:space-between;gap:8px;margin-top:8px;font-size:13px}
+    .legend{margin-top:8px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
   </style>
 </head>
 <body>
   <h1>Mage Knight Companion</h1>
 
   <div class="panel" aria-labelledby="rep-title">
-    <h2 id="rep-title" style="margin:6px 0 8px 0;font-size:14px">Reputation Track (tap to set)</h2>
+    <h2 id="rep-title" style="margin:6px 0 8px 0;font-size:14px">Reputation Track (single line)</h2>
 
-    <!-- Responsive reputation grid: will wrap into multiple rows on narrow screens -->
-    <div class="rep-grid" id="rep-grid" role="list" aria-label="Reputation slots"></div>
+    <!-- Single-line reputation row: 15 cells that flex to fit the available width -->
+    <div class="rep-line" id="rep-line" role="list" aria-label="Reputation slots"></div>
+
     <div style="margin-top:8px;text-align:right;font-size:13px">Current: <strong id="rep-display">0</strong></div>
 
-    <hr style="border:none;height:8px;background:transparent">
-
-    <h2 style="margin:6px 0 8px 0;font-size:14px">Fame (enter number)</h2>
-    <div class="fame-row">
-      <label for="fame-input" class="small" style="font-weight:600">Fame</label>
+    <div class="fame-row" style="margin-top:12px">
+      <label for="fame-input" style="font-weight:600">Fame</label>
       <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
       <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
       <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
     </div>
 
-    <div class="legend" style="margin-top:10px">
-      <div class="small">Click reputation cells to select slot</div>
-      <div class="small">Fame levels: 1=0–2, 2=3–7, 3=8–14, 4=15–23, 5=24–34, 6=35–47, 7=48–62, 8=63–79, 9=80–98, 10=99–119</div>
+    <div class="legend">
+      <div style="font-size:12px">Tap a reputation cell to set it</div>
+      <div style="font-size:12px">Fame levels: 1=0–2, 2=3–7, 3=8–14, 4=15–23, 5=24–34, 6=35–47, 7=48–62, 8=63–79, 9=80–98, 10=99–119</div>
     </div>
   </div>
 
@@ -104,7 +109,7 @@
       <div>🔴 Red: <strong id="red">0</strong></div>
       <div><button class="compact" onclick="changeCrystal('red',1)">+ </button><button class="compact" onclick="changeCrystal('red',-1)">−</button></div>
 
-      <div style="width:16px"></div>
+      <div style="width:12px"></div>
 
       <div>🔵 Blue: <strong id="blue">0</strong></div>
       <div><button class="compact" onclick="changeCrystal('blue',1)">+ </button><button class="compact" onclick="changeCrystal('blue',-1)">−</button></div>
@@ -114,7 +119,7 @@
       <div>🟢 Green: <strong id="green">0</strong></div>
       <div><button class="compact" onclick="changeCrystal('green',1)">+ </button><button class="compact" onclick="changeCrystal('green',-1)">−</button></div>
 
-      <div style="width:16px"></div>
+      <div style="width:12px"></div>
 
       <div>⚪ White: <strong id="white">0</strong></div>
       <div><button class="compact" onclick="changeCrystal('white',1)">+ </button><button class="compact" onclick="changeCrystal('white',-1)">−</button></div>
@@ -159,7 +164,7 @@
     // Reputation values (15 slots)
     const repValues = ["–X","–5","–3","–2","–1","–1","0","0","0","+1","+1","+2","+2","+3","+5"];
 
-    // Fame level brackets (updated)
+    // Fame level brackets
     const fameLevels = [
       {level:1, min:0,  max:2},
       {level:2, min:3,  max:7},
@@ -174,15 +179,15 @@
     ];
 
     // DOM refs
-    const repGrid = document.getElementById('rep-grid');
+    const repLine = document.getElementById('rep-line');
     const fameInput = document.getElementById('fame-input');
     const fameResult = document.getElementById('fame-result');
     const fameDisplayEl = document.getElementById('fame-display');
     const repDisplayEl = document.getElementById('rep-display');
 
-    // Build reputation grid as a wrapping responsive grid
-    function buildRepGrid() {
-      repGrid.innerHTML = '';
+    // Build single-line reputation cells
+    function buildRepLine() {
+      repLine.innerHTML = '';
       repValues.forEach((v, idx) => {
         const el = document.createElement('div');
         el.className = 'rep-cell';
@@ -192,7 +197,7 @@
           reputationIndex = idx;
           updateRepUI();
         });
-        repGrid.appendChild(el);
+        repLine.appendChild(el);
       });
     }
 
@@ -212,7 +217,7 @@
     }
 
     function updateRepUI() {
-      Array.from(repGrid.children).forEach(c => c.classList.toggle('selected', Number(c.dataset.index) === reputationIndex));
+      Array.from(repLine.children).forEach(c => c.classList.toggle('selected', Number(c.dataset.index) === reputationIndex));
       repDisplayEl.textContent = repValues[reputationIndex];
     }
 
@@ -285,7 +290,7 @@
     // Init
     fameInput.addEventListener('input', updateFameFromInput);
     window.addEventListener('load', () => {
-      buildRepGrid();
+      buildRepLine();
       initializeDeck();
       // start with middle rep slot (index 6) selected
       reputationIndex = 6;
