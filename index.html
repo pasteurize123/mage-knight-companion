@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Reputation & Fame</title>
+  <title>Mage Knight Companion — Layout Update</title>
   <style>
     :root{
       --bg:#f4f4f4;
-      --panel:#ffffff;
-      --track-bg:#ececec;
+      --panel-bg:#ececec;
+      --box-bg:#ffffff;
       --cell:#e8e8e8;
       --sel-rep:#bfe7c7;
       --sel-fame:#ffdca3;
-      --gap:8px;
+      --gap:10px;
       --rep-min:44px;
     }
     *{box-sizing:border-box}
@@ -23,128 +23,153 @@
       color:#111;
       padding:12px;
     }
-    h1{font-size:18px;margin:0 0 10px;text-align:center}
-    .panel{background:var(--track-bg);border-radius:10px;padding:10px;margin-bottom:12px}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    button{padding:6px 8px;border-radius:8px;border:1px solid #ccc;background:#fff;font-size:13px}
-    .output{background:var(--panel);padding:8px;border-radius:8px;min-height:40px;font-size:13px;overflow:hidden}
+    h1{font-size:18px;margin:0 0 12px;text-align:center}
+    .container{display:flex;flex-direction:column;gap:12px;max-width:900px;margin:0 auto}
 
-    /* Reputation 3 rows layout, centered */
-    .rep-wrap{display:flex;flex-direction:column;gap:6px;width:100%;align-items:center}
-    .rep-row{display:flex;gap:6px;align-items:center;justify-content:center}
-    .rep-row .rep-cell{flex:0 0 auto;min-width:var(--rep-min);padding:6px 8px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;font-size:13px;user-select:none}
+    /* boxed sections */
+    .boxed {
+      background:var(--panel-bg);
+      border-radius:10px;
+      padding:10px;
+    }
+    .box-inner {
+      background:var(--box-bg);
+      border-radius:8px;
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    h2{font-size:14px;margin:0}
+
+    /* Reputation 3 rows, centered inside box */
+    .rep-wrap{display:flex;flex-direction:column;gap:8px;width:100%;align-items:center}
+    .rep-row{display:flex;gap:8px;align-items:center;justify-content:center}
+    .rep-row .rep-cell{flex:0 0 auto;min-width:var(--rep-min);padding:6px 10px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;font-size:13px;user-select:none}
     .rep-cell.selected{background:var(--sel-rep);font-weight:700}
 
-    /* Fame input */
-    .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+    /* Fame box */
+    .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     input[type=number]{width:110px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
     .fame-result{font-weight:700;font-size:16px;padding:6px 8px;background:#fff;border-radius:6px}
 
-    /* crystals & deck */
-    .cr-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:14px}
-    .compact{font-size:12px;padding:5px 6px;border-radius:6px}
+    /* Combined controls area (Crystals / Deck / Discard) */
+    .combined-grid{display:flex;flex-direction:column;gap:8px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .cols{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+    .col{background:var(--box-bg);border-radius:8px;padding:8px;min-width:160px;flex:1}
+    .col h3{font-size:13px;margin:0 0 6px 0}
+    .smallbtn{font-size:13px;padding:6px 8px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
+    .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:13px;overflow:hidden}
+    .stat{font-weight:700}
 
+    @media (max-width:820px){
+      .cols{flex-direction:column}
+      .col{min-width:0}
+    }
     @media (max-width:420px){
-      :root{--rep-min:36px}
+      :root{--rep-min:32px}
       input[type=number]{width:88px;padding:6px}
       .fame-result{font-size:14px}
       .rep-cell{font-size:12px;padding:5px 6px}
-      button{padding:5px 6px;font-size:12px}
+      .smallbtn{font-size:12px;padding:5px 6px}
     }
-    @media (max-width:340px){
-      :root{--rep-min:32px}
-      .rep-cell{font-size:11px;padding:4px 5px}
-    }
-
-    .legend{margin-top:8px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
   </style>
 </head>
 <body>
   <h1>Mage Knight Companion</h1>
 
-  <div class="panel" aria-labelledby="rep-title">
-    <h2 id="rep-title" style="margin:6px 0 8px 0;font-size:14px">Reputation Track</h2>
+  <div class="container">
 
-    <div class="rep-wrap" id="rep-wrap" aria-label="Reputation three rows">
-      <!-- rows inserted by JS -->
-    </div>
+    <!-- Reputation boxed section -->
+    <section class="boxed" aria-labelledby="rep-section">
+      <div class="box-inner">
+        <h2 id="rep-section">Reputation Track</h2>
 
-    <div style="margin-top:8px;text-align:center;font-size:13px">Selected: <strong id="rep-display">0</strong></div>
+        <div class="rep-wrap" id="rep-wrap" aria-label="Reputation three rows">
+          <!-- JS will insert three rows: positive / neutral / negative -->
+        </div>
 
-    <hr style="border:none;height:8px;background:transparent">
-
-    <h2 style="margin:6px 0 8px 0;font-size:14px">Fame Track</h2>
-    <div class="fame-row">
-      <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
-      <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
-      <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
-    </div>
-
-    <div class="legend">
-      <div class="small"></div>
-      <div class="small"></div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <h2 style="margin:6px 0 8px 0;font-size:14px">Crystals</h2>
-    <div class="cr-row">
-      <div>🔴 Red: <strong id="red">0</strong></div>
-      <div><button class="compact" onclick="changeCrystal('red',1)">+ </button><button class="compact" onclick="changeCrystal('red',-1)">−</button></div>
-
-      <div style="width:16px"></div>
-
-      <div>🔵 Blue: <strong id="blue">0</strong></div>
-      <div><button class="compact" onclick="changeCrystal('blue',1)">+ </button><button class="compact" onclick="changeCrystal('blue',-1)">−</button></div>
-    </div>
-
-    <div class="cr-row">
-      <div>🟢 Green: <strong id="green">0</strong></div>
-      <div><button class="compact" onclick="changeCrystal('green',1)">+ </button><button class="compact" onclick="changeCrystal('green',-1)">−</button></div>
-
-      <div style="width:16px"></div>
-
-      <div>⚪ White: <strong id="white">0</strong></div>
-      <div><button class="compact" onclick="changeCrystal('white',1)">+ </button><button class="compact" onclick="changeCrystal('white',-1)">−</button></div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <h2 style="margin:6px 0 8px 0;font-size:14px">Dummy Deck</h2>
-    <div class="row" style="align-items:center">
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="compact" onclick="addCard('Red')">+ Red</button>
-        <button class="compact" onclick="addCard('Blue')">+ Blue</button>
-        <button class="compact" onclick="addCard('Green')">+ Green</button>
-        <button class="compact" onclick="addCard('White')">+ White</button>
-        <button class="compact" onclick="resetDeck()">Reset</button>
-        <button class="compact" onclick="reshuffleDiscardIntoDeck()">Reshuffle</button>
+        <div style="text-align:center;font-size:13px">Selected: <strong id="rep-display">0</strong></div>
       </div>
-      <div style="margin-left:auto;font-size:13px">Cards: <strong id="deck-count">0</strong></div>
-    </div>
-  </div>
+    </section>
 
-  <div class="panel">
-    <div class="row" style="align-items:center">
-      <button onclick="drawDummyCards()">Draw Dummy Cards</button>
-      <div id="dummy-output" class="output" style="flex:1;margin-left:8px">Drawn cards will appear here.</div>
-    </div>
-  </div>
+    <!-- Fame boxed section -->
+    <section class="boxed" aria-labelledby="fame-section">
+      <div class="box-inner">
+        <h2 id="fame-section">Fame Track</h2>
 
-  <div class="panel">
-    <div style="font-weight:700;margin-bottom:6px">Discard Pile</div>
-    <div id="discard-output" class="output">Discard pile is empty.</div>
+        <div class="fame-row" role="group" aria-label="Fame input">
+          <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
+          <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
+          <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Combined Crystals / Deck / Discard boxed section -->
+    <section class="boxed" aria-labelledby="combined-section">
+      <div class="box-inner">
+        <h2 id="combined-section">Resources & Deck</h2>
+
+        <div class="combined-grid">
+          <div class="cols">
+            <div class="col" aria-labelledby="crystal-title">
+              <h3 id="crystal-title">Crystals</h3>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+                <div>🔴 Red: <span class="stat" id="red">0</span></div>
+                <div><button class="smallbtn" onclick="changeCrystal('red',1)">+ </button><button class="smallbtn" onclick="changeCrystal('red',-1)">−</button></div>
+                <div style="width:8px"></div>
+                <div>🔵 Blue: <span class="stat" id="blue">0</span></div>
+                <div><button class="smallbtn" onclick="changeCrystal('blue',1)">+ </button><button class="smallbtn" onclick="changeCrystal('blue',-1)">−</button></div>
+              </div>
+              <div style="height:8px"></div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+                <div>🟢 Green: <span class="stat" id="green">0</span></div>
+                <div><button class="smallbtn" onclick="changeCrystal('green',1)">+ </button><button class="smallbtn" onclick="changeCrystal('green',-1)">−</button></div>
+                <div style="width:8px"></div>
+                <div>⚪ White: <span class="stat" id="white">0</span></div>
+                <div><button class="smallbtn" onclick="changeCrystal('white',1)">+ </button><button class="smallbtn" onclick="changeCrystal('white',-1)">−</button></div>
+              </div>
+            </div>
+
+            <div class="col" aria-labelledby="deck-title">
+              <h3 id="deck-title">Dummy Deck</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="smallbtn" onclick="addCard('Red')">+ Red</button>
+                <button class="smallbtn" onclick="addCard('Blue')">+ Blue</button>
+                <button class="smallbtn" onclick="addCard('Green')">+ Green</button>
+                <button class="smallbtn" onclick="addCard('White')">+ White</button>
+                <button class="smallbtn" onclick="resetDeck()">Reset</button>
+                <button class="smallbtn" onclick="reshuffleDiscardIntoDeck()">Reshuffle</button>
+              </div>
+              <div style="margin-top:8px;font-size:13px">Cards: <strong id="deck-count">0</strong></div>
+            </div>
+
+            <div class="col" aria-labelledby="discard-title">
+              <h3 id="discard-title">Discard Pile</h3>
+              <div id="discard-output" class="output">Discard pile is empty.</div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:6px;align-items:center">
+            <button class="smallbtn" onclick="drawDummyCards()">Draw Dummy Cards</button>
+            <div id="dummy-output" class="output" style="flex:1;margin-left:8px">Drawn cards will appear here.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <script>
     // State
     let fame = 0;
-    let reputationIndex = 6; // start at middle neutral 0
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let dummyDeck = [];
     let discardPile = [];
 
-    // Reputation layout requested:
+    // Reputation rows content
     const repPositive = ["+1","+1","+2","+2","+3","+5"];
     const repNeutral = ["0","0","0"];
     const repNegative = ["-1","-1","-2","-3","-5","X"];
@@ -165,48 +190,36 @@
 
     // DOM refs
     const repWrap = document.getElementById('rep-wrap');
+    const repDisplayEl = document.getElementById('rep-display');
     const fameInput = document.getElementById('fame-input');
     const fameResult = document.getElementById('fame-result');
     const fameDisplayEl = document.getElementById('fame-display');
-    const repDisplayEl = document.getElementById('rep-display');
+    const dummyOutput = document.getElementById('dummy-output');
+    const discardOutput = document.getElementById('discard-output');
 
+    // Build reputation rows inside the boxed area
     function buildRepRows() {
       repWrap.innerHTML = '';
-
-      const topRow = document.createElement('div');
-      topRow.className = 'rep-row';
-      repPositive.forEach((label, idx) => {
-        const el = document.createElement('div');
-        el.className = 'rep-cell';
-        el.textContent = label;
-        el.dataset.slot = `pos-${idx}`;
+      const topRow = document.createElement('div'); topRow.className = 'rep-row';
+      repPositive.forEach(label => {
+        const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => selectRep(el, label));
         topRow.appendChild(el);
       });
-      repWrap.appendChild(topRow);
-
-      const midRow = document.createElement('div');
-      midRow.className = 'rep-row';
-      repNeutral.forEach((label, idx) => {
-        const el = document.createElement('div');
-        el.className = 'rep-cell';
-        el.textContent = label;
-        el.dataset.slot = `mid-${idx}`;
+      const midRow = document.createElement('div'); midRow.className = 'rep-row';
+      repNeutral.forEach(label => {
+        const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => selectRep(el, label));
         midRow.appendChild(el);
       });
-      repWrap.appendChild(midRow);
-
-      const botRow = document.createElement('div');
-      botRow.className = 'rep-row';
-      repNegative.forEach((label, idx) => {
-        const el = document.createElement('div');
-        el.className = 'rep-cell';
-        el.textContent = label;
-        el.dataset.slot = `neg-${idx}`;
+      const botRow = document.createElement('div'); botRow.className = 'rep-row';
+      repNegative.forEach(label => {
+        const el = document.createElement('div'); el.className = 'rep-cell'; el.textContent = label;
         el.addEventListener('click', () => selectRep(el, label));
         botRow.appendChild(el);
       });
+      repWrap.appendChild(topRow);
+      repWrap.appendChild(midRow);
       repWrap.appendChild(botRow);
     }
 
@@ -226,7 +239,6 @@
       for (const b of fameLevels) if (val >= b.min && val <= b.max) return b.level;
       return 1;
     }
-
     function updateFameFromInput() {
       const val = Math.max(0, Math.min(119, Math.floor(Number(fameInput.value) || 0)));
       fame = val;
@@ -235,13 +247,13 @@
       fameDisplayEl.textContent = fame;
     }
 
-    // crystals
+    // Crystals
     function changeCrystal(color, amount) {
       crystals[color] = Math.max(0, crystals[color] + amount);
       document.getElementById(color).textContent = crystals[color];
     }
 
-    // deck & draw
+    // Deck & draw logic
     function initializeDeck() {
       dummyDeck = [
         ...Array(4).fill("Red Card"),
@@ -252,67 +264,48 @@
       discardPile = [];
       shuffle(dummyDeck);
       updateDeckCount();
-      updateDiscardPile();
-      document.getElementById('dummy-output').textContent = 'Deck initialized and shuffled.';
+      updateDiscard();
+      dummyOutput.textContent = 'Deck initialized and shuffled.';
     }
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
+    function addCard(color){ dummyDeck.push(`${color} Card`); updateDeckCount(); }
+    function resetDeck(){ initializeDeck(); }
+    function reshuffleDiscardIntoDeck(){ if(discardPile.length===0) return; dummyDeck.push(...discardPile); discardPile=[]; shuffle(dummyDeck); updateDeckCount(); updateDiscard(); }
 
-    function shuffle(a) {
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-    }
-
-    function addCard(color) {
-      dummyDeck.push(`${color} Card`);
-      updateDeckCount();
-    }
-    function resetDeck() { initializeDeck(); }
-
-    function reshuffleDiscardIntoDeck() {
-      if (discardPile.length === 0) return;
-      dummyDeck.push(...discardPile);
-      discardPile = [];
-      shuffle(dummyDeck);
-      updateDeckCount();
-      updateDiscardPile();
-    }
-
-    function drawDummyCards() {
+    function drawDummyCards(){
       const drawn = [];
-      for (let i = 0; i < 3 && dummyDeck.length > 0; i++) drawn.push(dummyDeck.pop());
-      const last = drawn[drawn.length - 1];
-      if (last) {
+      for(let i=0;i<3 && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
+      const last = drawn[drawn.length-1];
+      if(last){
         const color = last.split(' ')[0].toLowerCase();
         const extra = crystals[color] || 0;
-        for (let i = 0; i < extra && dummyDeck.length > 0; i++) drawn.push(dummyDeck.pop());
+        for(let i=0;i<extra && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
       }
-      if (dummyDeck.length === 0 && discardPile.length > 0) {
+      if(dummyDeck.length===0 && discardPile.length>0){
         const moved = discardPile.splice(0);
         dummyDeck.push(...moved);
         shuffle(dummyDeck);
       }
       discardPile.push(...drawn);
-      document.getElementById('dummy-output').textContent = drawn.length === 0 ? 'No cards drawn (deck empty).' : `Dummy draws: ${drawn.join(', ')}`;
-      updateDeckCount();
-      updateDiscardPile();
+      dummyOutput.textContent = drawn.length===0 ? 'No cards drawn (deck empty).' : `Dummy draws: ${drawn.join(', ')}`;
+      updateDeckCount(); updateDiscard();
     }
 
-    function updateDeckCount() { document.getElementById('deck-count').textContent = dummyDeck.length; }
-    function updateDiscardPile() { document.getElementById('discard-output').textContent = discardPile.length === 0 ? 'Discard pile is empty.' : `Discard pile (${discardPile.length}): ${discardPile.join(', ')}`; }
+    function updateDeckCount(){ document.getElementById('deck-count').textContent = dummyDeck.length; }
+    function updateDiscard(){ discardOutput.textContent = discardPile.length===0 ? 'Discard pile is empty.' : `Discard pile (${discardPile.length}): ${discardPile.join(', ')}`; }
 
     // Init
     fameInput.addEventListener('input', updateFameFromInput);
-    window.addEventListener('load', () => {
+    window.addEventListener('load', ()=>{
       buildRepRows();
       initializeDeck();
-      // select middle neutral center by default
-      const midCells = repWrap.querySelectorAll('.rep-row')[1].querySelectorAll('.rep-cell');
-      if (midCells.length) { midCells[1]?.click?.(); }
-      setTimeout(() => { updateFameFromInput(); }, 40);
+      // select center neutral 0 by default
+      const midCells = repWrap.querySelectorAll('.rep-row')[1]?.querySelectorAll('.rep-cell');
+      if(midCells && midCells[1]) midCells[1].click();
+      setTimeout(()=>{ updateFameFromInput(); }, 40);
     });
 
-    // Expose functions used by buttons
+    // Export functions for inline use
     window.changeCrystal = changeCrystal;
     window.addCard = addCard;
     window.resetDeck = resetDeck;
