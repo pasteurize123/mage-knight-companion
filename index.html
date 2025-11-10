@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — End Round Fix</title>
+  <title>Mage Knight Companion — Full Reset</title>
   <style>
     :root{
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
@@ -338,7 +338,7 @@
       });
     }
 
-    // Fame UI and prompts
+    // Fame UI and prompt handling
     function handleLevelPrompts(prevLevel,newLevel){
       const messages=[];
       for(let L=prevLevel+1; L<=newLevel; L++) if(LEVEL_PROMPTS[L]) messages.push(`Level ${L}: ${LEVEL_PROMPTS[L]}`);
@@ -346,6 +346,7 @@
       levelMessage.textContent = messages.join('\n');
       levelModal.style.display='flex'; levelModal.setAttribute('aria-hidden','false');
     }
+
     function updateFameUI(prevFame=null){
       const prevLevel = prevFame !== null ? getFameLevel(prevFame) : null;
       const level = getFameLevel(fame);
@@ -373,9 +374,7 @@
     function updateDiscardUI(){ if(!discardPile||discardPile.length===0) discardOutput.textContent='Discard pile is empty.'; else {
       const syms = discardPile.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c); discardOutput.textContent = `Discard (${discardPile.length}): ${syms.join(' ')}`; } }
 
-    // Draw behaviour:
-    // - If deck empty at press: change to End Round with descriptor and wait for End Round press.
-    // - If deck has cards: draw up to 3 and apply extra draws per crystals based on last card drawn.
+    // Draw logic: only flip to End Round when the deck is empty at the moment the player presses Draw
     function drawCardsOnce(){
       const drawn = [];
       for (let i = 0; i < 3 && dummyDeck.length > 0; i++) {
@@ -385,7 +384,7 @@
     }
 
     function announceEndRoundMessage(){
-      dummyOutput.textContent = 'Nil cards drawn. End of round announced.'; // full stop added
+      dummyOutput.textContent = 'Nil cards drawn. End of round announced.'; // full stop ensured
     }
 
     function onDrawClick(){
@@ -544,28 +543,55 @@
       const prev = fame; fame = clampInt(fame + delta, 0, 119); updateFameUI(prev);
     }
 
-    // new game
+    // NEW GAME - full reset including deck
     function newGame(){
       if (!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
+
+      // clear storage
       clearSavedState();
+
+      // reset state
       fame = 0;
       crystals = { ...DEFAULT_CRYSTALS };
       cardCounts = { ...DEFAULT_CARDS };
-      dummyDeck = []; discardPile = []; endRoundFlag = false;
-      achievedLevels = [1];
+      dummyDeck = [];
+      discardPile = [];
+      endRoundFlag = false;
+      achievedLevels = [1]; // include Level 1 start
       repSelection = null;
-      rebuildDeckFromCounts(); updateDiscardUI();
-      buildRepRows();
-      const midCell = repWrap.querySelector('.rep-row.mid .rep-cell'); if(midCell){ midCell.classList.add('selected'); repSelection={row:'mid',index:0}; }
+
+      // rebuild deck from card counts and shuffle
+      rebuildDeckFromCounts();
+
+      // update UI values
       document.getElementById('red').textContent = crystals.red;
       document.getElementById('blue').textContent = crystals.blue;
       document.getElementById('green').textContent = crystals.green;
       document.getElementById('white').textContent = crystals.white;
+
       document.getElementById('card-red').textContent = cardCounts.Red;
       document.getElementById('card-blue').textContent = cardCounts.Blue;
       document.getElementById('card-green').textContent = cardCounts.Green;
       document.getElementById('card-white').textContent = cardCounts.White;
-      updateFameUI(null); renderLevels(); saveState();
+
+      updateDeckCount();
+      updateDiscardUI();
+      buildRepRows();
+
+      // default reputation mid selected if available
+      const midCell = repWrap.querySelector('.rep-row.mid .rep-cell');
+      if (midCell) { midCell.classList.add('selected'); repSelection = {row:'mid', index:0}; }
+
+      // reset UI text and level/fame display
+      endRoundFlag = false;
+      drawBtn.textContent = 'Draw';
+      dummyOutput.textContent = 'Drawn symbols appear here';
+
+      updateFameUI(null);
+      renderLevels();
+
+      // persist cleared state
+      saveState();
     }
 
     // init wiring
