@@ -29,7 +29,9 @@
 
     .boxed { background:var(--panel-bg); border-radius:10px; padding:10px; }
     .box-inner { background:var(--box-bg); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:10px; }
+    /* Make heading elements visually match and not bold */
     h2{font-size:14px;margin:0}
+    h3{font-size:13px;margin:0 0 6px 0;font-weight:400;color:inherit} /* unbold headings */
 
     .rep-wrap{display:flex;flex-direction:column;gap:8px;width:100%;align-items:center}
     .rep-row{display:flex;gap:8px;align-items:center;justify-content:center}
@@ -42,14 +44,13 @@
     .fame-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .fame-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     select, input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
-    .fame-result{font-weight:700;font-size:16px;padding:6px 8px;background:#fff;border-radius:6px}
+    .fame-result{font-weight:400;font-size:14px;padding:6px 8px;background:#fff;border-radius:6px}
     .fame-btn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:14px}
 
     .combined-grid{display:flex;flex-direction:column;gap:8px}
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .cols{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
     .col{background:var(--box-bg);border-radius:8px;padding:8px;min-width:160px;flex:1}
-    .col h3{font-size:13px;margin:0 0 6px 0}
     .smallbtn{font-size:13px;padding:6px 8px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:13px;overflow:hidden}
     .stat{font-weight:700}
@@ -96,9 +97,11 @@
 
         <div class="fame-row" role="group" aria-label="Fame input">
           <div class="fame-controls" style="flex:1">
-            <label for="fame-input" style="font-size:13px">Fame</label>
+            <!-- Label changed to use same heading formatting as crystals/cards -->
+            <h3 style="margin:0 8px 0 0">Fame</h3>
             <input id="fame-input" type="number" min="0" max="119" value="0" aria-label="Fame value" />
-            <div class="fame-result" id="fame-result" aria-live="polite">Level 1</div>
+            <!-- Level will render as "Level: X" with X bolded -->
+            <div class="fame-result" id="fame-result" aria-live="polite">Level: <strong>1</strong></div>
             <div style="margin-left:auto;font-size:13px">Fame: <strong id="fame-display">0</strong></div>
           </div>
 
@@ -318,7 +321,8 @@
     }
     function updateFameUI() {
       const level = getFameLevel(fame);
-      fameResult.textContent = `Level ${level}`;
+      // Level: X with X bolded
+      fameResult.innerHTML = `Level: <strong>${level}</strong>`;
       fameDisplayEl.textContent = fame;
       fameInput.value = fame;
     }
