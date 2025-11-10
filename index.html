@@ -57,7 +57,6 @@
       .fame-result{font-size:14px}
       .rep-cell{font-size:12px;padding:5px 6px}
       .smallbtn{font-size:12px;padding:5px 6px}
-      .count-btn{font-size:12px;padding:4px 6px}
     }
   </style>
 </head>
@@ -142,9 +141,6 @@
 
             <div class="col" aria-labelledby="deck-title">
               <h3 id="deck-title">Deck & Discard</h3>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <!-- reshuffle removed -->
-              </div>
               <div style="margin-top:8px;font-size:13px">Cards in deck: <strong id="deck-count">0</strong></div>
             </div>
           </div>
@@ -176,7 +172,7 @@
     let cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 };
     let dummyDeck = [];
     let discardPile = [];
-    let endRoundMode = false; // when true, Draw button shows "End Round"
+    let endTurnMode = false; // true when button should be "End Turn" (i.e. last draw returned 0 cards)
 
     const repPositive = ["+1","+1","+2","+2","+3","+5"];
     const repNeutral = ["0","0","0"];
@@ -261,7 +257,6 @@
       const key = color.toLowerCase();
       crystals[key] = Math.max(0, (crystals[key] || 0) + amount);
       document.getElementById(key).textContent = crystals[key];
-      // crystals do not affect deck unless you want them to
     }
 
     function changeCard(color, amount) {
@@ -281,7 +276,7 @@
     function initializeDeck() {
       rebuildDeckFromCounts();
       discardPile = [];
-      endRoundMode = false;
+      endTurnMode = false;
       updateDrawButton();
       updateDiscard();
       dummyOutput.textContent = 'Deck initialized and shuffled.';
@@ -289,45 +284,35 @@
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
 
     function resetDeck(){
-      // rebuild deck from cardCounts and clear discard
       initializeDeck();
     }
 
     function updateDrawButton(){
-      if(endRoundMode){
-        drawBtn.textContent = 'End Round';
-      } else {
-        drawBtn.textContent = 'Draw';
-      }
+      drawBtn.textContent = endTurnMode ? 'End Turn' : 'Draw';
     }
 
+    // Called by the Draw/End Turn button
     function onDrawClick(){
-      if(endRoundMode){
-        // End Round clicked -> reshuffle discard into deck and return to Draw
-        // Move discard into deck, shuffle, clear discard
+      if(endTurnMode){
+        // End Turn: move discard into deck, shuffle, clear discard, revert button
         if(discardPile.length > 0){
           dummyDeck.push(...discardPile);
           discardPile = [];
           shuffle(dummyDeck);
         }
-        endRoundMode = false;
+        endTurnMode = false;
         updateDeckCount();
         updateDiscard();
         dummyOutput.textContent = 'Round ended. Deck reshuffled.';
         updateDrawButton();
         return;
       }
-      // Regular draw behavior
-      drawDummyCards();
-    }
-
-    function drawDummyCards(){
+      // Normal draw
       const drawn = [];
       for(let i=0;i<3 && dummyDeck.length>0;i++){
         drawn.push(dummyDeck.pop());
       }
-
-      // apply extra draws based on crystals matching last drawn color
+      // extra draws based on crystals matching last drawn color
       const last = drawn[drawn.length-1];
       if(last){
         const color = last.split(' ')[0].toLowerCase();
@@ -335,22 +320,24 @@
         for(let i=0;i<extra && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
       }
 
-      // If this draw consumed the final cards (deck now empty), do NOT reshuffle.
-      // Instead set endRoundMode so button becomes "End Round"
-      if(dummyDeck.length === 0){
-        endRoundMode = true;
+      // If this draw produced zero drawn cards -> switch to End Turn mode
+      if(drawn.length === 0){
+        endTurnMode = true;
         updateDrawButton();
+        dummyOutput.textContent = 'No cards drawn. Select End Turn to reshuffle.';
+        return;
       }
 
+      // Otherwise, append drawn to discard and display symbols.
       discardPile.push(...drawn);
-
-      // Show symbols instead of names
       const drawnSymbols = drawn.map(c => {
         const color = c.split(' ')[0];
         return colorSymbol[color] || c;
       });
-      dummyOutput.textContent = drawnSymbols.length===0 ? 'No cards drawn (deck empty).' : drawnSymbols.join(' ');
+      dummyOutput.textContent = drawnSymbols.join(' ');
 
+      // If the draw emptied the deck (but at least one card was drawn), keep button as Draw.
+      // Only a subsequent Draw attempt (which would draw 0) will flip button to End Turn.
       updateDeckCount();
       updateDiscard();
     }
@@ -386,9 +373,8 @@
     window.changeCrystal = changeCrystal;
     window.changeCard = changeCard;
     window.resetDeck = resetDeck;
-    window.drawDummyCards = drawDummyCards;
-    window.reshuffleDiscardIntoDeck = function(){}; // removed/disabled
     window.onDrawClick = onDrawClick;
+    window.drawDummyCards = onDrawClick; // backward compatibility
   </script>
 </body>
 </html>
