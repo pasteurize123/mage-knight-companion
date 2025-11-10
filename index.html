@@ -2,13 +2,13 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Mage Knight Companion - Fame by Level</title>
+  <title>Mage Knight Companion — Independent Tracks</title>
   <style>
     :root{
       --rep-cell-w: 60px;
       --rep-gap: 6px;
       --fame-cell-w: 36px;
-      --fame-gap: 4px;
+      --fame-gap: 6px;
       --level-gap: 12px;
     }
 
@@ -21,7 +21,8 @@
     .track-container { background: #ececec; padding: 10px; border-radius: 8px; }
 
     /* Reputation track */
-    .rep-grid { display: grid; grid-auto-flow: column; gap: var(--rep-gap); align-items: center; margin-bottom: 12px; position: relative; }
+    .rep-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .rep-grid { display: grid; grid-auto-flow: column; gap: var(--rep-gap); align-items: center; position: relative; }
     .rep-cell { width: var(--rep-cell-w); background:#ddd; padding:6px; text-align:center; border-radius:6px; font-size:13px; }
 
     /* Fame track grouped by level rows */
@@ -38,6 +39,7 @@
 
     /* markers */
     .marker { position: absolute; transform: translate(-50%, -140%); pointer-events: none; font-size:20px; transition: left .16s linear, top .16s linear; }
+    .rep-marker { position:absolute; transform: translate(-50%, -220%); font-size:20px; pointer-events:none; transition: left .16s linear, top .16s linear; }
 
     /* small helpers */
     .controls { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
@@ -46,6 +48,7 @@
     .fame-row-scroll { overflow-x: auto; padding-bottom:6px; }
     .fame-row-scroll::-webkit-scrollbar { height:10px; }
     .fame-row-scroll::-webkit-scrollbar-thumb { background:#c1c1c1; border-radius:6px; }
+    .track-controls { display:flex; gap:8px; align-items:center; }
   </style>
 </head>
 <body>
@@ -53,13 +56,21 @@
 
   <div class="track-container section">
     <h2>Reputation Track</h2>
-    <div class="rep-grid" id="rep-grid" aria-hidden="false">
-      <!-- rep cells inserted by JS -->
+    <div class="rep-row">
+      <div class="track-controls">
+        <button id="rep-decrease" onclick="changeReputation(-1)">−</button>
+        <button id="rep-increase" onclick="changeReputation(1)">+</button>
+      </div>
+      <div class="rep-grid" id="rep-grid" aria-hidden="false">
+        <!-- rep cells inserted by JS -->
+      </div>
+      <div style="min-width:80px; text-align:center;">Current: <strong id="rep-display">0</strong></div>
     </div>
 
     <h2>Fame Track (by Level)</h2>
     <div style="position:relative;">
-      <div id="marker" class="marker">⭐</div>
+      <div id="fame-marker" class="marker">⭐</div>
+      <div id="rep-marker" class="rep-marker">🧭</div>
       <div class="levels" id="levels-container">
         <!-- level rows inserted by JS -->
       </div>
@@ -67,14 +78,13 @@
 
     <div class="legend">
       Fame Level: <strong id="fame-level">1</strong> &nbsp;|&nbsp; Fame: <strong id="fame-display">0</strong>
+      <span style="float:right">
+        <span class="track-controls">
+          <button onclick="changeFame(-1)">−</button>
+          <button onclick="changeFame(1)">+</button>
+        </span>
+      </span>
     </div>
-  </div>
-
-  <div class="section controls">
-    <button onclick="changeFame(1)">+1 Fame</button>
-    <button onclick="changeFame(-1)">-1 Fame</button>
-    <button onclick="changeReputation(1)">+1 Rep</button>
-    <button onclick="changeReputation(-1)">-1 Rep</button>
   </div>
 
   <div class="section">
@@ -126,7 +136,7 @@
   <script>
     // State
     let fame = 0;
-    let reputationIndex = 7; // middle of rep array
+    let reputationIndex = 7; // start at middle index (0..14) representing 0
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
     let dummyDeck = [];
     let discardPile = [];
@@ -134,7 +144,7 @@
     // Reputation values fixed
     const repValues = ["–X", "–5", "–3", "–2", "–1", "–1", "0", "0", "0", "+1", "+1", "+2", "+2", "+3", "+5"];
 
-    // Fame level brackets (as arrays of ranges inclusive)
+    // Fame level brackets
     const fameLevels = [
       {level:1, min:0,  max:3  },
       {level:2, min:4,  max:7  },
@@ -151,9 +161,11 @@
     // DOM refs
     const repGrid = document.getElementById('rep-grid');
     const levelsContainer = document.getElementById('levels-container');
-    const marker = document.getElementById('marker');
+    const marker = document.getElementById('fame-marker');
+    const repMarker = document.getElementById('rep-marker');
     const fameLevelEl = document.getElementById('fame-level');
     const fameDisplayEl = document.getElementById('fame-display');
+    const repDisplayEl = document.getElementById('rep-display');
 
     // Build reputation UI
     repValues.forEach((v, idx) => {
@@ -164,20 +176,17 @@
       repGrid.appendChild(c);
     });
 
-    // Build fame rows by level
-    // We'll store references to cells so we can compute marker position later
-    const fameCellRefs = []; // objects {levelIndex, cellIndex, el, value}
+    // Build fame UI rows and keep references
+    const fameCellRefs = []; // {levelIndex, value, el}
     fameLevels.forEach((lvl, levelIndex) => {
       const rowWrap = document.createElement('div');
       rowWrap.className = 'level-row';
 
-      // label
       const label = document.createElement('div');
       label.className = 'level-label';
       label.textContent = `Level ${lvl.level}`;
       rowWrap.appendChild(label);
 
-      // scroll wrapper ensures long rows can scroll horizontally
       const scrollWrap = document.createElement('div');
       scrollWrap.className = 'fame-row-scroll';
       scrollWrap.style.flex = '1';
@@ -195,7 +204,7 @@
         cell.textContent = v;
         cell.dataset.value = v;
         cellsContainer.appendChild(cell);
-        fameCellRefs.push({ levelIndex, cellIndex: v - lvl.min, el: cell, value: v });
+        fameCellRefs.push({ levelIndex, value: v, el: cell });
       }
 
       scrollWrap.appendChild(cellsContainer);
@@ -203,79 +212,78 @@
       levelsContainer.appendChild(rowWrap);
     });
 
-    // helper: find level index and index-within-row for a fame value
+    // locate fame position
     function locateFame(value) {
       value = Math.max(0, Math.min(119, value));
       for (let i=0;i<fameLevels.length;i++){
         const lvl = fameLevels[i];
         if (value >= lvl.min && value <= lvl.max) {
-          return { levelIndex: i, indexInRow: value - lvl.min, level: lvl.level, min: lvl.min, max: lvl.max };
+          return { levelIndex: i, level: lvl.level, min: lvl.min, max: lvl.max, indexInRow: value - lvl.min };
         }
       }
-      // fallback
-      return { levelIndex:0, indexInRow:0, level:1, min:0, max:3 };
+      return { levelIndex:0, level:1, indexInRow:0 };
     }
 
-    // compute and position marker above the correct cell
-    function updateMarker() {
-      const loc = locateFame(fame);
-      // find the DOM cell reference
+    // position fame marker above the correct cell
+    function updateFameMarker() {
       const ref = fameCellRefs.find(r => r.value === fame);
       if (!ref) return;
-
-      // compute left offset relative to levelsContainer
-      // offset = distance from container left to cell center
       const containerRect = levelsContainer.getBoundingClientRect();
       const cellRect = ref.el.getBoundingClientRect();
-
       const left = (cellRect.left + cellRect.right) / 2 - containerRect.left;
-      // compute top: place marker above the row; row's top relative to container
       const rowEl = ref.el.closest('.level-row');
       const rowRect = rowEl.getBoundingClientRect();
-      const top = rowRect.top - containerRect.top; // top relative to container
+      const top = rowRect.top - containerRect.top;
       marker.style.left = `${left}px`;
       marker.style.top = `${top}px`;
-
-      // update displayed fame and fame level
+      // update displays
+      const loc = locateFame(fame);
       fameLevelEl.textContent = loc.level;
       fameDisplayEl.textContent = fame;
-
-      // ensure the row's scroll wrapper scrolls so the cell is visible
+      // scroll the row to center the cell
       const scrollWrap = ref.el.closest('.fame-row-scroll');
       if (scrollWrap) {
         const cellCenter = (cellRect.left + cellRect.right) / 2;
         const wrapRect = scrollWrap.getBoundingClientRect();
         const relative = cellCenter - wrapRect.left;
-        // scroll so cell center is near middle of wrapper
         const target = relative - wrapRect.width/2;
         scrollWrap.scrollLeft += target;
       }
     }
 
-    // Basic UI functions
+    // position reputation marker above selected rep cell
+    function updateRepMarker() {
+      const repCell = repGrid.querySelector(`.rep-cell[data-index="${reputationIndex}"]`);
+      if (!repCell) return;
+      const gridRect = repGrid.getBoundingClientRect();
+      const cellRect = repCell.getBoundingClientRect();
+      const left = (cellRect.left + cellRect.right)/2 - gridRect.left;
+      // place repMarker above rep grid
+      const top = repGrid.getBoundingClientRect().top - levelsContainer.getBoundingClientRect().top - 28; // lift above fame area
+      repMarker.style.left = `${left}px`;
+      repMarker.style.top = `${top}px`;
+      // update rep display (middle index 7 maps to 0)
+      // map index 0..14 to logical rep value display using repValues array
+      repDisplayEl.textContent = repValues[reputationIndex];
+    }
+
+    // controls
     function changeFame(amount) {
       fame = Math.max(0, Math.min(119, fame + amount));
-      updateMarker();
+      updateFameMarker();
     }
+
     function changeReputation(amount) {
-      reputationIndex = Math.max(0, Math.min(repValues.length-1, reputationIndex + amount));
-      // move rep marker left above selected rep cell
-      const repCell = repGrid.querySelector(`.rep-cell[data-index="${reputationIndex}"]`);
-      if (repCell) {
-        const gridRect = repGrid.getBoundingClientRect();
-        const cellRect = repCell.getBoundingClientRect();
-        const left = (cellRect.left + cellRect.right)/2 - gridRect.left;
-        // place marker a bit above reputation grid (adjust translate in CSS)
-        marker.style.left = `${left}px`;
-        // keep top at the fame marker row (do not change top here)
-      }
+      reputationIndex = Math.max(0, Math.min(repValues.length - 1, reputationIndex + amount));
+      updateRepMarker();
     }
+
     function changeCrystal(color, amount) {
       crystals[color] = Math.max(0, crystals[color] + amount);
       document.getElementById(color).textContent = crystals[color];
     }
 
-    // Deck and draw logic
+    // Deck functions
     function initializeDeck() {
       dummyDeck = [
         ...Array(4).fill("Red Card"),
@@ -326,9 +334,10 @@
           drawn.push(dummyDeck.pop());
         }
       }
-      // if deck empty and discard exists, reshuffle automatically (after current draws)
+      // if deck empty and discard exists, reshuffle discard into deck AFTER the draw (current drawn go to discard)
       if (dummyDeck.length === 0 && discardPile.length > 0){
-        dummyDeck = discardPile.splice(0);
+        const moved = discardPile.splice(0);
+        dummyDeck.push(...moved);
         shuffleArray(dummyDeck);
       }
       discardPile.push(...drawn);
@@ -345,20 +354,14 @@
     // initialize UI on load
     window.addEventListener('load', () => {
       initializeDeck();
-      // position marker for initial fame (0)
-      // small timeout to allow layout to be ready
-      setTimeout(() => updateMarker(), 60);
-      // place rep marker above initial rep index
-      const repCell = repGrid.querySelector(`.rep-cell[data-index="${reputationIndex}"]`);
-      if (repCell) {
-        const gridRect = repGrid.getBoundingClientRect();
-        const cellRect = repCell.getBoundingClientRect();
-        const left = (cellRect.left + cellRect.right)/2 - gridRect.left;
-        marker.style.left = `${left}px`;
-      }
+      // ensure fame marker positioned
+      setTimeout(() => {
+        updateFameMarker();
+        updateRepMarker();
+      }, 60);
     });
 
-    // expose functions for inline onclick buttons
+    // expose functions for inline onclicks
     window.changeFame = changeFame;
     window.changeReputation = changeReputation;
     window.changeCrystal = changeCrystal;
