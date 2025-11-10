@@ -156,7 +156,6 @@
 
           <div>
             <h3 style="margin:0 0 6px 0;font-size:1rem">Cards</h3>
-            <!-- Cards section now matches crystals layout (spacing and controls) -->
             <div class="row" style="align-items:center">
               <div class="mini-group icon-label">🔴 <strong id="card-red">4</strong></div>
               <div class="mini-group"><button class="smallbtn card-btn" data-color="Red" data-act="inc">+</button><button class="smallbtn card-btn" data-color="Red" data-act="dec">−</button></div>
@@ -635,6 +634,28 @@
       saveState();
     }
 
+    // Prevent refresh/reload so app state remains unaffected
+    function disableRefreshBehavior() {
+      // Block keyboard shortcuts: F5 and Ctrl/Cmd+R
+      window.addEventListener('keydown', (e) => {
+        const key = e.key || e.keyIdentifier || '';
+        const isF5 = key === 'F5';
+        const isCmdR = (key === 'r' || key === 'R') && (e.ctrlKey || e.metaKey);
+        if (isF5 || isCmdR) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, { passive: false });
+
+      // Intercept beforeunload to require confirmation before leaving / refreshing.
+      // This prevents accidental refresh from destroying in-memory state unless user confirms.
+      window.addEventListener('beforeunload', (e) => {
+        // Standard pattern to trigger a confirmation dialog in most browsers.
+        e.preventDefault();
+        e.returnValue = '';
+      });
+    }
+
     // init wiring
     window.addEventListener('load', ()=>{
       buildRepRows();
@@ -696,6 +717,10 @@
       // level modal ok
       document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
+      // ensure app resists accidental refresh - call after wiring
+      disableRefreshBehavior();
+
+      // final save on unload (kept for state persistence when user confirms navigation)
       window.addEventListener('beforeunload', saveState);
     });
 
