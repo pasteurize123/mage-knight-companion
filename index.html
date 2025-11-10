@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Layout Update</title>
+  <title>Mage Knight Companion — Dummy Player</title>
   <style>
     :root{
       --bg:#f4f4f4;
@@ -53,7 +53,7 @@
     input[type=number]{width:110px;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:14px}
     .fame-result{font-weight:700;font-size:16px;padding:6px 8px;background:#fff;border-radius:6px}
 
-    /* Combined controls area (Crystals / Deck / Discard) */
+    /* Combined controls area (Dummy Player) */
     .combined-grid{display:flex;flex-direction:column;gap:8px}
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .cols{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
@@ -62,6 +62,10 @@
     .smallbtn{font-size:13px;padding:6px 8px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:13px;overflow:hidden}
     .stat{font-weight:700}
+
+    /* card count controls (same style as crystals) */
+    .count-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:14px}
+    .count-btn{font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
 
     @media (max-width:820px){
       .cols{flex-direction:column}
@@ -73,6 +77,7 @@
       .fame-result{font-size:14px}
       .rep-cell{font-size:12px;padding:5px 6px}
       .smallbtn{font-size:12px;padding:5px 6px}
+      .count-btn{font-size:12px;padding:4px 6px}
     }
   </style>
 </head>
@@ -107,13 +112,14 @@
       </div>
     </section>
 
-    <!-- Combined Crystals / Deck / Discard boxed section -->
+    <!-- Combined Dummy Player section (Crystals / Card counts / Deck / Draw / Discard) -->
     <section class="boxed" aria-labelledby="combined-section">
       <div class="box-inner">
-        <h2 id="combined-section">Resources & Deck</h2>
+        <h2 id="combined-section">Dummy Player</h2>
 
         <div class="combined-grid">
           <div class="cols">
+            <!-- Crystals column -->
             <div class="col" aria-labelledby="crystal-title">
               <h3 id="crystal-title">Crystals</h3>
               <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
@@ -133,29 +139,50 @@
               </div>
             </div>
 
-            <div class="col" aria-labelledby="deck-title">
-              <h3 id="deck-title">Dummy Deck</h3>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button class="smallbtn" onclick="addCard('Red')">+ Red</button>
-                <button class="smallbtn" onclick="addCard('Blue')">+ Blue</button>
-                <button class="smallbtn" onclick="addCard('Green')">+ Green</button>
-                <button class="smallbtn" onclick="addCard('White')">+ White</button>
-                <button class="smallbtn" onclick="resetDeck()">Reset</button>
-                <button class="smallbtn" onclick="reshuffleDiscardIntoDeck()">Reshuffle</button>
+            <!-- Card counts column (add/remove like crystals) -->
+            <div class="col" aria-labelledby="cards-title">
+              <h3 id="cards-title">Card Counts</h3>
+              <div class="count-row">
+                <div>🔴 Red Cards: <span class="stat" id="card-red">4</span></div>
+                <div><button class="count-btn" onclick="changeCard('Red',1)">+ </button><button class="count-btn" onclick="changeCard('Red',-1)">−</button></div>
               </div>
-              <div style="margin-top:8px;font-size:13px">Cards: <strong id="deck-count">0</strong></div>
+              <div class="count-row">
+                <div>🔵 Blue Cards: <span class="stat" id="card-blue">4</span></div>
+                <div><button class="count-btn" onclick="changeCard('Blue',1)">+ </button><button class="count-btn" onclick="changeCard('Blue',-1)">−</button></div>
+              </div>
+              <div class="count-row">
+                <div>🟢 Green Cards: <span class="stat" id="card-green">4</span></div>
+                <div><button class="count-btn" onclick="changeCard('Green',1)">+ </button><button class="count-btn" onclick="changeCard('Green',-1)">−</button></div>
+              </div>
+              <div class="count-row">
+                <div>⚪ White Cards: <span class="stat" id="card-white">4</span></div>
+                <div><button class="count-btn" onclick="changeCard('White',1)">+ </button><button class="count-btn" onclick="changeCard('White',-1)">−</button></div>
+              </div>
             </div>
 
-            <div class="col" aria-labelledby="discard-title">
-              <h3 id="discard-title">Discard Pile</h3>
-              <div id="discard-output" class="output">Discard pile is empty.</div>
+            <!-- Deck & Discard column -->
+            <div class="col" aria-labelledby="deck-title">
+              <h3 id="deck-title">Deck & Discard</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="smallbtn" onclick="resetDeck()">Reset Deck</button>
+                <button class="smallbtn" onclick="reshuffleDiscardIntoDeck()">Reshuffle Discard</button>
+              </div>
+              <div style="margin-top:8px;font-size:13px">Cards in deck: <strong id="deck-count">0</strong></div>
             </div>
           </div>
 
+          <!-- Draw row -->
           <div class="row" style="margin-top:6px;align-items:center">
-            <button class="smallbtn" onclick="drawDummyCards()">Draw Dummy Cards</button>
+            <button class="smallbtn" onclick="drawDummyCards()">Draw</button>
             <div id="dummy-output" class="output" style="flex:1;margin-left:8px">Drawn cards will appear here.</div>
           </div>
+
+          <!-- Discard below draw -->
+          <div style="margin-top:6px">
+            <div style="font-weight:700;margin-bottom:6px">Discard Pile</div>
+            <div id="discard-output" class="output">Discard pile is empty.</div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -166,6 +193,8 @@
     // State
     let fame = 0;
     let crystals = { red: 0, blue: 0, green: 0, white: 0 };
+    // cardCounts mirror crystals-style controls (start 4 each)
+    let cardCounts = { Red: 4, Blue: 4, Green: 4, White: 4 };
     let dummyDeck = [];
     let discardPile = [];
 
@@ -249,38 +278,51 @@
 
     // Crystals
     function changeCrystal(color, amount) {
-      crystals[color] = Math.max(0, crystals[color] + amount);
-      document.getElementById(color).textContent = crystals[color];
+      const key = color.toLowerCase();
+      crystals[key] = Math.max(0, crystals[key] + amount);
+      document.getElementById(key).textContent = crystals[key];
+    }
+
+    // Card counts behave like crystals (same add/remove UI)
+    function changeCard(color, amount) {
+      cardCounts[color] = Math.max(0, (cardCounts[color] || 0) + amount);
+      document.getElementById(`card-${color.toLowerCase()}`).textContent = cardCounts[color];
+      // optionally update deck count if deck is not yet generated
+    }
+
+    // Build deck from current cardCounts
+    function rebuildDeckFromCounts() {
+      dummyDeck = [];
+      Object.keys(cardCounts).forEach(color => {
+        for (let i=0;i<cardCounts[color];i++) dummyDeck.push(`${color} Card`);
+      });
+      shuffle(dummyDeck);
+      updateDeckCount();
     }
 
     // Deck & draw logic
     function initializeDeck() {
-      dummyDeck = [
-        ...Array(4).fill("Red Card"),
-        ...Array(4).fill("Blue Card"),
-        ...Array(4).fill("Green Card"),
-        ...Array(4).fill("White Card")
-      ];
+      rebuildDeckFromCounts();
       discardPile = [];
-      shuffle(dummyDeck);
-      updateDeckCount();
       updateDiscard();
       dummyOutput.textContent = 'Deck initialized and shuffled.';
     }
     function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
-    function addCard(color){ dummyDeck.push(`${color} Card`); updateDeckCount(); }
     function resetDeck(){ initializeDeck(); }
-    function reshuffleDiscardIntoDeck(){ if(discardPile.length===0) return; dummyDeck.push(...discardPile); discardPile=[]; shuffle(dummyDeck); updateDeckCount(); updateDiscard(); }
+    function reshuffleDiscardIntoDeck(){ if(discardPile.length===0) return; dummyDeck.push(...discardPile); discardPile = []; shuffle(dummyDeck); updateDeckCount(); updateDiscard(); }
 
     function drawDummyCards(){
       const drawn = [];
+      // draw 3 base
       for(let i=0;i<3 && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
+      // extra based on crystals matching last drawn color
       const last = drawn[drawn.length-1];
       if(last){
         const color = last.split(' ')[0].toLowerCase();
         const extra = crystals[color] || 0;
         for(let i=0;i<extra && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop());
       }
+      // if deck empty and discard exists, reshuffle discard into deck AFTER draw
       if(dummyDeck.length===0 && discardPile.length>0){
         const moved = discardPile.splice(0);
         dummyDeck.push(...moved);
@@ -292,12 +334,17 @@
     }
 
     function updateDeckCount(){ document.getElementById('deck-count').textContent = dummyDeck.length; }
-    function updateDiscard(){ discardOutput.textContent = discardPile.length===0 ? 'Discard pile is empty.' : `Discard pile (${discardPile.length}): ${discardPile.join(', ')}`; }
+    function updateDiscard(){ document.getElementById('discard-output').textContent = discardPile.length===0 ? 'Discard pile is empty.' : `Discard pile (${discardPile.length}): ${discardPile.join(', ')}`; }
 
     // Init
     fameInput.addEventListener('input', updateFameFromInput);
     window.addEventListener('load', ()=>{
       buildRepRows();
+      // ensure card count elements reflect initial values
+      document.getElementById('card-red').textContent = cardCounts.Red;
+      document.getElementById('card-blue').textContent = cardCounts.Blue;
+      document.getElementById('card-green').textContent = cardCounts.Green;
+      document.getElementById('card-white').textContent = cardCounts.White;
       initializeDeck();
       // select center neutral 0 by default
       const midCells = repWrap.querySelectorAll('.rep-row')[1]?.querySelectorAll('.rep-cell');
@@ -307,7 +354,7 @@
 
     // Export functions for inline use
     window.changeCrystal = changeCrystal;
-    window.addCard = addCard;
+    window.changeCard = changeCard;
     window.resetDeck = resetDeck;
     window.drawDummyCards = drawDummyCards;
     window.reshuffleDiscardIntoDeck = reshuffleDiscardIntoDeck;
