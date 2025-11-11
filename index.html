@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mage Knight Companion — Full (Fame + Levels Achieved)</title>
+<title>Mage Knight Companion — Mobile-friendly Reputation + Dummy Player</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -13,7 +13,7 @@
   *{box-sizing:border-box}
   body{margin:12px;font-family:var(--font);background:var(--bg);color:#111}
   h1{font-size:18px;text-align:center;margin:0 0 12px}
-  .container{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+  .container{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px;padding:0 10px}
   .panel{background:var(--panel);border-radius:10px;padding:10px}
   .panel-inner{background:var(--card);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
   .smallbtn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
@@ -33,7 +33,7 @@
   .player-level-box label{font-weight:700;display:block;text-align:center}
   .player-level-num{min-width:80px;padding:8px;border-radius:6px;background:#fff;text-align:center;border:1px solid #eee;font-weight:700}
 
-  /* Levels Achieved block: hidden list on hover or focus-within; click toggles too */
+  /* Levels Achieved popup */
   .levels-wrapper{position:relative;display:flex;flex-direction:column;align-items:center;margin-top:6px}
   .levels-trigger{background:transparent;border:0;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:700}
   .levels-list{
@@ -47,15 +47,27 @@
   .levels-wrapper:focus-within .levels-list,
   .levels-wrapper[aria-expanded="true"] .levels-list { display:block; }
 
-  /* reputation and other UI */
-  .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:center;position:relative}
-  .rep-row{display:flex;gap:8px;justify-content:center;align-items:center}
-  .rep-cell{min-width:44px;padding:6px 10px;background:#e8e8e8;border-radius:6px;text-align:center;cursor:pointer;user-select:none}
+  /* Reputation — mobile friendly */
+  .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:center;position:relative;padding:6px}
+  .rep-row{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:nowrap;overflow:auto;padding:6px 0;width:100%}
+  .rep-row::-webkit-scrollbar{height:8px}
+  .rep-row::-webkit-scrollbar-thumb{background:#ddd;border-radius:8px}
+  .rep-cell{min-width:36px;padding:6px 8px;background:#e8e8e8;border-radius:6px;text-align:center;cursor:pointer;user-select:none;font-size:14px;flex:0 0 auto}
   .rep-row.top .rep-cell.selected{background:var(--gold);font-weight:700;color:#111}
   .rep-row.mid .rep-cell.selected{background:#ffeb99;font-weight:700;color:#111}
   .rep-row.bot .rep-cell.selected{background:#ff6b6b;font-weight:700;color:#fff}
 
-  /* symbols and wounds */
+  /* Dummy player responsive layout (restore previous compact layout) */
+  .dummy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+  .section-card{background:var(--card);border-radius:8px;padding:10px;border:1px solid #eee}
+  .crystal-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .crystal-pill{display:flex;align-items:center;gap:8px;background:var(--pill);padding:8px;border-radius:8px;border:1px solid #eee;min-width:86px;justify-content:space-between}
+  .card-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .card-pill{display:flex;align-items:center;gap:8px;background:#fff;padding:8px;border-radius:8px;border:1px solid #eee;min-width:86px;justify-content:space-between}
+  .controls-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .output-small{background:#fff;padding:8px;border-radius:6px;min-height:28px;font-size:14px}
+
+  /* GV and other elements keep previous style */
   .symbol { display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;font-size:18px;position:relative;line-height:1;border-radius:50%; }
   .symbol.spell::after{ content:'S'; position:absolute; top:-7px; right:-8px; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; background:rgba(0,0,0,0.65); border-radius:10px; box-shadow:0 1px 2px rgba(0,0,0,0.2); }
   .wound-box{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border-radius:6px;background:#fff;border:1px solid #eee;min-width:46px}
@@ -65,6 +77,8 @@
     .fame-row{gap:12px}
     .fame-input{width:110px}
     .levels-list{min-width:180px}
+    .dummy-grid{grid-template-columns:1fr;gap:10px}
+    .rep-cell{min-width:44px;padding:8px 10px;font-size:16px}
   }
 </style>
 </head>
@@ -72,7 +86,7 @@
   <h1>Mage Knight Companion</h1>
 
   <div class="container">
-    <!-- Reputation -->
+    <!-- Reputation (mobile friendly scrollable rows) -->
     <section class="panel" aria-labelledby="rep-title">
       <div class="panel-inner">
         <h2 id="rep-title">Reputation</h2>
@@ -116,63 +130,109 @@
       </div>
     </section>
 
-    <!-- Dummy Player -->
+    <!-- Dummy Player (compact, like previous renditions) -->
     <section class="panel" aria-labelledby="dummy-title">
       <div class="panel-inner" id="dummy-module">
         <h2 id="dummy-title">Dummy Player</h2>
 
-        <div class="row" style="gap:18px">
-          <div>
-            <h3 style="margin:0 0 6px 0;font-size:1rem">Crystals</h3>
-            <div class="row" style="align-items:center">
-              <div>🔴 <strong id="red">0</strong></div>
-              <div><button class="smallbtn crystal-btn" data-player="main" data-color="red" data-act="inc">+</button><button class="smallbtn crystal-btn" data-player="main" data-color="red" data-act="dec">−</button></div>
-              <div style="width:12px"></div>
-              <div>🔵 <strong id="blue">0</strong></div>
-              <div><button class="smallbtn crystal-btn" data-player="main" data-color="blue" data-act="inc">+</button><button class="smallbtn crystal-btn" data-player="main" data-color="blue" data-act="dec">−</button></div>
-              <div style="width:12px"></div>
-              <div>🟢 <strong id="green">0</strong></div>
-              <div><button class="smallbtn crystal-btn" data-player="main" data-color="green" data-act="inc">+</button><button class="smallbtn crystal-btn" data-player="main" data-color="green" data-act="dec">−</button></div>
-              <div style="width:12px"></div>
-              <div>⚪ <strong id="white">0</strong></div>
-              <div><button class="smallbtn crystal-btn" data-player="main" data-color="white" data-act="inc">+</button><button class="smallbtn crystal-btn" data-player="main" data-color="white" data-act="dec">−</button></div>
+        <div class="dummy-grid">
+          <div class="section-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-weight:600">Crystals</div>
+              <div style="font-size:12px;color:var(--muted)">Adjust available crystals</div>
+            </div>
+
+            <div class="crystal-row">
+              <div class="crystal-pill">🔴 <strong id="red">0</strong>
+                <div style="display:flex;gap:6px">
+                  <button class="smallbtn crystal-btn" data-player="main" data-color="red" data-act="inc">+</button>
+                  <button class="smallbtn crystal-btn" data-player="main" data-color="red" data-act="dec">−</button>
+                </div>
+              </div>
+
+              <div class="crystal-pill">🔵 <strong id="blue">0</strong>
+                <div style="display:flex;gap:6px">
+                  <button class="smallbtn crystal-btn" data-player="main" data-color="blue" data-act="inc">+</button>
+                  <button class="smallbtn crystal-btn" data-player="main" data-color="blue" data-act="dec">−</button>
+                </div>
+              </div>
+
+              <div class="crystal-pill">🟢 <strong id="green">0</strong>
+                <div style="display:flex;gap:6px">
+                  <button class="smallbtn crystal-btn" data-player="main" data-color="green" data-act="inc">+</button>
+                  <button class="smallbtn crystal-btn" data-player="main" data-color="green" data-act="dec">−</button>
+                </div>
+              </div>
+
+              <div class="crystal-pill">⚪ <strong id="white">0</strong>
+                <div style="display:flex;gap:6px">
+                  <button class="smallbtn crystal-btn" data-player="main" data-color="white" data-act="inc">+</button>
+                  <button class="smallbtn crystal-btn" data-player="main" data-color="white" data-act="dec">−</button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div>
-            <h3 style="margin:0 0 6px 0;font-size:1rem">Cards</h3>
-            <div class="row" style="align-items:center">
-              <div>🔴 <strong id="card-red">4</strong></div>
-              <div><button class="smallbtn card-btn" data-player="main" data-color="Red" data-act="inc">+</button><button class="smallbtn card-btn" data-player="main" data-color="Red" data-act="dec">−</button></div>
-              <div style="width:12px"></div>
-              <div>🔵 <strong id="card-blue">4</strong></div>
-              <div><button class="smallbtn card-btn" data-player="main" data-color="Blue" data-act="inc">+</button><button class="smallbtn card-btn" data-player="main" data-color="Blue" data-act="dec">−</button></div>
-              <div style="width:12px"></div>
-              <div>🟢 <strong id="card-green">4</strong></div>
-              <div><button class="smallbtn card-btn" data-player="main" data-color="Green" data-act="inc">+</button><button class="smallbtn card-btn" data-player="main" data-color="Green" data-act="dec">−</button></div>
-              <div style="width:12px"></div>
-              <div>⚪ <strong id="card-white">4</strong></div>
-              <div><button class="smallbtn card-btn" data-player="main" data-color="White" data-act="inc">+</button><button class="smallbtn card-btn" data-player="main" data-color="White" data-act="dec">−</button></div>
+          <div class="section-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-weight:600">Cards</div>
+              <div style="font-size:12px;color:var(--muted)">Deck composition</div>
             </div>
+
+            <div class="card-row">
+              <div class="card-pill">🔴 <strong id="card-red">4</strong>
+                <div style="display:flex;gap:6px">
+                  <button class="smallbtn card-btn" data-player="main" data-color="Red" data-act="inc">+</button>
+                  <button class="smallbtn card-btn" data-player="main" data-color="Red" data-act="dec">−</button>
+                </div>
+              </div>
+
+              <div class="card-pill">🔵 <strong id="card-blue">4</strong>
+                <div style="display:flex;gap:6px">
+                  <button class="smallbtn card-btn" data-player="main" data-color="Blue" data-act="inc">+</button>
+                  <button class="smallbtn card-btn" data-player="main" data-color="Blue" data-act="dec">−</button>
+                </div>
+              </div>
+
+              <div class="card-pill">🟢 <strong id="card-green">4</strong>
+                <div style="display:flex;gap:6px">
+                  <button class="smallbtn card-btn" data-player="main" data-color="Green" data-act="inc">+</button>
+                  <button class="smallbtn card-btn" data-player="main" data-color="Green" data-act="dec">−</button>
+                </div>
+              </div>
+
+              <div class="card-pill">⚪ <strong id="card-white">4</strong>
+                <div style="display:flex;gap:6px">
+                  <button class="smallbtn card-btn" data-player="main" data-color="White" data-act="inc">+</button>
+                  <button class="smallbtn card-btn" data-player="main" data-color="White" data-act="dec">−</button>
+                </div>
+              </div>
+            </div>
+
             <div style="margin-top:8px" class="muted">Cards in deck: <strong id="deck-count">0</strong></div>
           </div>
-        </div>
 
-        <div style="margin-top:10px" class="row">
-          <button id="draw-btn" class="smallbtn" data-player="main">Draw</button>
-          <div id="dummy-output" class="output" style="flex:1;margin-left:8px">Drawn symbols appear here</div>
-        </div>
+          <div class="section-card" style="grid-column:1 / -1">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="font-weight:600">Actions</div>
+              <div style="font-size:12px;color:var(--muted)">Draw, discard and reshuffle</div>
+            </div>
 
-        <div style="margin-top:8px">
-          <div id="discard-output" class="output">Discard pile is empty.</div>
-          <div style="margin-top:8px;display:flex;justify-content:center">
-            <button id="reshuffle-btn" class="smallbtn" data-player="main">Reshuffle Deck</button>
+            <div class="controls-row" style="margin-bottom:8px">
+              <button id="draw-btn" class="smallbtn" data-player="main">Draw</button>
+              <button id="reshuffle-btn" class="smallbtn" data-player="main">Reshuffle Deck</button>
+              <div style="flex:1"></div>
+              <div class="muted" style="font-size:13px">Discard: <strong id="discard-count">0</strong></div>
+            </div>
+
+            <div id="dummy-output" class="output">Drawn symbols appear here</div>
+            <div id="discard-output" class="output" style="margin-top:8px">Discard pile is empty.</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- General Volkare -->
+    <!-- General Volkare (unchanged) -->
     <section class="panel" aria-labelledby="gv-title">
       <div class="panel-inner" id="gv-module">
         <h2 id="gv-title">General Volkare</h2>
@@ -278,13 +338,11 @@
   </div>
 
 <script>
-/* Full integrated JS
-   - Fame: centered input + labelled Player Level; increments; Levels Achieved popup shows Level 1..N (14px)
-   - Reputation persisted and keyboard accessible
-   - Dummy & GV modules preserve previous behaviour
+/* Full integrated JS adapted to mobile-friendly reputation and restored compact dummy layout.
+   Behavior matches previous versions: fame->level mapping, rep persistence, dummy/GV decks, end-round modal.
 */
 
-const STORAGE_KEY = 'mk_companion_full_v3';
+const STORAGE_KEY = 'mk_companion_full_v4';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
 const FAME_LEVELS = [
@@ -337,6 +395,7 @@ function DummyModule() {
     if(el(ids.cardWhite)) el(ids.cardWhite).textContent = cardCounts.White;
   }
   function updateDeckCount(){ const n = el(ids.deckCount); if(n) n.textContent = deck.length; }
+  function updateDiscardCount(){ const n = document.getElementById('discard-count'); if(n) n.textContent = discard.length; }
   function displayMainCard(code){
     if(!code) return '';
     if(code.endsWith('Card')) return SYMBOL[code.split(' ')[0]] || code;
@@ -354,7 +413,7 @@ function DummyModule() {
     updateCardViews();
     if(delta>0){ const name = `${color} Card`; const pos = Math.floor(Math.random()*(deck.length+1)); deck.splice(pos,0,name); }
     else { const name = `${color} Card`; const idx = deck.indexOf(name); if(idx!==-1) deck.splice(idx,1); else { const dj=discard.indexOf(name); if(dj!==-1) discard.splice(dj,1); } }
-    updateDeckCount(); updateDiscardView(); save();
+    updateDeckCount(); updateDiscardView(); updateDiscardCount(); save();
   }
 
   function rebuildDeck(){ deck = []; Object.keys(cardCounts).forEach(color=>{ for(let i=0;i<cardCounts[color];i++) deck.push(`${color} Card`); }); shuffle(deck); updateDeckCount(); save(); }
@@ -375,9 +434,9 @@ function DummyModule() {
     }
     discard.push(...drawn);
     const out = el(ids.dummyOutput); if(out) out.textContent = drawn.map(displayMainCard).join(' ');
-    updateDeckCount(); updateDiscardView(); save();
+    updateDeckCount(); updateDiscardView(); updateDiscardCount(); save();
   }
-  function reshuffle(){ if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); }
+  function reshuffle(){ if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); updateDiscardCount(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); }
 
   function getRenderLevels(){ return achievedLevels.slice(); }
   function setAchievedLevels(levels){ if(Array.isArray(levels)) achievedLevels = levels.slice(); save(); }
@@ -391,7 +450,7 @@ function DummyModule() {
     crystals[first]=2; crystals[second]=1;
     cardCounts = {...DEFAULT_CARDS};
     deck = []; discard = []; achievedLevels=[1]; endRoundFlag=false;
-    rebuildDeck(); updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); save();
+    rebuildDeck(); updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); updateDiscardCount(); save();
   }
 
   function wire(){
@@ -407,7 +466,7 @@ function DummyModule() {
     if(reshuffleEl) reshuffleEl.addEventListener('click', reshuffle);
   }
 
-  return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); }, setAchievedLevels, achievedLevelsRef: ()=>achievedLevels };
+  return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); updateDiscardCount(); }, setAchievedLevels, achievedLevelsRef: ()=>achievedLevels };
 }
 
 /* ---------------- GV Module ---------------- */
