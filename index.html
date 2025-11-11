@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Reputation & Fame</title>
+  <title>Mage Knight Companion — Fame Confirm</title>
   <style>
     :root{
       --bg:#0f1724;
@@ -177,6 +177,10 @@
         newGameBtn: document.getElementById('new-game')
       };
 
+      // Temporary edit state
+      let editing = false;
+      let tempFame = null;
+
       // Utilities
       function clamp(n,min=0,max=999){return Math.max(min,Math.min(max,n));}
       function classifyLabel(label) {
@@ -222,9 +226,9 @@
         if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
       }
 
-      // Fame rendering & tooltip
+      // Fame rendering: show stored fame/level; do NOT change level while editing
       function renderFameAndLevel() {
-        el.fameInput.value = state.fame;
+        el.fameInput.value = editing && tempFame !== null ? tempFame : String(state.fame || 0);
         const level = getLevelForFame(state.fame);
         el.playerLevel.textContent = `Player Level ${level}`;
         el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
@@ -242,7 +246,7 @@
         item.appendChild(lvlDiv); item.appendChild(rewardDiv); return item;
       }
 
-      // show newly gained levels and keep popup visible until tap-off
+      // Show newly gained levels only when confirmed (persist until tap-off)
       function showGainedLevelsPersist(prevLevel, newLevel) {
         el.tooltipList.innerHTML = '';
         for (let l = prevLevel + 1; l <= newLevel; l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
@@ -254,7 +258,7 @@
       }
       function toggleTooltip() {
         const isVisible = el.tooltip.classList.contains('visible');
-        if (isVisible) { closeTooltip(); }
+        if (isVisible) closeTooltip();
         else {
           const level = getLevelForFame(state.fame);
           buildFullTooltip(level);
@@ -269,29 +273,65 @@
         el.playerLevel.setAttribute('aria-pressed','false');
       }
 
-      // Fame input behaviour (select all on focus/click and prevent caret repositioning)
-      el.fameInput.addEventListener('focus', (e) => { setTimeout(() => e.target.select(), 0); });
-      el.fameInput.addEventListener('mouseup', (e) => { e.preventDefault(); e.target.select(); });
-      el.fameInput.addEventListener('touchstart', (e) => { setTimeout(() => e.target.select(), 0); }, {passive:true});
-
-      // handle input changes: only show rewards for newly gained levels (persist until tap-off)
-      el.fameInput.addEventListener('input', (e) => {
-        const raw = e.target.value;
-        const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw) || 0)) : 0;
-        const prevLevel = state.previousLevel || getLevelForFame(state.fame || 0);
+      // Fame edit lifecycle
+      function startEditFame() {
+        editing = true;
+        tempFame = String(state.fame || 0);
+        el.fameInput.classList.add('editing');
+        setTimeout(()=> el.fameInput.select(), 0);
+      }
+      function cancelEditFame() {
+        editing = false;
+        tempFame = null;
+        el.fameInput.classList.remove('editing');
+        renderFameAndLevel();
+      }
+      function commitEditFame() {
+        if (!editing) return;
+        const raw = tempFame==='' ? '0' : (tempFame||'0');
+        const parsed = Math.max(0, Math.floor(Number(raw)||0));
+        const prevLevel = getLevelForFame(state.fame || 0);
         const newLevel = getLevelForFame(parsed);
         state.fame = parsed;
-        renderFameAndLevel();
+        // only update displayed player level now (renderFameAndLevel uses stored fame)
+        state.previousLevel = prevLevel; // previousLevel tracks last confirmed level for gained popup logic
         if (newLevel > prevLevel) showGainedLevelsPersist(prevLevel, newLevel);
+        // after showing popup, update previousLevel to newLevel (confirmed)
         state.previousLevel = newLevel;
+        editing = false;
+        tempFame = null;
+        el.fameInput.classList.remove('editing');
         saveToStorage();
+        renderFameAndLevel();
+      }
+
+      // Input handlers: only update tempFame while editing
+      el.fameInput.addEventListener('focus', (e) => { startEditFame(); });
+      el.fameInput.addEventListener('mouseup', (e) => { e.preventDefault(); el.fameInput.select(); });
+      el.fameInput.addEventListener('touchstart', (e) => { setTimeout(()=> el.fameInput.select(), 0); }, {passive:true});
+      el.fameInput.addEventListener('input', (e) => {
+        const raw = e.target.value;
+        // keep tempFame string to preserve user typing, but sanitize to integers for display if needed
+        if (raw === '') tempFame = '';
+        else {
+          const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw)||0)) : 0;
+          tempFame = String(parsed);
+        }
+        // reflect temp value in input (prevents caret behind leading zero)
+        e.target.value = tempFame;
       });
+      el.fameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); commitEditFame(); el.fameInput.blur(); }
+        else if (e.key === 'Escape') { e.preventDefault(); cancelEditFame(); el.fameInput.blur(); }
+      });
+      // blur commits (tap elsewhere confirms)
+      el.fameInput.addEventListener('blur', () => { commitEditFame(); });
 
       // Player level badge interactions
       el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
       el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
 
-      // close tooltip when tapping outside (applies to gained-level popup and full list)
+      // Close tooltip when tapping outside (but if editing and clicking elsewhere, blur handler will commit first)
       document.addEventListener('click', (e) => {
         const inside = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.fameInput;
         if (!inside) closeTooltip();
@@ -307,22 +347,16 @@
 
       // New Game: reset everything back to defaults
       function newGameReset() {
-        // reset state
         state.repIndex = DEFAULT_REP_INDEX;
         state.fame = 0;
         state.previousLevel = 1;
-        // clear stored key entirely and save fresh defaults
         try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
         saveToStorage();
         closeTooltip();
         renderReputation();
         renderFameAndLevel();
       }
-
-      el.newGameBtn.addEventListener('click', () => {
-        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(30);
-        newGameReset();
-      });
+      el.newGameBtn.addEventListener('click', () => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(30); newGameReset(); });
 
       // init
       buildRepTrack();
@@ -340,7 +374,7 @@
       window.addEventListener('keydown', (ev) => {
         if (ev.key === 'ArrowLeft') document.getElementById('rep-down').click();
         if (ev.key === 'ArrowRight') document.getElementById('rep-up').click();
-        if (ev.key === 'f' || ev.key === 'F') {
+        if ((ev.key === 'f' || ev.key === 'F') && !editing) {
           state.fame = clamp(state.fame + 1, 0);
           renderFameAndLevel();
           saveToStorage();
