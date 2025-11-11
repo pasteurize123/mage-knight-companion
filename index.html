@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mage Knight Companion — Fixed Reputation & Fame</title>
+<title>Mage Knight Companion — Fixed Reputation, Fame, Levels Achieved</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -41,24 +41,24 @@
   .rep-row.mid .rep-cell.selected{background:#ffeb99;font-weight:700;color:#111}
   .rep-row.bot .rep-cell.selected{background:#ff6b6b;font-weight:700;color:#fff}
 
-  /* levels panel */
-  .levels-container{position:relative;display:inline-block}
-  .levels-trigger{background:transparent;border:0;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:700}
-  .levels-panel{ position:absolute;left:0;top:calc(100% + 8px); display:none;background:#fff;border-radius:8px;padding:10px; box-shadow:0 8px 30px rgba(0,0,0,0.12); min-width:220px; max-width:360px; z-index:50; font-size:14px; }
-  .levels-container:hover .levels-panel, .levels-container:focus-within .levels-panel, .levels-container[aria-expanded="true"] .levels-panel { display:block; }
-  .levels-list{display:flex;flex-direction:column;gap:6px;padding:0;margin:0;list-style:none}
-  .level-line{padding:6px 8px;border-radius:4px;font-weight:600;font-size:14px;background:transparent;color:#111}
+  /* levels list underneath player level */
+  .levels-block{margin-top:8px;align-self:flex-start;}
+  .levels-list{background:#fff;border:1px solid #eee;padding:8px;border-radius:6px;min-width:220px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+  .level-line{padding:6px 8px;border-bottom:1px dashed #f0f0f0;font-weight:600;font-size:14px}
+  .level-line:last-child{border-bottom:0}
 
   /* fame row */
-  .fame-row{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+  .fame-row{display:flex;align-items:flex-start;justify-content:center;gap:20px;flex-wrap:wrap}
   .fame-controls{display:flex;flex-direction:column;align-items:center;gap:8px}
   .fame-increments{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-  .player-level-box{display:flex;flex-direction:column;align-items:center;min-width:80px}
+  .player-level-box{display:flex;flex-direction:column;align-items:flex-start;min-width:160px}
 
   @media (max-width:700px){
     .symbol{width:24px;height:24px;font-size:16px}
     .symbol.spell::after{top:-6px;right:-6px;width:16px;height:16px;font-size:11px}
     .rep-cell{min-width:34px}
+    .player-level-box{min-width:120px}
+    .levels-list{min-width:180px}
   }
 </style>
 </head>
@@ -78,7 +78,7 @@
         <h2 id="fame-title">Fame</h2>
 
         <div class="fame-row" role="group" aria-label="Fame controls">
-          <div class="fame-controls">
+          <div class="fame-controls" aria-hidden="false">
             <label style="font-weight:700">Player Fame</label>
             <input id="fame-input" type="number" min="0" value="0" style="width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center" />
             <div class="fame-increments" role="toolbar" aria-label="Add fame">
@@ -93,14 +93,13 @@
           <div class="player-level-box" aria-live="polite">
             <label style="font-weight:700;display:block;margin-bottom:6px">Player Level</label>
             <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
-          </div>
 
-          <span class="levels-container" id="levels-container" aria-expanded="false">
-            <button id="levels-toggle" class="levels-trigger" aria-haspopup="true" aria-controls="levels-panel">Levels Achieved</button>
-            <div id="levels-panel" class="levels-panel" role="region" aria-label="Levels achieved panel" aria-hidden="true" tabindex="-1">
-              <ul id="levels-list" class="levels-list"><li class="level-line">None yet</li></ul>
+            <div class="levels-block" id="levels-block" aria-hidden="false">
+              <div class="levels-list" id="levels-list" role="list">
+                <div class="level-line">Level 1 — Command Token</div>
+              </div>
             </div>
-          </span>
+          </div>
         </div>
       </div>
     </section>
@@ -244,7 +243,7 @@
     </footer>
   </div>
 
-  <!-- End round modal -->
+  <!-- End round modal (shared) -->
   <div id="endround-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:60">
     <div style="background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%">
       <h3 style="margin:0 0 8px 0">End Round — Choose Card</h3>
@@ -267,14 +266,14 @@
   </div>
 
 <script>
-/* Full corrected app logic
-   - reputation selection fixed and persisted
-   - fame and player level centered; level fits same row as fame input
-   - Levels Achieved displays current achieved levels (no header) when hovered or clicked
-   - General Volkare and main dummy modules unchanged in behaviour from earlier integration
+/* Working integrated JS
+   - Reputation selection persisted and keyboard accessible
+   - Fame input and +fame buttons centered; player level in same row
+   - Levels Achieved lists Level 1..currentLevel with descriptions and lives under Player Level
+   - Dummy and GV modules preserve previous behaviour
 */
 
-const STORAGE_KEY = 'mk_companion_fixed_v1';
+const STORAGE_KEY = 'mk_companion_full_v2';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
 const FAME_LEVELS = [
@@ -361,8 +360,8 @@ function DummyModule() {
   }
   function reshuffle(){ if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); }
 
-  function getRenderLevels(){ const arr = []; for(let i=0;i<achievedLevels.length;i++){ const L = achievedLevels[i]; const desc = LEVEL_PROMPTS[L]||''; arr.push(`Level ${L}: ${desc}`); } return arr.length?arr:[]; }
-  function setAchievedLevels(levels){ achievedLevels = Array.isArray(levels)?levels.slice():achievedLevels; save(); }
+  function getRenderLevels(){ return achievedLevels.slice(); }
+  function setAchievedLevels(levels){ if(Array.isArray(levels)) achievedLevels = levels.slice(); save(); }
 
   function resetInitial(){
     crystals = { red:0, blue:0, green:0, white:0 };
@@ -517,14 +516,9 @@ function GVModule(){
 const mainModule = DummyModule();
 const gvModule = GVModule();
 
-const levelsContainer = document.getElementById('levels-container');
-const levelsToggleBtn = document.getElementById('levels-toggle');
-const levelsPanel = document.getElementById('levels-panel');
-const levelsList = document.getElementById('levels-list');
-
 let fame = 0;
 
-/* Helpers */
+/* helpers */
 function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
 function getFameLevel(fameValue){
   const v = Math.max(0, Number(fameValue) || 0);
@@ -540,11 +534,11 @@ function buildRepRows(){
   const repWrap = document.getElementById('rep-wrap');
   repWrap.innerHTML = '';
   const top=document.createElement('div'); top.className='rep-row top';
-  REP_TOP.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'top',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); selectRepCell({row:'top',index:i}); saveMeta(); }}); top.appendChild(c); });
+  REP_TOP.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'top',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectRepCell({row:'top',index:i}); saveMeta(); }}); top.appendChild(c); });
   const mid=document.createElement('div'); mid.className='rep-row mid';
-  REP_MID.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'mid',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); selectRepCell({row:'mid',index:i}); saveMeta(); }}); mid.appendChild(c); });
+  REP_MID.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'mid',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectRepCell({row:'mid',index:i}); saveMeta(); }}); mid.appendChild(c); });
   const bot=document.createElement('div'); bot.className='rep-row bot';
-  REP_BOT.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'bot',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); selectRepCell({row:'bot',index:i}); saveMeta(); }}); bot.appendChild(c); });
+  REP_BOT.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'bot',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectRepCell({row:'bot',index:i}); saveMeta(); }}); bot.appendChild(c); });
   repWrap.appendChild(top); repWrap.appendChild(mid); repWrap.appendChild(bot);
 }
 function selectRepCell(sel){
@@ -560,17 +554,24 @@ function applyRepSelection(sel){
   const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected');
 }
 
-/* Levels rendering */
-function renderLevelsPanel(){
-  levelsList.innerHTML = '';
-  const lines = mainModule.getRenderLevels();
-  if(lines.length === 0){
-    const li = document.createElement('li'); li.className='level-line'; li.textContent='None yet'; levelsList.appendChild(li); return;
+/* Levels achieved rendering under Player Level (Level 1..current) */
+function renderLevelsAchieved(){
+  const listEl = document.getElementById('levels-list');
+  if(!listEl) return;
+  listEl.innerHTML = '';
+  const level = getFameLevel(fame);
+  if(!level || level < 1){
+    const div = document.createElement('div'); div.className='level-line'; div.textContent = 'None yet'; listEl.appendChild(div); return;
   }
-  lines.forEach(l=>{ const li=document.createElement('li'); li.className='level-line'; li.textContent = l; levelsList.appendChild(li); });
+  for(let L=1; L<=level; L++){
+    const div = document.createElement('div'); div.className='level-line';
+    const desc = LEVEL_PROMPTS[L] || '';
+    div.textContent = `Level ${L}` + (desc ? ` — ${desc}` : '');
+    listEl.appendChild(div);
+  }
 }
 
-/* End-round modal wiring (shared) */
+/* End-round modal wiring */
 const endroundModal = document.getElementById('endround-modal');
 const cardChoices = document.getElementById('card-choices');
 const endroundConfirm = document.getElementById('endround-confirm');
@@ -602,7 +603,11 @@ if(endroundConfirm) endroundConfirm.addEventListener('click', ()=>{
   endRoundContext = null; selectedCard = null;
 });
 
-/* Fame handling */
+/* Meta persistence for fame + rep */
+function saveMeta(){ try{ const rep = window._repSelection || null; localStorage.setItem(STORAGE_KEY + '_meta', JSON.stringify({ fame, rep })); }catch(e){} }
+function loadMeta(){ try{ const raw = localStorage.getItem(STORAGE_KEY + '_meta'); if(!raw) return false; const m = JSON.parse(raw); fame = typeof m.fame==='number'?m.fame:fame; window._repSelection = m.rep || window._repSelection; return true;}catch(e){ return false; } }
+
+/* Fame handling and prompts */
 function handleLevelPrompts(prevLevel, newLevel){
   const messages = [];
   for(let L = prevLevel+1; L<=newLevel; L++){
@@ -619,15 +624,11 @@ function updateFameUI(prevFame = null){
   const fameInput = document.getElementById('fame-input');
   if(fameInput) fameInput.value = fame;
   if(prevLevel !== null && level > prevLevel) handleLevelPrompts(prevLevel, level);
-  renderLevelsPanel();
+  renderLevelsAchieved();
   saveMeta();
 }
 
-/* Meta persistence */
-function saveMeta(){ try{ const rep = window._repSelection || null; localStorage.setItem(STORAGE_KEY + '_meta', JSON.stringify({ fame, rep })); }catch(e){} }
-function loadMeta(){ try{ const raw = localStorage.getItem(STORAGE_KEY + '_meta'); if(!raw) return false; const m = JSON.parse(raw); fame = typeof m.fame==='number'?m.fame:fame; window._repSelection = m.rep || window._repSelection; return true;}catch(e){ return false; } }
-
-/* New game resets */
+/* New game */
 function newGame(){
   if(!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
   try{
@@ -644,10 +645,10 @@ function newGame(){
   window._repSelection = { row: 'mid', index: 0 };
   buildRepRows(); applyRepSelection(window._repSelection);
   updateFameUI(null);
-  renderLevelsPanel();
+  renderLevelsAchieved();
 }
 
-/* Initialize */
+/* Initialize wiring */
 window.addEventListener('load', ()=>{
   mainModule.load(); mainModule.wire();
   gvModule.load(); gvModule.wire();
@@ -672,50 +673,17 @@ window.addEventListener('load', ()=>{
   }
   document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=>{ const prev=fame; fame = Math.max(0, Number(fame) + Number(btn.dataset.inc||0)); updateFameUI(prev); }));
 
-  // levels toggle click toggles aria-expanded (hover/focus also show)
-  levelsToggleBtn.addEventListener('click', (e)=>{
-    const expanded = levelsContainer.getAttribute('aria-expanded') === 'true';
-    if(expanded){
-      levelsContainer.setAttribute('aria-expanded','false');
-      levelsPanel.setAttribute('aria-hidden','true');
-      levelsPanel.style.display = 'none';
-      levelsToggleBtn.setAttribute('aria-expanded','false');
-    } else {
-      renderLevelsPanel();
-      levelsContainer.setAttribute('aria-expanded','true');
-      levelsPanel.setAttribute('aria-hidden','false');
-      levelsPanel.style.display = 'block';
-      levelsToggleBtn.setAttribute('aria-expanded','true');
-      levelsPanel.focus?.();
-    }
-  });
-
-  // close levels panel on outside click or ESC
-  document.addEventListener('click', (ev)=>{
-    if(!levelsContainer.contains(ev.target)){
-      levelsContainer.setAttribute('aria-expanded','false');
-      levelsPanel.setAttribute('aria-hidden','true');
-      levelsToggleBtn.setAttribute('aria-expanded','false');
-      levelsPanel.style.display = 'none';
-    }
-  });
-  document.addEventListener('keydown', (ev)=>{
-    if(ev.key === 'Escape'){
-      levelsContainer.setAttribute('aria-expanded','false');
-      levelsPanel.setAttribute('aria-hidden','true');
-      levelsToggleBtn.setAttribute('aria-expanded','false');
-      levelsPanel.style.display = 'none';
-    }
-  });
-
-  // wire new game
+  // new game
   document.getElementById('new-game').addEventListener('click', newGame);
 
-  // save periodically
+  // initial render of levels achieved
+  renderLevelsAchieved();
+
+  // periodic save
   setInterval(()=>{ mainModule.save && mainModule.save(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
 });
 
-/* Expose for debugging */
+/* Expose for debugging in console if you want to inspect */
 window._main = mainModule;
 window._gv = gvModule;
 </script>
