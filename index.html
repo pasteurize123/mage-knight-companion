@@ -29,6 +29,10 @@
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
 
+    /* specifically center titles for Reputation and Fame */
+    #reputation-card .card-header,
+    #fame-card .card-header { justify-content:center; }
+
     /* Reputation */
     .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; }
     .stat-value { font-size:28px; font-weight:700; color:var(--accent); display:inline-block; line-height:1; }
@@ -63,7 +67,7 @@
     .level-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
     .level-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
 
-    /* Fame ranges tooltip now centered in viewport like level tooltip (same behavior) */
+    /* Centered popups (Fame Ranges and Level Ups) */
     .fame-tooltip, .level-tooltip {
       position: fixed;
       top: 50%;
@@ -133,7 +137,7 @@
               <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Level 1</div>
             </div>
 
-            <!-- Fame ranges tooltip (now centered like level tooltip) -->
+            <!-- Fame ranges tooltip (centered) -->
             <div id="fame-tooltip" class="fame-tooltip" role="dialog" aria-hidden="true">
               <div style="font-weight:800; margin-bottom:6px;">Fame Ranges</div>
               <div class="tooltip-list" id="fame-tooltip-list"></div>
