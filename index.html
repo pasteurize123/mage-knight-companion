@@ -3,66 +3,135 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Mage Knight Companion</title>
+  <title>Mage Knight Companion — Copilot Style</title>
   <style>
     :root{
-      --bg:#0f1720;
-      --card:#0b1220;
-      --accent:#e0a200;
+      --bg:#07101a;
+      --panel:#0b1720;
+      --card:#0f1a24;
       --muted:#98a0b0;
+      --accent:#e0a200;
+      --accent-2:#ffd27a;
+      --glass:rgba(255,255,255,0.03);
       --text:#e6eef8;
     }
+
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-    .phone-frame{max-width:420px;margin:12px auto;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.6);background:linear-gradient(180deg,#07101a,#08131b);min-height:640px;display:flex;flex-direction:column}
-    .topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03)}
-    .title{font-weight:600;font-size:14px}
-    .icon-btn{background:transparent;border:none;color:var(--muted);font-size:18px;padding:8px;border-radius:8px}
-    .content{padding:12px;display:flex;flex-direction:column;gap:12px;flex:1}
-    .card{background:var(--card);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
-    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#061018,#08121a);color:var(--text);-webkit-font-smoothing:antialiased}
+    /* phone frame */
+    .phone-frame{
+      width:100%;
+      max-width:420px;
+      margin:12px auto;
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 12px 30px rgba(0,0,0,0.6);
+      background:linear-gradient(180deg,var(--panel),var(--card));
+      min-height:680px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* topbar (Copilot compact) */
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:10px 14px;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+    }
+    .logo {
+      width:36px;
+      height:36px;
+      border-radius:8px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      color:#102027;
+      font-size:14px;
+      box-shadow:0 3px 8px rgba(224,162,0,0.12) inset;
+    }
+    .title {
+      font-size:14px;
+      font-weight:600;
+      letter-spacing:0.2px;
+    }
+    .sub {
+      font-size:11px;
+      color:var(--muted);
+      margin-left:auto;
+      padding-right:6px;
+    }
+    .icon-btn{
+      margin-left:6px;
+      background:transparent;border:none;color:var(--muted);font-size:18px;padding:8px;border-radius:8px;
+    }
+
+    /* content */
+    .content{padding:12px;display:flex;flex-direction:column;gap:10px;flex:1}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+      padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);
+      box-shadow: 0 4px 14px rgba(2,6,10,0.25);
+    }
+    .card-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
     .card-header h3{margin:0;font-size:13px;color:var(--muted)}
-    .rep-value,.fame-value{font-weight:700;font-size:20px;color:var(--accent)}
-    .rep-bar{position:relative;height:36px;background:rgba(255,255,255,0.03);border-radius:10px;overflow:hidden;margin-bottom:10px}
-    .rep-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),#ffd27a);width:30%}
-    .rep-marker{position:absolute;top:0;height:100%;transform:translateX(-50%);display:flex;align-items:flex-end;padding-bottom:4px}
-    .rep-marker span{font-size:11px;color:var(--muted);background:rgba(0,0,0,0.25);padding:2px 6px;border-radius:6px}
+    .value {font-weight:700;font-size:20px;color:var(--accent)}
+    .divider {height:1px;background:var(--glass);margin:10px 0;border-radius:4px}
+
+    /* reputation track */
+    .rep-bar{position:relative;height:38px;background:rgba(255,255,255,0.02);border-radius:10px;overflow:hidden;margin-bottom:10px;border:1px solid rgba(255,255,255,0.01)}
+    .rep-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:30%}
+    .rep-marker{position:absolute;top:0;height:100%;transform:translateX(-50%);display:flex;align-items:flex-end;padding-bottom:6px}
+    .rep-marker span{font-size:11px;color:var(--muted);background:rgba(0,0,0,0.28);padding:3px 7px;border-radius:8px}
+
+    /* controls */
     .controls-row{display:flex;gap:8px;align-items:center}
-    .controls-row button{flex:1;padding:8px 10px;border-radius:10px;border:none;background:rgba(255,255,255,0.03);color:var(--text);font-size:16px}
+    .controls-row button{flex:1;padding:10px 12px;border-radius:10px;border:none;background:var(--glass);color:var(--text);font-size:16px;min-height:44px}
+    .controls-row .wide{flex:2}
+
+    /* fame */
     .fame-controls{display:flex;flex-direction:column;gap:8px}
     .fame-step{display:flex;gap:8px;align-items:center}
-    .fame-step input{width:68px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text);text-align:center}
+    .fame-step button{padding:10px;border-radius:10px;border:none;background:var(--glass);color:var(--text);min-width:52px;min-height:44px;font-size:18px}
+    .fame-step input{width:78px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text);text-align:center;font-size:16px}
     .fame-presets{display:flex;gap:8px}
-    .fame-presets button{padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:var(--text)}
+    .fame-presets button{padding:8px 10px;border-radius:10px;border:none;background:rgba(255,255,255,0.02);color:var(--text);min-height:44px}
     .level-preview{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);padding-top:6px}
-    .small-controls{display:flex;justify-content:space-between;padding:6px 12px}
-    .small-controls button{padding:8px 12px;border-radius:8px;border:none;background:#14202a;color:var(--text)}
-    .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:40}
-    .modal-card{background:#07131a;padding:16px;border-radius:12px;width:92%;max-width:380px;border:1px solid rgba(255,255,255,0.04)}
+
+    .small-controls{display:flex;justify-content:space-between;padding:6px 2px}
+    .small-controls button{padding:10px 12px;border-radius:10px;border:none;background:#09202a;color:var(--text);min-width:120px}
+
+    /* modal & toast */
+    .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:40}
+    .modal-card{background:linear-gradient(180deg,#07131a,#09161b);padding:16px;border-radius:12px;width:92%;max-width:420px;border:1px solid rgba(255,255,255,0.03)}
     .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
     .modal-actions button{padding:8px 10px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:var(--text)}
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:#112232;padding:8px 14px;border-radius:18px;color:var(--text);font-size:13px;border:1px solid rgba(255,255,255,0.03);z-index:50}
-    /* small responsive tweaks */
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:#0f2a35;padding:9px 16px;border-radius:18px;color:var(--text);font-size:13px;border:1px solid rgba(255,255,255,0.03);z-index:50}
+
     @media (max-width:380px){
       .phone-frame{margin:8px}
-      .rep-bar{height:32px}
+      .rep-bar{height:34px}
+      .fame-step input{width:64px}
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <!-- React + ReactDOM UMD builds -->
+  <!-- React UMD -->
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <!-- Babel for JSX in-browser (development only) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <script type="text/babel">
     const { useState, useEffect } = React;
 
     const DEFAULTS = {
-      reputation: { value: 12, min: 0, max: 24, markers: [0, 6, 12, 18, 24] },
+      reputation: { value: 12, min: 0, max: 24, markers: [0,6,12,18,24] },
       fame: {
         value: 3,
         levels: [
@@ -90,9 +159,7 @@
       const [modal, setModal] = useState(null);
       const [toast, showToast] = useToast();
 
-      function pushHistory(item) {
-        setHistory(h => [...h, item].slice(-30));
-      }
+      function pushHistory(item) { setHistory(h => [...h, item].slice(-40)); }
 
       function changeReputation(delta) {
         const newVal = Math.max(reputation.min, Math.min(reputation.max, reputation.value + delta));
@@ -123,9 +190,7 @@
 
       function checkFameLevel(fameState) {
         const reached = fameState.levels.slice().reverse().find(l => fameState.value >= l.threshold);
-        if (reached) {
-          setModal({ type: "level", threshold: reached.threshold, reward: reached.reward });
-        }
+        if (reached) setModal({ type: "level", threshold: reached.threshold, reward: reached.reward });
       }
 
       function applyLevelReward() {
@@ -154,7 +219,11 @@
       return (
         <div className="phone-frame" role="application" aria-label="Mage Knight Companion">
           <header className="topbar">
-            <div className="title">Mage Knight Companion</div>
+            <div className="logo">MK</div>
+            <div>
+              <div className="title">Mage Knight Companion</div>
+              <div className="sub">Reputation · Fame</div>
+            </div>
             <button className="icon-btn" aria-label="settings">⚙️</button>
           </header>
 
@@ -162,7 +231,7 @@
             <section className="card" aria-labelledby="rep-heading">
               <div className="card-header">
                 <h3 id="rep-heading">Reputation</h3>
-                <div className="rep-value" aria-live="polite">{reputation.value}</div>
+                <div className="value" aria-live="polite">{reputation.value}</div>
               </div>
 
               <div
@@ -174,13 +243,8 @@
                 aria-label="Reputation track"
               >
                 <div className="rep-fill" style={{ width: `${repFillPct}%` }} />
-                {reputation.markers.map((m, i) => (
-                  <div
-                    key={i}
-                    className="rep-marker"
-                    style={{ left: `${((m - reputation.min) / (reputation.max - reputation.min)) * 100}%` }}
-                    aria-hidden
-                  >
+                {reputation.markers.map((m,i) => (
+                  <div key={i} className="rep-marker" style={{ left: `${((m - reputation.min) / (reputation.max - reputation.min)) * 100}%` }} aria-hidden>
                     <span>{m}</span>
                   </div>
                 ))}
@@ -189,26 +253,20 @@
               <div className="controls-row">
                 <button onClick={() => changeReputation(-1)} aria-label="decrease reputation">−</button>
                 <button onClick={() => changeReputation(1)} aria-label="increase reputation">+</button>
-                <button onClick={() => setModal({ type: "reputation-details" })}>Details</button>
+                <button className="wide" onClick={() => setModal({ type: "reputation-details" })}>Details</button>
               </div>
             </section>
 
             <section className="card" aria-labelledby="fame-heading">
               <div className="card-header">
                 <h3 id="fame-heading">Fame</h3>
-                <div className="fame-value" aria-live="polite">{fame.value}</div>
+                <div className="value" aria-live="polite">{fame.value}</div>
               </div>
 
               <div className="fame-controls">
                 <div className="fame-step">
                   <button onClick={() => changeFame(-1)} aria-label="decrease fame">−</button>
-                  <input
-                    type="number"
-                    value={fame.value}
-                    min="0"
-                    onChange={(e) => setFameValueDirect(e.target.value)}
-                    aria-label="fame value"
-                  />
+                  <input type="number" value={fame.value} min="0" onChange={(e) => setFameValueDirect(e.target.value)} aria-label="fame value" />
                   <button onClick={() => changeFame(1)} aria-label="increase fame">+</button>
                 </div>
 
@@ -220,9 +278,7 @@
 
                 <div className="level-preview">
                   <strong>Next level</strong>
-                  <span>
-                    {fame.levels.find(l => l.threshold > fame.value)?.threshold ?? "—"}
-                  </span>
+                  <span>{fame.levels.find(l => l.threshold > fame.value)?.threshold ?? "—"}</span>
                 </div>
               </div>
             </section>
@@ -238,9 +294,10 @@
               <div className="modal-card">
                 {modal.type === "level" && (
                   <>
-                    <h4>Level reached</h4>
-                    <p><strong>Threshold:</strong> {modal.threshold}</p>
-                    <p><strong>Reward:</strong> {modal.reward}</p>
+                    <h4 style={{margin:0}}>Level reached</h4>
+                    <div style={{height:8}} />
+                    <p style={{margin:0}}><strong>Threshold:</strong> {modal.threshold}</p>
+                    <p style={{margin:"6px 0 0 0"}}><strong>Reward:</strong> {modal.reward}</p>
                     <div className="modal-actions">
                       <button onClick={() => setModal(null)}>Close</button>
                       <button onClick={applyLevelReward}>Apply Reward</button>
@@ -249,9 +306,10 @@
                 )}
                 {modal.type === "reputation-details" && (
                   <>
-                    <h4>Reputation Details</h4>
-                    <p><strong>Current:</strong> {reputation.value}</p>
-                    <p><strong>Markers:</strong> {reputation.markers.join(", ")}</p>
+                    <h4 style={{margin:0}}>Reputation Details</h4>
+                    <div style={{height:8}} />
+                    <p style={{margin:0}}><strong>Current:</strong> {reputation.value}</p>
+                    <p style={{margin:"6px 0 0 0"}}><strong>Markers:</strong> {reputation.markers.join(", ")}</p>
                     <div className="modal-actions">
                       <button onClick={() => setModal(null)}>Close</button>
                     </div>
@@ -266,8 +324,7 @@
       );
     }
 
-    const rootEl = document.getElementById('root');
-    ReactDOM.createRoot(rootEl).render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
 </html>
