@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — 16px UI</title>
+  <title>Mage Knight Companion</title>
   <style>
     :root{
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
@@ -13,7 +13,10 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:var(--bg);color:#111;padding:12px;font-size:var(--base-font);line-height:1.3}
+    body{
+      margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+      background:var(--bg);color:#111;padding:12px;font-size:var(--base-font);line-height:1.3;
+    }
     h1{font-size:var(--title-font);margin:0 0 12px;text-align:center;font-weight:700}
     .container{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
     .panel{background:var(--panel);border-radius:10px;padding:10px}
@@ -23,31 +26,38 @@
     input[type=number]{width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center;font-size:1rem}
     .smallbtn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:1rem}
     .muted{color:#666;font-size:0.9375rem}
-    .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:center}
+    .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:center;position:relative}
     .rep-row{display:flex;gap:8px;justify-content:center;align-items:center}
     .rep-cell{min-width:var(--rep-min);padding:6px 10px;background:var(--cell);border-radius:6px;text-align:center;cursor:pointer;user-select:none;font-size:0.9375rem}
     .rep-row.top .rep-cell.selected{background:var(--gold);font-weight:700;color:#111}
     .rep-row.mid .rep-cell.selected{background:var(--yellow);font-weight:700;color:#111}
     .rep-row.bot .rep-cell.selected{background:var(--danger);font-weight:700;color:#fff}
 
-    /* Levels Achieved styling: entries formatted and 14px */
-    .levels-list{background:#fff;padding:8px;border-radius:6px;min-height:36px;display:flex;flex-direction:column;gap:6px;flex-wrap:wrap;font-size:14px}
-    .level-line{background:transparent;padding:6px 8px;border-radius:4px;font-weight:600;font-size:14px}
+    /* Levels panel (hidden by default, appears on hover/focus/click) */
+    .levels-trigger{background:transparent;border:0;padding:0;font-weight:700;cursor:pointer;color:inherit}
+    .levels-container{position:relative;display:inline-block}
+    .levels-panel{
+      position:absolute;left:0;top:calc(100% + 8px);
+      display:none;
+      background:#fff;border-radius:8px;padding:10px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.12);
+      min-width:220px;max-width:360px;z-index:50;font-size:14px;
+    }
+    /* reveal on hover/focus or when aria-expanded=true on button */
+    .levels-trigger[aria-expanded="true"] + .levels-panel,
+    .levels-trigger:hover + .levels-panel,
+    .levels-trigger:focus + .levels-panel,
+    .levels-panel:hover { display:block; }
+
+    .levels-list{display:flex;flex-direction:column;gap:6px;padding:0;margin:0;list-style:none}
+    .level-line{padding:6px 8px;border-radius:4px;font-weight:600;font-size:14px;background:transparent;color:#111}
 
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:1rem}
     .center{display:flex;align-items:center;justify-content:center;gap:8px}
     .center-column{display:flex;flex-direction:column;align-items:center;gap:6px}
     .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--overlay);z-index:60}
     .modal{background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
-    .modal h3{margin:0 0 8px 0;font-size:1rem}
-    .modal p{margin:8px 0;font-size:0.9375rem;white-space:pre-wrap}
-    .choice-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-    .choice-btn{padding:8px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:1rem}
-    .choice-btn.selected{background:#eef6e9;border-color:#9fd49f}
-    footer{display:flex;justify-content:center;padding:8px 0}
-    .mini-group{display:flex;align-items:center;gap:8px}
-    .icon-label{display:flex;align-items:center;gap:6px}
-    @media (max-width:700px){ input[type=number]{width:90px} :root{--rep-min:34px} .mini-group{gap:6px} }
+    @media (max-width:700px){ input[type=number]{width:90px} :root{--rep-min:34px} }
   </style>
 </head>
 <body>
@@ -93,8 +103,14 @@
         </div>
 
         <div style="width:100%;margin-top:10px">
-          <h3 style="margin:8px 0 6px 0;font-size:1rem">Levels Achieved</h3>
-          <div id="levels-list" class="levels-list" aria-live="polite">None yet</div>
+          <h3 style="margin:8px 0 6px 0;font-size:1rem">
+            <span class="levels-container">
+              <button id="levels-toggle" class="levels-trigger" aria-expanded="false" aria-controls="levels-panel" aria-haspopup="true">Levels Achieved</button>
+              <div id="levels-panel" class="levels-panel" role="region" aria-label="Levels achieved panel" aria-hidden="true" tabindex="-1">
+                <ul id="levels-list" class="levels-list"><li class="level-line">None yet</li></ul>
+              </div>
+            </span>
+          </h3>
         </div>
       </div>
     </section>
@@ -177,7 +193,6 @@
     <div class="modal" role="document" aria-labelledby="endround-title">
       <h3 id="endround-title">End Round — Choose Additions</h3>
       <p>Choose one crystal and one card to add to the dummy player. This will then reshuffle the discard into the deck.</p>
-
       <div style="margin-top:8px">
         <div style="font-weight:600;margin-bottom:6px;font-size:0.9375rem">Choose crystal</div>
         <div id="crystal-choices" class="choice-row">
@@ -187,7 +202,6 @@
           <button class="choice-btn" data-val="white">⚪</button>
         </div>
       </div>
-
       <div style="margin-top:8px">
         <div style="font-weight:600;margin-bottom:6px;font-size:0.9375rem">Choose card</div>
         <div id="card-choices" class="choice-row">
@@ -197,7 +211,6 @@
           <button class="choice-btn" data-val="White">⚪</button>
         </div>
       </div>
-
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
         <button id="endround-cancel" class="smallbtn">Cancel</button>
         <button id="endround-confirm" class="smallbtn" disabled>Confirm</button>
@@ -217,14 +230,14 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'mk_companion_state_v4';
+    const STORAGE_KEY = 'mk_companion_state_v5';
     const DEFAULT_CARDS = { Red: 4, Blue: 4, Green: 4, White: 4 };
 
     const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
     const REP_MID = ["0"];
     const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
 
-    // Updated prompts mapping
+    // prompts and levels
     const FAME_LEVELS = [
       {level:1, min:0,  max:2},
       {level:2, min:3,  max:7},
@@ -254,7 +267,7 @@
     const COLOR_SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', red:'🔴', blue:'🔵', green:'🟢', white:'⚪' };
 
     // State
-    let fame = 0; // now allowed to grow above previous numeric "cap"
+    let fame = 0; // numeric value may exceed previous caps
     let crystals = { red:0, blue:0, green:0, white:0 };
     let cardCounts = { ...DEFAULT_CARDS };
     let dummyDeck = [];
@@ -267,7 +280,10 @@
     const repWrap = document.getElementById('rep-wrap');
     const fameInput = document.getElementById('fame-input');
     const playerLevelEl = document.getElementById('player-level');
-    const levelsList = document.getElementById('levels-list');
+    const levelsListEl = document.getElementById('levels-list');
+    const levelsToggleBtn = document.getElementById('levels-toggle');
+    const levelsPanel = document.getElementById('levels-panel');
+
     const levelModal = document.getElementById('level-modal');
     const levelMessage = document.getElementById('level-message');
     const newGameBtn = document.getElementById('new-game');
@@ -275,35 +291,34 @@
     const dummyOutput = document.getElementById('dummy-output');
     const discardOutput = document.getElementById('discard-output');
     const reshuffleBtn = document.getElementById('reshuffle-btn');
-    const endroundModal = document.getElementById('endround-modal');
+
     const crystalChoices = document.getElementById('crystal-choices');
     const cardChoices = document.getElementById('card-choices');
     const endroundConfirm = document.getElementById('endround-confirm');
     const endroundCancel = document.getElementById('endround-cancel');
 
+    let selectedCrystal = null;
+    let selectedCard = null;
+
     // Helpers
     function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
 
-    // getFameLevel now caps level at 10. Fame numeric value itself is not capped.
+    // determine player level from fame, capped at 10
     function getFameLevel(fameValue){
-      // allow fameValue to be any number >= 0
       const v = Math.max(0, Number(fameValue) || 0);
-      for (const b of FAME_LEVELS) {
-        if (v >= b.min && v <= b.max) return b.level;
-      }
-      // if fame is beyond defined max, return level 10
+      for (const b of FAME_LEVELS) if (v >= b.min && v <= b.max) return b.level;
       return 10;
     }
 
     // Persistence
     function saveState(){
-      try {
+      try{
         const s = { fame, crystals, cardCounts, dummyDeck, discardPile, endRoundFlag, achievedLevels, repSelection };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-      } catch(e){}
+      }catch(e){}
     }
     function loadState(){
-      try {
+      try{
         const raw = localStorage.getItem(STORAGE_KEY);
         if(!raw) return false;
         const s = JSON.parse(raw);
@@ -316,14 +331,14 @@
         achievedLevels = Array.isArray(s.achievedLevels) ? s.achievedLevels : achievedLevels;
         repSelection = s.repSelection || repSelection;
         return true;
-      } catch(e){ return false; }
+      }catch(e){ return false; }
     }
-    function clearSavedState(){ try { localStorage.removeItem(STORAGE_KEY); } catch(e){} }
+    function clearSavedState(){ try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} }
 
-    // Debounced saver + persistAll
+    // Debounced saver
     function debounce(fn, wait=80){ let t=null; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), wait); }; }
     const saveStateDebounced = debounce(saveState, 60);
-    function persistAll(){ try{ saveStateDebounced(); } catch(e){ saveState(); } }
+    function persistAll(){ try{ saveStateDebounced(); }catch(e){ saveState(); } }
 
     // Reputation UI
     function buildRepRows(){
@@ -342,33 +357,34 @@
       });
       repWrap.appendChild(top); repWrap.appendChild(mid); repWrap.appendChild(bot);
     }
-
     function selectRepCell(sel){
       const all = repWrap.querySelectorAll('.rep-cell'); all.forEach(c=>c.classList.remove('selected'));
       const rowEl = repWrap.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return;
       const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]){ cells[sel.index].classList.add('selected'); repSelection={...sel}; persistAll(); }
     }
-
     function applyRepSelection(sel){
       if(!sel) return;
       const rowEl = repWrap.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return;
       const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected');
     }
 
-    // Levels UI: show each as "Level X: Description"
+    // Levels rendering: "Level X: Description" lines
     function renderLevels(){
-      levelsList.innerHTML = '';
-      if(!achievedLevels || achievedLevels.length === 0){ levelsList.textContent = 'None yet'; return; }
+      levelsListEl.innerHTML = '';
+      if(!achievedLevels || achievedLevels.length === 0){
+        const li = document.createElement('li'); li.className='level-line'; li.textContent='None yet'; levelsListEl.appendChild(li); return;
+      }
       achievedLevels.forEach(L=>{
-        const line = document.createElement('div');
-        line.className = 'level-line';
+        const li = document.createElement('li'); li.className='level-line';
         const desc = LEVEL_PROMPTS[L] ? LEVEL_PROMPTS[L] : '';
-        line.textContent = `Level ${L}: ${desc}`;
-        levelsList.appendChild(line);
+        li.textContent = `Level ${L}: ${desc}`;
+        levelsListEl.appendChild(li);
       });
+      // ensure panel aria state follows toggle
+      levelsPanel.setAttribute('aria-hidden', levelsToggleBtn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
     }
 
-    // Fame handling
+    // Fame UI and prompts
     function handleLevelPrompts(prevLevel,newLevel){
       const messages = [];
       for(let L = prevLevel + 1; L <= newLevel; L++){
@@ -378,13 +394,11 @@
       levelMessage.textContent = messages.join('\n');
       levelModal.style.display = 'flex'; levelModal.setAttribute('aria-hidden','false');
     }
-
     function updateFameUI(prevFame = null){
       const prevLevel = prevFame !== null ? getFameLevel(prevFame) : null;
       const level = getFameLevel(fame);
       playerLevelEl.textContent = level;
       fameInput.value = fame;
-      // rebuild achievedLevels up to capped level 10
       achievedLevels = [];
       for(let i=1;i<=level && i<=10;i++) achievedLevels.push(i);
       if(prevLevel !== null && level > prevLevel) handleLevelPrompts(prevLevel, level);
@@ -392,7 +406,7 @@
       persistAll();
     }
 
-    // Deck & draw
+    // Deck & draw helpers
     function rebuildDeckFromCounts(){
       dummyDeck = [];
       Object.keys(cardCounts).forEach(color => { for(let i=0;i<cardCounts[color];i++) dummyDeck.push(`${color} Card`); });
@@ -402,8 +416,8 @@
     function updateDeckCount(){ document.getElementById('deck-count').textContent = dummyDeck.length; }
     function updateDiscardUI(){ if(!discardPile||discardPile.length===0) discardOutput.textContent='Discard pile is empty.'; else { const syms = discardPile.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c); discardOutput.textContent = `Discard (${discardPile.length}): ${syms.join(' ')}`; } }
 
-    // Draw logic
-    function drawCardsOnce(){ const drawn = []; for(let i=0;i<3 && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop()); return drawn; }
+    // draw logic
+    function drawCardsOnce(){ const drawn=[]; for(let i=0;i<3 && dummyDeck.length>0;i++) drawn.push(dummyDeck.pop()); return drawn; }
     function announceEndRoundMessage(){ dummyOutput.textContent = 'Nil cards drawn. End of round announced.'; }
     function onDrawClick(){
       if(dummyDeck.length === 0){ endRoundFlag = true; drawBtn.textContent = 'End Round'; announceEndRoundMessage(); persistAll(); return; }
@@ -421,9 +435,9 @@
       updateDeckCount(); updateDiscardUI(); persistAll();
     }
 
-    // End-round modal
-    function openEndRoundModal(){ selectedCrystal=null; selectedCard=null; endroundConfirm.disabled=true; endroundModal.style.display='flex'; endroundModal.setAttribute('aria-hidden','false'); Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.remove('selected')); Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.remove('selected')); }
-    function closeEndRoundModal(){ endroundModal.style.display='none'; endroundModal.setAttribute('aria-hidden','true'); }
+    // end-round modal interactions
+    function openEndRoundModal(){ selectedCrystal=null; selectedCard=null; endroundConfirm.disabled=true; document.getElementById('endround-modal').style.display='flex'; document.getElementById('endround-modal').setAttribute('aria-hidden','false'); Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.remove('selected')); Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.remove('selected')); }
+    function closeEndRoundModal(){ document.getElementById('endround-modal').style.display='none'; document.getElementById('endround-modal').setAttribute('aria-hidden','true'); }
 
     crystalChoices.addEventListener('click',(e)=>{ const btn=e.target.closest('.choice-btn'); if(!btn) return; selectedCrystal=btn.dataset.val; Array.from(crystalChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.toggle('selected', b===btn)); endroundConfirm.disabled = !(selectedCrystal && selectedCard); });
     cardChoices.addEventListener('click',(e)=>{ const btn=e.target.closest('.choice-btn'); if(!btn) return; selectedCard=btn.dataset.val; Array.from(cardChoices.querySelectorAll('.choice-btn')).forEach(b=>b.classList.toggle('selected', b===btn)); endroundConfirm.disabled = !(selectedCrystal && selectedCard); });
@@ -434,19 +448,25 @@
       changeCrystal(selectedCrystal,1); changeCard(selectedCard,1);
       if(discardPile.length>0){ dummyDeck.push(...discardPile); discardPile = []; shuffle(dummyDeck); }
       updateDeckCount(); updateDiscardUI();
-      endRoundFlag = false; drawBtn.textContent = 'Draw';
+      endRoundFlag=false; drawBtn.textContent='Draw';
       dummyOutput.textContent = `End Round: added ${COLOR_SYMBOL[selectedCard] || selectedCard} and ${COLOR_SYMBOL[selectedCrystal] || selectedCrystal}. Deck reshuffled.`;
       persistAll(); closeEndRoundModal();
     });
 
-    // Reshuffle
+    // reshuffle
     function reshuffleDeck(){ if(!discardPile||discardPile.length===0){ dummyOutput.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } dummyDeck.push(...discardPile); discardPile = []; shuffle(dummyDeck); updateDeckCount(); updateDiscardUI(); endRoundFlag=false; drawBtn.textContent='Draw'; dummyOutput.textContent='Deck reshuffled from discard.'; persistAll(); }
 
     // crystals & cards
     function changeCrystal(color,delta){ crystals[color] = Math.max(0,(crystals[color]||0)+delta); document.getElementById(color).textContent = crystals[color]; persistAll(); }
-    function changeCard(color,delta){ cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta); document.getElementById(`card-${color.toLowerCase()}`).textContent = cardCounts[color]; if(delta>0){ const name=`${color} Card`; const pos=Math.floor(Math.random()*(dummyDeck.length+1)); dummyDeck.splice(pos,0,name); } else { const name=`${color} Card`; const idx=dummyDeck.indexOf(name); if(idx!==-1) dummyDeck.splice(idx,1); else { const dj=discardPile.indexOf(name); if(dj!==-1) discardPile.splice(dj,1); } } updateDeckCount(); updateDiscardUI(); persistAll(); }
+    function changeCard(color,delta){
+      cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta);
+      document.getElementById(`card-${color.toLowerCase()}`).textContent = cardCounts[color];
+      if(delta>0){ const name=`${color} Card`; const pos=Math.floor(Math.random()*(dummyDeck.length+1)); dummyDeck.splice(pos,0,name); }
+      else { const name=`${color} Card`; const idx=dummyDeck.indexOf(name); if(idx!==-1) dummyDeck.splice(idx,1); else { const dj=discardPile.indexOf(name); if(dj!==-1) discardPile.splice(dj,1); } }
+      updateDeckCount(); updateDiscardUI(); persistAll();
+    }
 
-    // fame setters — allow fame numeric value above previous cap, but only non-negative integers
+    // fame setters (fame numeric unbounded, level capped at 10)
     function setFameOverride(value){
       const prev = fame;
       fame = clampIntNonNeg(value);
@@ -458,9 +478,9 @@
       updateFameUI(prev);
     }
 
-    // Random starting crystals: two of one colour, one of another
+    // starting crystals
     function initStartingCrystals(){
-      const keys=['red','blue','green','white'];
+      const keys = ['red','blue','green','white'];
       const first = keys[Math.floor(Math.random()*keys.length)];
       let second = keys[Math.floor(Math.random()*keys.length)];
       while(second === first) second = keys[Math.floor(Math.random()*keys.length)];
@@ -473,7 +493,7 @@
       persistAll();
     }
 
-    // NEW GAME: reputation set to middle row 0 and persisted
+    // NEW GAME: set reputation to middle 0 and persist
     function newGame(){
       if(!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
       clearSavedState();
@@ -484,51 +504,63 @@
       endRoundFlag = false;
       achievedLevels = [1];
 
-      // starting crystals and deck
       initStartingCrystals();
       rebuildDeckFromCounts();
 
-      // set reputation to middle 0 and persist
+      // build rep rows then set middle 0 persistently
       repSelection = { row: 'mid', index: 0 };
       buildRepRows();
       applyRepSelection(repSelection);
       persistAll();
 
-      // update card UI
       document.getElementById('card-red').textContent = cardCounts.Red;
       document.getElementById('card-blue').textContent = cardCounts.Blue;
       document.getElementById('card-green').textContent = cardCounts.Green;
       document.getElementById('card-white').textContent = cardCounts.White;
 
-      updateDeckCount();
-      updateDiscardUI();
+      updateDeckCount(); updateDiscardUI();
 
-      endRoundFlag = false;
-      drawBtn.textContent = 'Draw';
-      dummyOutput.textContent = 'Drawn symbols appear here';
-
-      fame = 0;
-      updateFameUI(null);
-      renderLevels();
-      persistAll();
+      endRoundFlag=false; drawBtn.textContent='Draw'; dummyOutput.textContent='Drawn symbols appear here';
+      fame = 0; updateFameUI(null); renderLevels(); persistAll();
     }
 
-    // Prevent immediate reload via F5 / Ctrl/Cmd+R while ensuring state saved first.
+    // Block immediate reload keystrokes but save first (silent)
     window.addEventListener('keydown', (e)=>{
       const key = e.key || '';
       const isF5 = key === 'F5';
       const isCmdR = (key === 'r' || key === 'R') && (e.ctrlKey || e.metaKey);
-      if (isF5 || isCmdR){
-        try{ saveState(); }catch(e){}
-        e.preventDefault(); e.stopImmediatePropagation();
-      }
+      if (isF5 || isCmdR){ try{ saveState(); }catch(e){} e.preventDefault(); e.stopImmediatePropagation(); }
     }, { passive:false });
 
-    // Save on visibility change / pagehide to persist before refresh/navigation (silent)
+    // Save on visibility change/pagehide
     window.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') persistAll(); });
     window.addEventListener('pagehide', persistAll);
 
-    // INIT wiring
+    // Levels panel keyboard & toggle behavior
+    levelsToggleBtn.addEventListener('click', (e)=>{
+      const expanded = levelsToggleBtn.getAttribute('aria-expanded') === 'true';
+      if(expanded){
+        levelsToggleBtn.setAttribute('aria-expanded','false');
+        levelsPanel.setAttribute('aria-hidden','true');
+      } else {
+        levelsToggleBtn.setAttribute('aria-expanded','true');
+        levelsPanel.setAttribute('aria-hidden','false');
+        levelsPanel.focus();
+      }
+    });
+    levelsPanel.addEventListener('blur', (e)=>{
+      setTimeout(()=>{
+        if(!levelsPanel.contains(document.activeElement) && document.activeElement !== levelsToggleBtn){
+          levelsToggleBtn.setAttribute('aria-expanded','false');
+          levelsPanel.setAttribute('aria-hidden','true');
+        }
+      }, 10);
+    });
+    levelsPanel.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){ levelsToggleBtn.setAttribute('aria-expanded','false'); levelsPanel.setAttribute('aria-hidden','true'); levelsToggleBtn.focus(); }
+    });
+
+    // Init wiring
     window.addEventListener('load', ()=>{
       buildRepRows();
       const ok = loadState();
@@ -539,13 +571,13 @@
         cardCounts = { ...DEFAULT_CARDS };
         rebuildDeckFromCounts();
         achievedLevels = [1];
-
-        // set reputation default to middle 0 and persist (new game requirement)
+        // default reputation mid 0 and persist (user asked for new-game behavior)
         repSelection = { row: 'mid', index: 0 };
         applyRepSelection(repSelection);
         persistAll();
       } else {
-        // loaded state: apply saved repSelection if present, otherwise default to mid and persist
+        // loaded state: make sure UI reflects it
+        buildRepRows();
         if(repSelection) applyRepSelection(repSelection);
         else {
           repSelection = { row: 'mid', index: 0 };
@@ -554,7 +586,7 @@
         }
       }
 
-      // ensure crystal counters reflect state
+      // reflect crystals and cards
       document.getElementById('red').textContent = crystals.red || 0;
       document.getElementById('blue').textContent = crystals.blue || 0;
       document.getElementById('green').textContent = crystals.green || 0;
@@ -569,7 +601,7 @@
 
       updateDeckCount(); updateDiscardUI(); updateFameUI(null); renderLevels();
 
-      // wiring
+      // input handlers
       fameInput.addEventListener('change', ()=> setFameOverride(fameInput.value));
       fameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); setFameOverride(fameInput.value); fameInput.blur(); } });
 
@@ -583,11 +615,11 @@
 
       document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
-      // periodic persistence to reduce chance of a race with refresh
+      // periodic persistence
       setInterval(persistAll, 2000);
     });
 
-    // debug helpers
+    // Expose debug helpers
     window._mk_save = saveState;
     window._mk_load = loadState;
     window._mk_newGame = newGame;
