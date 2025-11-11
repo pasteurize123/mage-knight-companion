@@ -60,11 +60,13 @@
     }
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
+    .card-sub { font-size:12px; color:var(--muted); margin-top:2px; }
     .card-body { font-size:14px; color:#e6eef6; }
+
+    /* Reputation track */
     .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; } /* centered current reputation */
     .stat-value { font-size:28px; font-weight:700; color:var(--accent); }
 
-    /* Reputation track */
     .rep-area { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
     .rep-controls-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 6px; }
     .thumb-btn {
@@ -128,6 +130,52 @@
       transform:scale(1.06);
       font-weight:800;
     }
+
+    /* Fame inputs */
+    .fame-grid {
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:center;
+    }
+    .fame-row {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      width:100%;
+      justify-content:center;
+    }
+    .fame-input {
+      width:110px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.01);
+      color:#eaf2ff;
+      font-size:16px;
+      text-align:center;
+      -moz-appearance: textfield;
+    }
+    .level-badge {
+      min-width:120px;
+      padding:8px 10px;
+      border-radius:10px;
+      background: rgba(255,255,255,0.02);
+      color:var(--muted);
+      text-align:center;
+      font-weight:700;
+      border:1px solid rgba(255,255,255,0.04);
+    }
+    .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
+    .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
+    .level-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
+    .level-badge.level-4 { color:#b3e6ff; border-color: rgba(179,230,255,0.08); }
+    .level-badge.level-5 { color:#d1f7c4; border-color: rgba(209,247,196,0.08); }
+    .level-badge.level-6 { color:#ffdcb3; border-color: rgba(255,220,179,0.08); }
+    .level-badge.level-7 { color:#ffb3b3; border-color: rgba(255,179,179,0.08); }
+    .level-badge.level-8 { color:#d6b3ff; border-color: rgba(214,179,255,0.08); }
+    .level-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
+    .level-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
 
     .dummy-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; color:#eaf2ff; }
     .controls-row { display:flex; gap:8px; justify-content:space-between; margin-top:8px; }
@@ -208,12 +256,13 @@
           </div>
         </div>
         <div class="card-body">
-          <div class="stat-row">
-            <div class="stat-value" id="fame-value">0</div>
-          </div>
-          <div style="display:flex; justify-content:center; gap:8px; margin-top:8px;">
-            <button id="fame-decrease">-</button>
-            <button id="fame-increase">+</button>
+          <div class="fame-grid">
+            <div class="fame-row">
+              <input id="fame-input" class="fame-input" type="number" inputmode="numeric" min="0" step="1" value="0" aria-label="Fame value" />
+            </div>
+            <div class="fame-row">
+              <div id="player-level" class="level-badge level-1" aria-live="polite">Player Level 1</div>
+            </div>
           </div>
         </div>
       </section>
@@ -267,11 +316,23 @@
 
   <script>
     (function () {
-      // Reputation track values (user provided)
+      // Reputation track values
       const REP_TRACK = ["X", "-5", "-3", "-2", "-1", "-1", "0", "0", "0", "+1", "+1", "+2", "+2", "+3", "+5"];
+      const DEFAULT_REP_INDEX = 7; // middle 0
 
-      // default to the middle 0 (there are three zeros at indices 6,7,8 -> choose center index 7)
-      const DEFAULT_REP_INDEX = 7;
+      // Fame to Level ranges
+      const LEVEL_RANGES = [
+        { level: 1, min: 0, max: 2 },
+        { level: 2, min: 3, max: 7 },
+        { level: 3, min: 8, max: 14 },
+        { level: 4, min: 15, max: 23 },
+        { level: 5, min: 24, max: 34 },
+        { level: 6, min: 35, max: 47 },
+        { level: 7, min: 48, max: 62 },
+        { level: 8, min: 63, max: 79 },
+        { level: 9, min: 80, max: 98 },
+        { level: 10, min: 99, max: 119 }
+      ];
 
       const state = {
         repIndex: DEFAULT_REP_INDEX,
@@ -285,7 +346,8 @@
         repTrackContainer: document.getElementById('rep-track'),
         repUp: document.getElementById('rep-up'),
         repDown: document.getElementById('rep-down'),
-        fameValue: document.getElementById('fame-value'),
+        fameInput: document.getElementById('fame-input'),
+        playerLevel: document.getElementById('player-level'),
         dummyHand: document.getElementById('dummy-hand'),
         dummyWounds: document.getElementById('dummy-wounds'),
         dummyLast: document.getElementById('dummy-last'),
@@ -299,12 +361,21 @@
         if (label.startsWith('+')) return 'positive';
         return '';
       }
-
       function colorForLabel(label) {
         if (label === "0") return getComputedStyle(document.documentElement).getPropertyValue('--yellow').trim() || '#f6d365';
         if (label === "X" || label.startsWith('-')) return getComputedStyle(document.documentElement).getPropertyValue('--red').trim() || '#d9534f';
         if (label.startsWith('+')) return getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#c7924f';
         return getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#9aa4b2';
+      }
+
+      function getLevelForFame(fame) {
+        // clamp fame to non-negative
+        const f = Math.max(0, Math.floor(Number(fame) || 0));
+        // find highest matching range; if beyond defined, pick highest level
+        for (let r of LEVEL_RANGES) {
+          if (f >= r.min && f <= r.max) return r.level;
+        }
+        return LEVEL_RANGES[LEVEL_RANGES.length - 1].level;
       }
 
       function buildRepTrack() {
@@ -329,32 +400,36 @@
       function renderReputation() {
         const label = REP_TRACK[state.repIndex];
         el.reputationValue.textContent = label;
-        // set numeric display color to match label
         el.reputationValue.style.color = colorForLabel(label);
-
         const steps = el.repTrackContainer.querySelectorAll('.rep-step');
         steps.forEach((s, i) => {
           s.classList.toggle('active', i === state.repIndex);
         });
         const active = steps[state.repIndex];
         if (active && typeof active.scrollIntoView === 'function') {
-          // center the active step in the track
           active.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
         }
       }
 
-      function renderFame() { el.fameValue.textContent = state.fame; }
+      function renderFameAndLevel() {
+        // update input value if different
+        el.fameInput.value = state.fame;
+        const level = getLevelForFame(state.fame);
+        el.playerLevel.textContent = `Player Level ${level}`;
+        // update badge class
+        el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
+      }
+
       function renderDummy() {
         el.dummyHand.textContent = state.dummy.hand;
         el.dummyWounds.textContent = state.dummy.wounds;
         el.dummyLast.textContent = state.dummy.lastAction;
         el.dummySub.textContent = state.dummy.name;
       }
-      function renderVolkare() { el.volkareText.value = state.volkareNotes; }
 
       function clamp(n, min=0, max=999) { return Math.max(min, Math.min(max, n)); }
 
-      // Up / Down buttons move one step
+      // Reputation controls
       el.repUp.addEventListener('click', () => {
         state.repIndex = clamp(state.repIndex + 1, 0, REP_TRACK.length - 1);
         renderReputation();
@@ -366,9 +441,15 @@
         saveToStorage();
       });
 
-      // Fame controls
-      document.getElementById('fame-decrease').addEventListener('click', () => { state.fame = clamp(state.fame - 1, 0); renderFame(); saveToStorage(); });
-      document.getElementById('fame-increase').addEventListener('click', () => { state.fame = clamp(state.fame + 1, 0); renderFame(); saveToStorage(); });
+      // Fame input binding
+      el.fameInput.addEventListener('input', (e) => {
+        const raw = e.target.value;
+        // parse integer, allow blank => 0
+        const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw) || 0)) : 0;
+        state.fame = parsed;
+        renderFameAndLevel();
+        saveToStorage();
+      });
 
       // Dummy controls
       document.getElementById('play-1').addEventListener('click', () => {
@@ -411,7 +492,7 @@
       });
 
       // persistence
-      const STORAGE_KEY = 'mk_companion_v1_reptrack';
+      const STORAGE_KEY = 'mk_companion_v1_reptrack_fame';
       function saveToStorage() {
         try {
           const payload = {
@@ -438,20 +519,27 @@
       // init
       buildRepTrack();
       loadFromStorage();
-      // enforce default middle zero only if storage didn't provide a repIndex
       if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
+      if (typeof state.fame !== 'number') state.fame = 0;
       renderReputation();
-      renderFame();
+      renderFameAndLevel();
       renderDummy();
-      renderVolkare();
+      // populate notes
+      document.getElementById('volkare-text').value = state.volkareNotes;
 
-      // autosave every 2s
+      // autosave
       setInterval(saveToStorage, 2000);
 
-      // keyboard shortcuts for desktop testing (left/right arrows)
+      // keyboard shortcuts for desktop testing
       window.addEventListener('keydown', (ev) => {
         if (ev.key === 'ArrowLeft') el.repDown.click();
         if (ev.key === 'ArrowRight') el.repUp.click();
+        if (ev.key === 'F' || ev.key === 'f') {
+          // increment fame quick shortcut
+          state.fame = clamp((state.fame || 0) + 1, 0);
+          renderFameAndLevel();
+          saveToStorage();
+        }
       });
     })();
   </script>
