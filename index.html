@@ -119,6 +119,37 @@
         </div>
       </section>
 
+      <!-- Dummy Player -->
+      <section class="card" id="dummy-card" aria-labelledby="dummy-title">
+        <div class="card-header"><div><h2 id="dummy-title" class="card-title">Dummy Player</h2><div class="card-sub" id="dummy-sub">Dummy</div></div></div>
+        <div class="card-body">
+          <div class="dummy-grid">
+            <div>Hand: <strong id="dummy-hand">5</strong></div>
+            <div>Wounds: <strong id="dummy-wounds">0</strong></div>
+            <div style="grid-column:1 / -1">Last: <em id="dummy-last">Idle</em></div>
+          </div>
+          <div class="controls-row" role="group" aria-label="Dummy controls">
+            <button id="play-1">Play 1</button>
+            <button id="draw-1">Draw 1</button>
+            <button id="auto-action" class="primary">Auto Action</button>
+          </div>
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <button id="heal-1">Heal 1</button>
+            <button id="reset-dummy">Reset Dummy</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- General Volkare -->
+      <section class="card" id="volkare-card" aria-labelledby="volkare-title">
+        <div class="card-header"><div><h2 id="volkare-title" class="card-title">General Volkare</h2><div class="card-sub">Notes / reminders</div></div></div>
+        <div class="card-body"><textarea id="volkare-text" class="volkare-text">General Volkare: Track story events or reminders here.</textarea></div>
+      </section>
+
+      <footer class="footer"><small>Phone layout • Lightweight companion</small></footer>
+    </div>
+  </div>
+
   <script>
     (function () {
       const REP_TRACK = ["X","-5","-3","-2","-1","-1","0","0","0","+1","+1","+2","+2","+3","+5"];
