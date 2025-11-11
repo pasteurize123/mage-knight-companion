@@ -15,6 +15,8 @@
       --phone-width:380px;
       --track-bg: rgba(255,255,255,0.03);
       --track-active: rgba(199,146,79,0.16);
+      --gold:#c7924f;
+      --red:#d9534f;
     }
     * { box-sizing: border-box; }
     html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
@@ -57,33 +59,48 @@
     }
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
-    .card-sub { font-size:12px; color:var(--muted); margin-top:2px; }
     .card-body { font-size:14px; color:#e6eef6; }
     .stat-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
     .stat-value { font-size:28px; font-weight:700; color:var(--accent); }
-    .stat-controls button {
-      background:var(--glass);
-      color:#eaf2ff;
-      border:1px solid rgba(255,255,255,0.03);
-      padding:6px 10px;
-      border-radius:8px;
-      margin-left:6px;
-      cursor:pointer;
-    }
-    .stat-controls { display:flex; align-items:center; }
-    .small { color:var(--muted); font-size:12px; margin-top:8px; }
 
     /* Reputation track */
+    .rep-area { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
+    .rep-controls-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 6px; }
+    .thumb-btn {
+      width:44px;
+      height:44px;
+      border-radius:10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(255,255,255,0.04);
+      background:var(--glass);
+      color:#fff;
+      cursor:pointer;
+      font-size:18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    }
+    .thumb-btn:active { transform:translateY(1px); }
+    .thumb-up {
+      background: linear-gradient(180deg, rgba(199,146,79,0.14), rgba(199,146,79,0.06));
+      color: #fff;
+      border: 1px solid rgba(199,146,79,0.25);
+    }
+    .thumb-down {
+      background: linear-gradient(180deg, rgba(217,83,79,0.12), rgba(217,83,79,0.06));
+      color: #fff;
+      border: 1px solid rgba(217,83,79,0.22);
+    }
     .rep-track {
       display:flex;
       gap:6px;
       align-items:center;
-      margin-top:10px;
       overflow:auto;
-      padding-bottom:6px;
+      padding:6px 4px;
+      border-radius:10px;
     }
     .rep-step {
-      min-width:40px;
+      min-width:44px;
       padding:8px 6px;
       border-radius:8px;
       background:var(--track-bg);
@@ -93,21 +110,14 @@
       font-size:13px;
       cursor:pointer;
       flex-shrink:0;
+      user-select:none;
     }
     .rep-step.active {
       background:var(--track-active);
       color:#ffdcb3;
       border:1px solid rgba(199,146,79,0.25);
       font-weight:700;
-    }
-    .rep-controls { display:flex; gap:8px; margin-top:8px; }
-    .rep-controls button {
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.04);
-      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
-      color:#eaf2ff;
-      cursor:pointer;
+      transform:scale(1.04);
     }
 
     .dummy-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; color:#eaf2ff; }
@@ -144,8 +154,6 @@
       color:var(--muted);
       font-size:12px;
     }
-    .row { display:flex; gap:8px; align-items:center; }
-    .chip { background: rgba(255,255,255,0.02); padding:6px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.02); font-size:13px; color:var(--muted); }
     @media (max-width:400px) {
       :root { --phone-width:94vw; }
       .topbar { left:50%; transform:translateX(-50%); width:94vw; }
@@ -164,30 +172,22 @@
         <div class="card-header">
           <div>
             <h2 id="rep-title" class="card-title">Reputation</h2>
-            <div class="card-sub">Influence track</div>
           </div>
         </div>
         <div class="card-body">
           <div class="stat-row">
-            <div class="row">
-              <div class="chip">Track pos</div>
-              <div style="width:12px"></div>
-              <div class="stat-value" id="reputation-value">—</div>
-            </div>
-            <div class="stat-controls" aria-hidden="true">
-              <button id="rep-left">◀</button>
-              <button id="rep-right">▶</button>
-            </div>
+            <div class="stat-value" id="reputation-value">—</div>
           </div>
 
-          <div class="rep-track" id="rep-track" role="list"></div>
+          <div class="rep-area">
+            <div class="rep-controls-row" aria-hidden="false">
+              <button id="rep-down" class="thumb-btn thumb-down" title="Decrease reputation one step" aria-label="Thumbs down to decrease reputation">👎</button>
+              <div style="flex:1"></div>
+              <button id="rep-up" class="thumb-btn thumb-up" title="Increase reputation one step" aria-label="Thumbs up to increase reputation">👍</button>
+            </div>
 
-          <div class="rep-controls">
-            <button id="rep-to-start">Go to start</button>
-            <button id="rep-to-end">Go to end</button>
+            <div class="rep-track" id="rep-track" role="list" aria-label="Reputation track"></div>
           </div>
-
-          <div class="small">Move along the reputation track to reflect your current standing. The leftmost step shows X (unavailable).</div>
         </div>
       </section>
 
@@ -196,7 +196,6 @@
         <div class="card-header">
           <div>
             <h2 id="fame-title" class="card-title">Fame</h2>
-            <div class="card-sub">Progress to level up</div>
           </div>
         </div>
         <div class="card-body">
@@ -207,7 +206,6 @@
               <button id="fame-increase">+</button>
             </div>
           </div>
-          <div class="small">Accumulate fame to reach the next level.</div>
         </div>
       </section>
 
@@ -249,7 +247,6 @@
         </div>
         <div class="card-body">
           <textarea id="volkare-text" class="volkare-text">General Volkare: Track story events or reminders here.</textarea>
-          <div class="small">Save story notes or special rules for this scenario.</div>
         </div>
       </section>
 
@@ -261,22 +258,20 @@
 
   <script>
     (function () {
-      // Reputation track values provided by the user
-      // Represented as strings to preserve the "X" and plus signs
       const REP_TRACK = ["X", "-5", "-3", "-2", "-1", "-1", "0", "0", "0", "+1", "+1", "+2", "+2", "+3", "+5"];
 
-      // state
       const state = {
-        repIndex: 6, // default: middle 0 (index 6 corresponds to first "0"); choose a reasonable default
+        repIndex: 6,
         fame: 0,
         dummy: { name:'Dummy Player', hand:5, wounds:0, lastAction:'Idle' },
         volkareNotes: 'General Volkare: Track story events or reminders here.'
       };
 
-      // elements
       const el = {
         reputationValue: document.getElementById('reputation-value'),
         repTrackContainer: document.getElementById('rep-track'),
+        repUp: document.getElementById('rep-up'),
+        repDown: document.getElementById('rep-down'),
         fameValue: document.getElementById('fame-value'),
         dummyHand: document.getElementById('dummy-hand'),
         dummyWounds: document.getElementById('dummy-wounds'),
@@ -285,7 +280,6 @@
         volkareText: document.getElementById('volkare-text')
       };
 
-      // build track UI
       function buildRepTrack() {
         el.repTrackContainer.innerHTML = '';
         REP_TRACK.forEach((label, idx) => {
@@ -293,7 +287,7 @@
           step.type = 'button';
           step.className = 'rep-step';
           step.setAttribute('role','listitem');
-          step.setAttribute('aria-label', `Reputation step ${idx} value ${label}`);
+          step.setAttribute('aria-label', `Reputation ${label}`);
           step.textContent = label;
           step.addEventListener('click', () => {
             state.repIndex = idx;
@@ -304,17 +298,13 @@
         });
       }
 
-      // render functions
       function renderReputation() {
-        // update numeric display (show label)
         const label = REP_TRACK[state.repIndex];
-        el.reputationValue.textContent = label === "X" ? "X" : label;
-        // update active class on steps
+        el.reputationValue.textContent = label;
         const steps = el.repTrackContainer.querySelectorAll('.rep-step');
         steps.forEach((s, i) => {
-          if (i === state.repIndex) s.classList.add('active'); else s.classList.remove('active');
+          s.classList.toggle('active', i === state.repIndex);
         });
-        // ensure active step is visible
         const active = steps[state.repIndex];
         if (active && typeof active.scrollIntoView === 'function') {
           active.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
@@ -330,25 +320,17 @@
       }
       function renderVolkare() { el.volkareText.value = state.volkareNotes; }
 
-      // helpers
       function clamp(n, min=0, max=999) { return Math.max(min, Math.min(max, n)); }
 
-      // controls binding
-      document.getElementById('rep-left').addEventListener('click', () => {
-        state.repIndex = clamp(state.repIndex - 1, 0, REP_TRACK.length - 1);
-        renderReputation();
-        saveToStorage();
-      });
-      document.getElementById('rep-right').addEventListener('click', () => {
+      el.repUp.addEventListener('click', () => {
         state.repIndex = clamp(state.repIndex + 1, 0, REP_TRACK.length - 1);
         renderReputation();
         saveToStorage();
       });
-      document.getElementById('rep-to-start').addEventListener('click', () => {
-        state.repIndex = 0; renderReputation(); saveToStorage();
-      });
-      document.getElementById('rep-to-end').addEventListener('click', () => {
-        state.repIndex = REP_TRACK.length - 1; renderReputation(); saveToStorage();
+      el.repDown.addEventListener('click', () => {
+        state.repIndex = clamp(state.repIndex - 1, 0, REP_TRACK.length - 1);
+        renderReputation();
+        saveToStorage();
       });
 
       document.getElementById('fame-decrease').addEventListener('click', () => { state.fame = clamp(state.fame - 1, 0); renderFame(); saveToStorage(); });
@@ -388,12 +370,10 @@
         renderDummy(); saveToStorage();
       });
 
-      // notes binding
       el.volkareText.addEventListener('input', (e) => {
         state.volkareNotes = e.target.value;
       });
 
-      // persistence
       const STORAGE_KEY = 'mk_companion_v1_reptrack';
       function saveToStorage() {
         try {
@@ -418,7 +398,6 @@
         } catch (e) {}
       }
 
-      // init
       buildRepTrack();
       loadFromStorage();
       renderReputation();
@@ -426,15 +405,11 @@
       renderDummy();
       renderVolkare();
 
-      // autosave every 2s
       setInterval(saveToStorage, 2000);
 
-      // keyboard shortcuts for desktop testing (left/right arrows to move rep track)
       window.addEventListener('keydown', (ev) => {
-        if (ev.key === 'ArrowLeft') { document.getElementById('rep-left').click(); }
-        if (ev.key === 'ArrowRight') { document.getElementById('rep-right').click(); }
-        if (ev.key === 'r') { state.fame = clamp(state.fame + 1); renderFame(); saveToStorage(); }
-        if (ev.key === 'd') { document.getElementById('auto-action').click(); }
+        if (ev.key === 'ArrowLeft') { el.repDown.click(); }
+        if (ev.key === 'ArrowRight') { el.repUp.click(); }
       });
     })();
   </script>
