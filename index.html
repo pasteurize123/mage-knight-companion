@@ -51,7 +51,8 @@
     .fame-input { width:110px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance:textfield; }
     .fame-input[readonly] { background: rgba(255,255,255,0.02); cursor:default; color:#eaf2ff; }
     .fame-input.editing { outline: 2px solid rgba(199,146,79,0.18); }
-    .level-badge { position:relative; min-width:200px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
+    .badges-row { display:flex; gap:8px; align-items:center; justify-content:center; width:100%; }
+    .level-badge, .fame-badge { position:relative; min-width:140px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
     .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
     .level-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
@@ -62,10 +63,20 @@
     .level-badge.level-8 { color:#d6b3ff; border-color: rgba(214,179,255,0.08); }
     .level-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
     .level-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
+    .fame-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
+    .fame-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
+    .fame-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
+    .fame-badge.level-4 { color:#b3e6ff; border-color: rgba(179,230,255,0.08); }
+    .fame-badge.level-5 { color:#d1f7c4; border-color: rgba(209,247,196,0.08); }
+    .fame-badge.level-6 { color:#ffdcb3; border-color: rgba(255,220,179,0.08); }
+    .fame-badge.level-7 { color:#ffb3b3; border-color: rgba(255,179,179,0.08); }
+    .fame-badge.level-8 { color:#d6b3ff; border-color: rgba(214,179,255,0.08); }
+    .fame-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
+    .fame-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
 
     /* tooltip / popup: single-line formatting for rewards */
-    .level-tooltip { position: absolute; top: -6px; left: 50%; transform: translate(-50%, -100%); min-width:220px; max-width:320px; background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95)); border-radius:10px; padding:10px; display:none; z-index:10; border:1px solid rgba(255,255,255,0.04); }
-    .level-tooltip.visible { display:block; }
+    .level-tooltip, .fame-tooltip { position: absolute; top: -6px; left: 50%; transform: translate(-50%, -100%); min-width:220px; max-width:320px; background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95)); border-radius:10px; padding:10px; display:none; z-index:10; border:1px solid rgba(255,255,255,0.04); }
+    .level-tooltip.visible, .fame-tooltip.visible { display:block; }
     .tooltip-list { display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; padding-right:6px; }
     .tooltip-item { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color: var(--muted); font-weight:600; justify-content:space-between; }
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
@@ -118,7 +129,16 @@
             </div>
 
             <div class="fame-row" style="position:relative;">
-              <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Level 1</div>
+              <div class="badges-row">
+                <div id="fame-badge" class="fame-badge level-1" role="button" aria-pressed="false" tabindex="0">Fame</div>
+                <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Level 1</div>
+              </div>
+
+              <div id="fame-tooltip" class="fame-tooltip" role="dialog" aria-hidden="true">
+                <div style="font-weight:800; margin-bottom:6px;">Fame Ranges</div>
+                <div class="tooltip-list" id="fame-tooltip-list"></div>
+              </div>
+
               <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
                 <div style="font-weight:800; margin-bottom:6px;">Level Ups</div>
                 <div class="tooltip-list" id="tooltip-list"></div>
@@ -183,8 +203,11 @@
         addFameInput: document.getElementById('add-fame-input'),
         fameInput: document.getElementById('fame-input'),
         playerLevel: document.getElementById('player-level'),
+        fameBadge: document.getElementById('fame-badge'),
         tooltip: document.getElementById('level-tooltip'),
         tooltipList: document.getElementById('tooltip-list'),
+        fameTooltip: document.getElementById('fame-tooltip'),
+        fameTooltipList: document.getElementById('fame-tooltip-list'),
         newGameBtn: document.getElementById('new-game')
       };
 
@@ -236,7 +259,9 @@
         el.fameInput.value = state.fame;
         const level = state.previousLevel; // only committed level shown
         el.playerLevel.textContent = `Level ${level}`;
+        // update both badges so they reflect current level color/style
         el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
+        el.fameBadge.className = 'fame-badge level-' + Math.max(1, Math.min(10, level));
         // make the fame number match the current level color
         try {
           const lvlColor = getComputedStyle(el.playerLevel).color;
@@ -273,7 +298,7 @@
         }
       }
 
-      // toggle full list (press badge)
+      // toggle full list for level badge (press)
       function buildFullTooltip(level) {
         el.tooltipList.innerHTML = '';
         for (let l = 1; l <= level; l++) {
@@ -295,6 +320,31 @@
         el.tooltip.classList.remove('visible');
         el.tooltip.setAttribute('aria-hidden','true');
         el.playerLevel.setAttribute('aria-pressed','false');
+      }
+
+      // Fame ranges tooltip: list all LEVEL_RANGES
+      function buildFameRangesTooltip() {
+        el.fameTooltipList.innerHTML = '';
+        for (let r of LEVEL_RANGES) {
+          const rangeText = (r.min === r.max) ? String(r.min) : `${r.min}-${r.max}`;
+          el.fameTooltipList.appendChild(createTooltipItem(r.level, rangeText));
+        }
+      }
+      function toggleFameTooltip() {
+        const isVisible = el.fameTooltip.classList.contains('visible');
+        if (isVisible) {
+          closeFameTooltip();
+        } else {
+          buildFameRangesTooltip();
+          el.fameTooltip.classList.add('visible');
+          el.fameTooltip.setAttribute('aria-hidden','false');
+          el.fameBadge.setAttribute('aria-pressed','true');
+        }
+      }
+      function closeFameTooltip() {
+        el.fameTooltip.classList.remove('visible');
+        el.fameTooltip.setAttribute('aria-hidden','true');
+        el.fameBadge.setAttribute('aria-pressed','false');
       }
 
       function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
@@ -345,15 +395,23 @@
       // Player level badge toggles full list (press)
       el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
 
-      // keyboard accessibility for badge
+      // fame badge toggles fame ranges list
+      el.fameBadge.addEventListener('click', (e) => { e.stopPropagation(); toggleFameTooltip(); });
+
+      // keyboard accessibility for badges
       el.playerLevel.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); }
       });
+      el.fameBadge.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFameTooltip(); }
+      });
 
-      // close tooltip when tapping outside (applies to gained-level popup and full list)
+      // close tooltips when tapping outside (applies to gained-level popup and full list and fame ranges)
       document.addEventListener('click', (e) => {
-        const inside = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.addFameInput;
-        if (!inside) closeTooltip();
+        const insideLevel = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.addFameInput;
+        const insideFame = e.target === el.fameBadge || el.fameBadge.contains(e.target) || el.fameTooltip.contains(e.target) || e.target === el.addFameInput;
+        if (!insideLevel) closeTooltip();
+        if (!insideFame) closeFameTooltip();
       });
 
       // New Game handler: reset app state to defaults and persist
@@ -364,6 +422,7 @@
         state.previousLevel = getLevelForFame(0);
         // close tooltips
         closeTooltip();
+        closeFameTooltip();
         // clear inputs
         el.addFameInput.value = '';
         // re-render UI
