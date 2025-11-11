@@ -118,6 +118,7 @@
       </div>
     </section>
 
+    <!-- Original Dummy Player section -->
     <section class="panel" aria-labelledby="dummy-title">
       <div class="panel-inner">
         <h2 id="dummy-title">Dummy Player</h2>
@@ -181,6 +182,75 @@
           <div id="discard-output" class="output">Discard pile is empty.</div>
           <div style="margin-top:8px;display:flex;justify-content:center">
             <button id="reshuffle-btn" class="smallbtn">Reshuffle Deck</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Copied section for General Volkare (IDs suffixed with -gv to avoid conflicts) -->
+    <section class="panel" aria-labelledby="gv-title">
+      <div class="panel-inner">
+        <h2 id="gv-title">General Volkare</h2>
+
+        <div class="row" style="gap:18px">
+          <div>
+            <h3 style="margin:0 0 6px 0;font-size:1rem">Crystals</h3>
+            <div class="row" style="align-items:center">
+              <div class="mini-group icon-label">🔴 <strong id="red-gv">0</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-crystal="red" data-act="inc" disabled>+</button><button class="smallbtn" data-crystal="red" data-act="dec" disabled>−</button></div>
+
+              <div style="width:12px"></div>
+
+              <div class="mini-group icon-label">🔵 <strong id="blue-gv">0</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-crystal="blue" data-act="inc" disabled>+</button><button class="smallbtn" data-crystal="blue" data-act="dec" disabled>−</button></div>
+
+              <div style="width:12px"></div>
+
+              <div class="mini-group icon-label">🟢 <strong id="green-gv">0</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-crystal="green" data-act="inc" disabled>+</button><button class="smallbtn" data-crystal="green" data-act="dec" disabled>−</button></div>
+
+              <div style="width:12px"></div>
+
+              <div class="mini-group icon-label">⚪ <strong id="white-gv">0</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-crystal="white" data-act="inc" disabled>+</button><button class="smallbtn" data-crystal="white" data-act="dec" disabled>−</button></div>
+            </div>
+          </div>
+
+          <div>
+            <h3 style="margin:0 0 6px 0;font-size:1rem">Cards</h3>
+            <div class="row" style="align-items:center">
+              <div class="mini-group icon-label">🔴 <strong id="card-red-gv">4</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-color="Red" data-act="inc" disabled>+</button><button class="smallbtn" data-color="Red" data-act="dec" disabled>−</button></div>
+
+              <div style="width:12px"></div>
+
+              <div class="mini-group icon-label">🔵 <strong id="card-blue-gv">4</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-color="Blue" data-act="inc" disabled>+</button><button class="smallbtn" data-color="Blue" data-act="dec" disabled>−</button></div>
+
+              <div style="width:12px"></div>
+
+              <div class="mini-group icon-label">🟢 <strong id="card-green-gv">4</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-color="Green" data-act="inc" disabled>+</button><button class="smallbtn" data-color="Green" data-act="dec" disabled>−</button></div>
+
+              <div style="width:12px"></div>
+
+              <div class="mini-group icon-label">⚪ <strong id="card-white-gv">4</strong></div>
+              <div class="mini-group"><button class="smallbtn" data-color="White" data-act="inc" disabled>+</button><button class="smallbtn" data-color="White" data-act="dec" disabled>−</button></div>
+            </div>
+
+            <div style="margin-top:8px" class="muted">Cards in deck: <strong id="deck-count-gv">0</strong></div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px" class="row">
+          <button id="draw-btn-gv" class="smallbtn" disabled>Draw</button>
+          <div id="dummy-output-gv" class="output" style="flex:1;margin-left:8px">Drawn symbols appear here</div>
+        </div>
+
+        <div style="margin-top:8px">
+          <div id="discard-output-gv" class="output">Discard pile is empty.</div>
+          <div style="margin-top:8px;display:flex;justify-content:center">
+            <button id="reshuffle-btn-gv" class="smallbtn" disabled>Reshuffle Deck</button>
           </div>
         </div>
       </div>
@@ -461,7 +531,7 @@
     function reshuffleDeck(){ if(!discardPile||discardPile.length===0){ dummyOutput.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } dummyDeck.push(...discardPile); discardPile = []; shuffle(dummyDeck); updateDeckCount(); updateDiscardUI(); endRoundFlag=false; drawBtn.textContent='Draw'; dummyOutput.textContent='Deck reshuffled from discard.'; persistAll(); }
 
     // crystals & cards
-    function changeCrystal(color,delta){ crystals[color] = Math.max(0,(crystals[color]||0)+delta); document.getElementById(color).textContent = crystals[color]; persistAll(); }
+    function changeCrystal(color,delta){ crystals[color] = Math.max(0,(crystals[color]||0)+delta); document.getElementById('red').textContent = crystals.red; document.getElementById('blue').textContent = crystals.blue; document.getElementById('green').textContent = crystals.green; document.getElementById('white').textContent = crystals.white; persistAll(); }
     function changeCard(color,delta){
       cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta);
       document.getElementById(`card-${color.toLowerCase()}`).textContent = cardCounts[color];
@@ -494,6 +564,11 @@
       document.getElementById('blue').textContent = crystals.blue;
       document.getElementById('green').textContent = crystals.green;
       document.getElementById('white').textContent = crystals.white;
+      // reflect to GV readouts visually (kept in sync but GV controls are disabled)
+      document.getElementById('red-gv').textContent = crystals.red;
+      document.getElementById('blue-gv').textContent = crystals.blue;
+      document.getElementById('green-gv').textContent = crystals.green;
+      document.getElementById('white-gv').textContent = crystals.white;
       persistAll();
     }
 
@@ -522,9 +597,20 @@
       document.getElementById('card-green').textContent = cardCounts.Green;
       document.getElementById('card-white').textContent = cardCounts.White;
 
+      // update GV card counts visually to match (controls disabled)
+      document.getElementById('card-red-gv').textContent = cardCounts.Red;
+      document.getElementById('card-blue-gv').textContent = cardCounts.Blue;
+      document.getElementById('card-green-gv').textContent = cardCounts.Green;
+      document.getElementById('card-white-gv').textContent = cardCounts.White;
+
       updateDeckCount(); updateDiscardUI();
 
       endRoundFlag=false; drawBtn.textContent='Draw'; dummyOutput.textContent='Drawn symbols appear here';
+      // GV outputs mirror main dummy player visuals
+      document.getElementById('dummy-output-gv').textContent = dummyOutput.textContent;
+      document.getElementById('discard-output-gv').textContent = discardOutput.textContent;
+      document.getElementById('deck-count-gv').textContent = document.getElementById('deck-count').textContent;
+
       fame = 0; updateFameUI(null); renderLevels(); persistAll();
     }
 
@@ -564,6 +650,21 @@
       if(e.key === 'Escape'){ levelsToggleBtn.setAttribute('aria-expanded','false'); levelsPanel.setAttribute('aria-hidden','true'); levelsToggleBtn.focus(); }
     });
 
+    // When key state for main dummy changes, mirror readable GV outputs (visual sync)
+    const mirrorGV = () => {
+      document.getElementById('red-gv').textContent = crystals.red;
+      document.getElementById('blue-gv').textContent = crystals.blue;
+      document.getElementById('green-gv').textContent = crystals.green;
+      document.getElementById('white-gv').textContent = crystals.white;
+      document.getElementById('card-red-gv').textContent = cardCounts.Red;
+      document.getElementById('card-blue-gv').textContent = cardCounts.Blue;
+      document.getElementById('card-green-gv').textContent = cardCounts.Green;
+      document.getElementById('card-white-gv').textContent = cardCounts.White;
+      document.getElementById('deck-count-gv').textContent = document.getElementById('deck-count').textContent;
+      document.getElementById('dummy-output-gv').textContent = document.getElementById('dummy-output').textContent;
+      document.getElementById('discard-output-gv').textContent = document.getElementById('discard-output').textContent;
+    };
+
     // Init wiring
     window.addEventListener('load', ()=>{
       buildRepRows();
@@ -596,25 +697,46 @@
       document.getElementById('green').textContent = crystals.green || 0;
       document.getElementById('white').textContent = crystals.white || 0;
 
+      // copy to GV readouts
+      document.getElementById('red-gv').textContent = crystals.red || 0;
+      document.getElementById('blue-gv').textContent = crystals.blue || 0;
+      document.getElementById('green-gv').textContent = crystals.green || 0;
+      document.getElementById('white-gv').textContent = crystals.white || 0;
+
       document.getElementById('card-red').textContent = cardCounts.Red;
       document.getElementById('card-blue').textContent = cardCounts.Blue;
       document.getElementById('card-green').textContent = cardCounts.Green;
       document.getElementById('card-white').textContent = cardCounts.White;
 
+      // GV card counts mirror main
+      document.getElementById('card-red-gv').textContent = cardCounts.Red;
+      document.getElementById('card-blue-gv').textContent = cardCounts.Blue;
+      document.getElementById('card-green-gv').textContent = cardCounts.Green;
+      document.getElementById('card-white-gv').textContent = cardCounts.White;
+
       if(!Array.isArray(dummyDeck) || dummyDeck.length === 0) rebuildDeckFromCounts();
 
       updateDeckCount(); updateDiscardUI(); updateFameUI(null); renderLevels();
+      mirrorGV();
 
       // input handlers
       fameInput.addEventListener('change', ()=> setFameOverride(fameInput.value));
       fameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); setFameOverride(fameInput.value); fameInput.blur(); } });
 
       document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=> addFame(Number(btn.dataset.inc||0))));
-      document.querySelectorAll('[data-crystal]').forEach(b => b.addEventListener('click', ()=>{ const color=b.dataset.crystal; const act=b.dataset.act; changeCrystal(color, act==='inc'?1:-1); }));
-      document.querySelectorAll('.card-btn').forEach(b => b.addEventListener('click', ()=>{ const color=b.dataset.color; const act=b.dataset.act; changeCard(color, act==='inc'?1:-1); }));
+      document.querySelectorAll('[data-crystal]').forEach(b => {
+        b.addEventListener('click', ()=>{
+          const color = b.dataset.crystal;
+          const act = b.dataset.act;
+          changeCrystal(color, act==='inc'?1:-1);
+          // update GV visuals after mutation
+          mirrorGV();
+        });
+      });
+      document.querySelectorAll('.card-btn').forEach(b => b.addEventListener('click', ()=>{ const color=b.dataset.color; const act=b.dataset.act; changeCard(color, act==='inc'?1:-1); mirrorGV(); }));
 
-      drawBtn.addEventListener('click', (e)=>{ if(endRoundFlag && drawBtn.textContent === 'End Round'){ openEndRoundModal(); return; } onDrawClick(); });
-      reshuffleBtn.addEventListener('click', reshuffleDeck);
+      drawBtn.addEventListener('click', (e)=>{ if(endRoundFlag && drawBtn.textContent === 'End Round'){ openEndRoundModal(); return; } onDrawClick(); mirrorGV(); });
+      reshuffleBtn.addEventListener('click', ()=>{ reshuffleDeck(); mirrorGV(); });
       newGameBtn.addEventListener('click', newGame);
 
       document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
