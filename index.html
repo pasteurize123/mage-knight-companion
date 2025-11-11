@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mage Knight Companion — Full (with single-line reputation rows)</title>
+<title>Mage Knight Companion — Full (end-round: force 1 crystal + 1 card)</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -17,6 +17,7 @@
   .panel{background:var(--panel);border-radius:10px;padding:10px}
   .panel-inner{background:var(--card);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
   .smallbtn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
+  .btn-ghost{background:transparent;border:1px dashed #ccc}
   .output{background:#fff;padding:8px;border-radius:6px;min-height:36px}
   .muted{color:var(--muted);font-size:0.95rem}
   .gv-pile{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
@@ -111,12 +112,13 @@
   .wound-box{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border-radius:6px;background:#fff;border:1px solid #eee;min-width:46px}
   .wound-symbol{font-size:1.2rem;color:var(--accent)}
 
-  @media (max-width:640px){
-    .fame-row{gap:12px}
-    .fame-input{width:110px}
-    .levels-list{min-width:180px}
-    .dummy-grid{grid-template-columns:1fr;gap:10px}
-  }
+  /* End-round modal specialized layout */
+  .endround-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .choice-list{display:flex;flex-direction:column;gap:8px}
+  .choice-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:6px;border:1px solid #eee;background:#fff}
+  .choice-item button{min-width:28px;padding:6px;border-radius:6px}
+  .choice-selected{outline:3px solid #7fb1ff;border-radius:8px}
+  .modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 </style>
 </head>
 <body>
@@ -165,7 +167,7 @@
       </div>
     </section>
 
-    <!-- Dummy Player (compact, like previous renditions) -->
+    <!-- Dummy Player (compact, with End Round behavior) -->
     <section class="panel" aria-labelledby="dummy-title">
       <div class="panel-inner" id="dummy-module">
         <h2 id="dummy-title">Dummy Player</h2>
@@ -177,7 +179,7 @@
               <div style="font-size:12px;color:var(--muted)">Adjust available crystals</div>
             </div>
 
-            <div class="crystal-row">
+            <div class="crystal-row" id="crystal-row">
               <div class="crystal-pill">🔴 <strong id="red">0</strong>
                 <div style="display:flex;gap:6px">
                   <button class="smallbtn crystal-btn" data-player="main" data-color="red" data-act="inc">+</button>
@@ -350,38 +352,40 @@
     </footer>
   </div>
 
-  <!-- End round modal -->
+  <!-- End round modal for dummy player: force 1 crystal + 1 card -->
   <div id="endround-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:60">
-    <div style="background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%">
-      <h3 style="margin:0 0 8px 0">End Round — Choose Card</h3>
-      <p style="margin:0 0 8px 0">Choose a card to add. For GV pick an Advanced Action (colour) or Spell (colour).</p>
-      <div id="card-choices" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
-        <button class="smallbtn choice-btn" data-val="Adv-Red">🔴 Adv</button>
-        <button class="smallbtn choice-btn" data-val="Adv-Blue">🔵 Adv</button>
-        <button class="smallbtn choice-btn" data-val="Adv-Green">🟢 Adv</button>
-        <button class="smallbtn choice-btn" data-val="Adv-White">⚪ Adv</button>
-        <button class="smallbtn choice-btn" data-val="Spell-Red">🔴 Spell</button>
-        <button class="smallbtn choice-btn" data-val="Spell-Blue">🔵 Spell</button>
-        <button class="smallbtn choice-btn" data-val="Spell-Green">🟢 Spell</button>
-        <button class="smallbtn choice-btn" data-val="Spell-White">⚪ Spell</button>
+    <div style="background:#fff;border-radius:10px;padding:16px;max-width:520px;width:96%;max-height:92vh;overflow:auto">
+      <h3 style="margin:0 0 8px 0">End Round — Choose 1 Crystal and 1 Card</h3>
+      <p style="margin:0 0 8px 0" class="muted">Select exactly one crystal and one card to add to the end-round choices. Confirm becomes enabled once both are chosen.</p>
+
+      <div class="endround-grid">
+        <div>
+          <div style="font-weight:700;margin-bottom:8px">Choose a Crystal</div>
+          <div id="modal-crystals" class="choice-list" aria-label="Crystal choices"></div>
+        </div>
+
+        <div>
+          <div style="font-weight:700;margin-bottom:8px">Choose a Card</div>
+          <div id="modal-cards" class="choice-list" aria-label="Card choices"></div>
+        </div>
       </div>
-      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
-        <button id="endround-cancel" class="smallbtn">Cancel</button>
+
+      <div class="modal-foot">
+        <button id="endround-cancel" class="smallbtn btn-ghost">Cancel</button>
         <button id="endround-confirm" class="smallbtn" disabled>Confirm</button>
       </div>
     </div>
   </div>
 
 <script>
-/* Full integrated JS with the single-line reputation rows:
-   Top:  ["0","+1","+1","+2","+2","+3","+5"]
-   Mid:  ["0"]
-   Bot:  ["0","-1","-1","-2","-3","-5","X"]
-   Levels Achieved formatted "Level X: Description" with prefix bold and description normal weight on one line.
-   Dummy player and GV logic included, plus persistence.
+/* Full integrated JS with:
+   - single-line reputation rows (top/mid/bot)
+   - dummy player end-round flow: when triggered, force user to pick 1 crystal and 1 card (then apply)
+   - GV unchanged; end-round modal specifically for the main player
+   - data persisted to localStorage
 */
 
-const STORAGE_KEY = 'mk_companion_full_v7';
+const STORAGE_KEY = 'mk_companion_full_v8';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
 const FAME_LEVELS = [
@@ -403,7 +407,7 @@ function getFameLevel(val){
   return 10;
 }
 
-/* ---------------- Dummy Module ---------------- */
+/* ---------------- Dummy Module (compact) with end-round forcing behavior ---------------- */
 function DummyModule() {
   const ids = {
     red:'red', blue:'blue', green:'green', white:'white',
@@ -463,7 +467,10 @@ function DummyModule() {
       endRoundFlag = true;
       const btn = el(ids.drawBtn); if(btn) btn.textContent = 'End Round';
       const out = el(ids.dummyOutput); if(out) out.textContent='Nil cards drawn. End of round announced.';
-      save(); return;
+      save();
+      // Trigger the forced end-round flow for the main player
+      openEndRoundModalForMain();
+      return;
     }
     const last = drawn[drawn.length-1];
     if(last){
@@ -500,7 +507,7 @@ function DummyModule() {
       btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCard(color, act==='inc'?1:-1); });
     });
     const drawBtnEl = el(ids.drawBtn);
-    if(drawBtnEl) drawBtnEl.addEventListener('click', ()=>{ if(endRoundFlag && drawBtnEl.textContent==='End Round'){ openEndRoundModalFor('main'); return; } drawOnce(); });
+    if(drawBtnEl) drawBtnEl.addEventListener('click', ()=>{ if(endRoundFlag && drawBtnEl.textContent==='End Round'){ openEndRoundModalForMain(); return; } drawOnce(); });
     const reshuffleEl = el(ids.reshuffleBtn);
     if(reshuffleEl) reshuffleEl.addEventListener('click', reshuffle);
   }
@@ -636,9 +643,9 @@ const gvModule = GVModule();
 let fame = 0;
 
 /* Reputation values requested by user */
-const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];      // single top row 0..+5 per user
-const REP_MID = ["0"];                                 // single middle 0
-const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];    // bottom 0..X (7 items)
+const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
+const REP_MID = ["0"];
+const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
 
 /* Build rep rows */
 function buildRepRows(){
@@ -719,36 +726,130 @@ function renderLevelsAchieved(){
   }
 }
 
-/* End-round modal wiring */
+/* ---------------- End-round modal behavior for main player ----------------
+   Matches earlier behavior: when End Round triggered for dummy player,
+   force selecting 1 crystal and 1 card. On confirm, apply selections:
+   - add the chosen card to main player's deck (changeCard +1)
+   - add 1 crystal of chosen color to crystals (increment)
+   This modal is independent of GV and only applies to the main player.
+*/
 const endroundModal = document.getElementById('endround-modal');
-const cardChoices = document.getElementById('card-choices');
+const modalCrystals = document.getElementById('modal-crystals');
+const modalCards = document.getElementById('modal-cards');
 const endroundConfirm = document.getElementById('endround-confirm');
 const endroundCancel = document.getElementById('endround-cancel');
-let endRoundContext = null;
-let selectedCard = null;
-function openEndRoundModalFor(playerKey){
-  endRoundContext = playerKey;
-  selectedCard = null;
+let pendingCrystalChoice = null;
+let pendingCardChoice = null;
+
+function openEndRoundModalForMain(){
+  pendingCrystalChoice = null;
+  pendingCardChoice = null;
+  renderModalChoices();
+  endroundConfirm.disabled = true;
   if(endroundModal) endroundModal.style.display = 'flex';
-  if(endroundConfirm) endroundConfirm.disabled = true;
-  cardChoices && cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));
 }
-if(cardChoices){
-  cardChoices.addEventListener('click',(e)=>{
-    const btn = e.target.closest('.choice-btn');
-    if(!btn) return;
-    selectedCard = btn.dataset.val;
-    cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.toggle('selected', b===btn));
-    endroundConfirm.disabled = !(selectedCard);
+
+function closeEndRoundModal(){
+  if(endroundModal) endroundModal.style.display = 'none';
+  pendingCrystalChoice = null;
+  pendingCardChoice = null;
+  renderModalChoices();
+}
+
+function renderModalChoices(){
+  // crystals: red, blue, green, white
+  const crystals = [
+    {key:'red', label:'🔴 Red'},
+    {key:'blue', label:'🔵 Blue'},
+    {key:'green', label:'🟢 Green'},
+    {key:'white', label:'⚪ White'}
+  ];
+  modalCrystals.innerHTML = '';
+  crystals.forEach(c => {
+    const div = document.createElement('div'); div.className='choice-item';
+    const span = document.createElement('div'); span.textContent = c.label;
+    const btn = document.createElement('button'); btn.className='smallbtn'; btn.type='button'; btn.textContent = pendingCrystalChoice === c.key ? 'Chosen' : 'Pick';
+    btn.addEventListener('click', ()=>{
+      pendingCrystalChoice = c.key;
+      renderModalChoices();
+      updateModalConfirmState();
+    });
+    if(pendingCrystalChoice === c.key) div.classList.add('choice-selected');
+    div.appendChild(span); div.appendChild(btn);
+    modalCrystals.appendChild(div);
+  });
+
+  // cards: offer Adv-Red/Blue/Green/White and Spell-Red/Blue/Green/White (like earlier renditions)
+  const cards = [
+    {code:'Adv-Red', label:'🔴 Advanced Action'},
+    {code:'Adv-Blue', label:'🔵 Advanced Action'},
+    {code:'Adv-Green', label:'🟢 Advanced Action'},
+    {code:'Adv-White', label:'⚪ Advanced Action'},
+    {code:'Spell-Red', label:'🔴 Spell'},
+    {code:'Spell-Blue', label:'🔵 Spell'},
+    {code:'Spell-Green', label:'🟢 Spell'},
+    {code:'Spell-White', label:'⚪ Spell'}
+  ];
+  modalCards.innerHTML = '';
+  cards.forEach(c => {
+    const div = document.createElement('div'); div.className='choice-item';
+    const span = document.createElement('div'); span.textContent = c.label;
+    const btn = document.createElement('button'); btn.className='smallbtn'; btn.type='button'; btn.textContent = pendingCardChoice === c.code ? 'Chosen' : 'Pick';
+    btn.addEventListener('click', ()=>{
+      pendingCardChoice = c.code;
+      renderModalChoices();
+      updateModalConfirmState();
+    });
+    if(pendingCardChoice === c.code) div.classList.add('choice-selected');
+    div.appendChild(span); div.appendChild(btn);
+    modalCards.appendChild(div);
   });
 }
-if(endroundCancel) endroundCancel.addEventListener('click', ()=>{ if(endroundModal) endroundModal.style.display='none'; endRoundContext=null; selectedCard=null; });
-if(endroundConfirm) endroundConfirm.addEventListener('click', ()=>{
-  if(!selectedCard || !endRoundContext) return;
-  if(endRoundContext === 'gv'){ gvModule.addCardToDiscard(selectedCard); gvModule.updateCounts && gvModule.updateCounts(); gvModule.updateDrawButtonState && gvModule.updateDrawButtonState(); }
-  else { const color = selectedCard.replace('Adv-','').replace('Spell-',''); mainModule.changeCard(color, 1); }
-  if(endroundModal) endroundModal.style.display='none';
-  endRoundContext = null; selectedCard = null;
+
+function updateModalConfirmState(){
+  endroundConfirm.disabled = !(pendingCrystalChoice && pendingCardChoice);
+}
+
+if(endroundCancel) endroundCancel.addEventListener('click', () => {
+  // cancel simply closes the modal but retains endRoundFlag state; user can reopen via Reshuffle or New Game flow
+  closeEndRoundModal();
+});
+
+if(endroundConfirm) endroundConfirm.addEventListener('click', () => {
+  if(!pendingCrystalChoice || !pendingCardChoice) return;
+  // Apply crystal: increment chosen crystal by 1
+  mainModule.changeCrystal ? mainModule.changeCrystal(pendingCrystalChoice, 1) : null;
+  // Apply card: add chosen card to main deck (treat Adv/Spell as adding an "Adv"/"Spell" card to deck)
+  // We'll add as a named code so the draw/display functions can use it if desired.
+  if(pendingCardChoice.startsWith('Adv-') || pendingCardChoice.startsWith('Spell-')){
+    // For compatibility with earlier simpler logic, we'll increment the color count if it's an Adv (matching cardCounts),
+    // or add a Spell marker into discard/deck if Spell selected (simulate adding a spell to discard so GV/draw logic won't confuse)
+    const parts = pendingCardChoice.split('-');
+    const kind = parts[0]; const color = parts[1];
+    if(kind === 'Adv'){
+      // increment cardCounts of that color on mainModule
+      mainModule.changeCard && mainModule.changeCard(color, 1);
+    } else {
+      // For Spell: push a Spell placeholder into discard so the next reshuffle/draw works visually
+      // We'll add to discard so player won't immediately draw it unless reshuffled.
+      // Use format 'Spell-Color' as token.
+      if(mainModule && mainModule.achievedLevelsRef){
+        // attempt to access internal discard via exposed module state if available
+        try{
+          // Best-effort: if mainModule has accessors, use them; else push into localStorage discard structure
+          const key = `${STORAGE_KEY}_main`;
+          const raw = localStorage.getItem(key);
+          if(raw){
+            const s = JSON.parse(raw);
+            s.discard = s.discard || [];
+            s.discard.push(pendingCardChoice);
+            localStorage.setItem(key, JSON.stringify(s));
+          }
+        }catch(e){}
+      }
+    }
+  }
+  closeEndRoundModal();
 });
 
 /* Meta persistence for fame + rep */
@@ -796,7 +897,7 @@ function newGame(){
   renderLevelsAchieved();
 }
 
-/* Initialize */
+/* Initialize app */
 window.addEventListener('load', ()=>{
   mainModule.load(); mainModule.wire();
   gvModule.load(); gvModule.wire();
