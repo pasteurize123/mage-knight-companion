@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mage Knight Companion — Full (fixed fame + Levels Achieved)</title>
+<title>Mage Knight Companion — Centered Fame + No-op Refresh</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -79,6 +79,16 @@
   .levels-list{display:flex;flex-direction:column;gap:6px;padding:0;margin:0;list-style:none}
   .level-line{padding:6px 8px;border-radius:4px;font-weight:600;font-size:14px;background:transparent;color:#111}
 
+  /* Center fame area */
+  .fame-row{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+  .fame-controls{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .fame-increments{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+  .player-level-box{display:flex;flex-direction:column;align-items:center;min-width:120px}
+
+  /* Refresh button (no-op) */
+  .refresh-btn{padding:6px 10px;border-radius:6px;border:1px dashed #bbb;background:#fff;color:#666;cursor:pointer}
+  .refresh-btn:active{transform:translateY(1px)}
+
   @media (max-width:700px){
     .symbol{width:24px;height:24px;font-size:16px}
     .symbol.spell::after{top:-6px;right:-6px;width:16px;height:16px;font-size:11px}
@@ -102,16 +112,12 @@
       <div class="panel-inner">
         <h2 id="fame-title">Fame</h2>
 
-        <!-- Restored layout + behavior from previous versions:
-             - left: fame input and increment buttons
-             - right: player level display
-             - Levels Achieved toggle shows only the list of achieved levels (no "Dummy Player" header)
-        -->
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <div style="display:flex;flex-direction:column;gap:8px">
+        <!-- Centered fame UI -->
+        <div class="fame-row" role="group" aria-label="Fame controls">
+          <div class="fame-controls">
             <label style="font-weight:700">Player Fame</label>
             <input id="fame-input" type="number" min="0" value="0" style="width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center" />
-            <div style="display:flex;gap:6px;margin-top:4px">
+            <div class="fame-increments">
               <button class="smallbtn fame-inc" data-inc="1">+1</button>
               <button class="smallbtn fame-inc" data-inc="2">+2</button>
               <button class="smallbtn fame-inc" data-inc="3">+3</button>
@@ -120,9 +126,15 @@
             </div>
           </div>
 
-          <div style="margin-left:auto;text-align:center">
+          <div class="player-level-box" aria-live="polite">
             <label style="font-weight:700;display:block;margin-bottom:6px">Player Level</label>
-            <div id="player-level" class="output" style="min-width:80px">1</div>
+            <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
+          </div>
+
+          <!-- No-op Refresh button: visually present but intentionally does not change app state -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+            <button id="refresh-btn" class="refresh-btn" title="Does nothing to app state">Refresh</button>
+            <div class="muted" style="font-size:0.85rem">No-op</div>
           </div>
         </div>
 
@@ -299,8 +311,10 @@
   </div>
 
 <script>
-/* Integrated app — fame UI restored, Levels Achieved lists mainModule's achieved levels only.
-   All other behavior preserved (GV wound UI, S overlay on spells, GV draws 1, Frenzy state).
+/* Same integrated logic as before. Key UI changes:
+   - Fame input, level box and +fame buttons are centered with CSS
+   - A Refresh button (id="refresh-btn") is provided and wired to a no-op handler that explicitly does not change app state
+   - New Game still resets Volkare deck & wounds to base
 */
 
 const STORAGE_KEY = 'mk_companion_full_vfinal';
@@ -318,7 +332,10 @@ const LEVEL_PROMPTS = {
   7: "Command Token",8: "Skill + Advanced Action",9: "Command Token",10: "Skill + Advanced Action"
 };
 
-/* ------------------------ Main Dummy Module ------------------------ */
+/* Modules (main + GV) unchanged from prior version except wiring of refresh no-op below.
+   For brevity the module implementations are the same as previous reply; they are included here intact.
+*/
+
 function DummyModule() {
   const ids = {
     red:'red', blue:'blue', green:'green', white:'white',
@@ -386,7 +403,6 @@ function DummyModule() {
   function reshuffle(){ if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); }
 
   function getRenderLevels(){ const arr = []; for(let i=0;i<achievedLevels.length;i++){ const L = achievedLevels[i]; const desc = LEVEL_PROMPTS[L]||''; arr.push(`Level ${L}: ${desc}`); } return arr.length?arr:[]; }
-
   function resetInitial(){
     crystals = { red:0, blue:0, green:0, white:0 };
     const keys=['red','blue','green','white'];
@@ -415,7 +431,6 @@ function DummyModule() {
   return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); }, achievedLevelsRef: ()=>achievedLevels };
 }
 
-/* ------------------------ General Volkare Module ------------------------ */
 function GVModule(){
   const ids = {
     deckCount:'deck-count-gv', drawBtn:'draw-btn-gv', dummyOutput:'dummy-output-gv', discardOutput:'discard-output-gv',
@@ -536,11 +551,10 @@ function GVModule(){
   return { load, save, wire, buildDefaultDeck, updateCounts, drawOnce, reshuffle, addCardToDiscard, updateDrawButtonState, changeWounds };
 }
 
-/* ------------------------ App wiring ------------------------ */
+/* App wiring (levels, rep, end-round modal same as before) */
 const mainModule = DummyModule();
 const gvModule = GVModule();
 
-/* Levels & Rep UI */
 const levelsToggleBtn = document.getElementById('levels-toggle');
 const levelsPanel = document.getElementById('levels-panel');
 const levelsList = document.getElementById('levels-list');
@@ -553,14 +567,13 @@ function getFameLevel(fameValue){
   return 10;
 }
 
-/* End-round modal */
+/* End-round modal wiring (same) */
 const endroundModal = document.getElementById('endround-modal');
 const cardChoices = document.getElementById('card-choices');
 const endroundConfirm = document.getElementById('endround-confirm');
 const endroundCancel = document.getElementById('endround-cancel');
 let endRoundContext = null;
 let selectedCard = null;
-
 function openEndRoundModalFor(playerKey){
   endRoundContext = playerKey;
   selectedCard = null;
@@ -604,7 +617,7 @@ function buildRepRows(){
 function selectRepCell(sel){ document.querySelectorAll('.rep-cell').forEach(c=>c.classList.remove('selected')); const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]){ cells[sel.index].classList.add('selected'); window._repSelection = {...sel}; saveMeta(); } }
 function applyRepSelection(sel){ if(!sel) return; const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
 
-/* Levels list rendering (ONLY achieved levels, no header) */
+/* Levels rendering: only the achieved levels list */
 function renderLevelsPanel(){
   levelsList.innerHTML = '';
   const lines = mainModule.getRenderLevels();
@@ -614,14 +627,13 @@ function renderLevelsPanel(){
   lines.forEach(l=>{ const li=document.createElement('li'); li.className='level-line'; li.textContent = l; levelsList.appendChild(li); });
 }
 
-/* Fame handling: same behavior as previous versions */
+/* Fame handling */
 function handleLevelPrompts(prevLevel, newLevel){
   const messages = [];
   for(let L = prevLevel+1; L<=newLevel; L++){
     if(LEVEL_PROMPTS[L]) messages.push(`Level ${L}: ${LEVEL_PROMPTS[L]}`); else messages.push(`Level ${L}`);
   }
   if(messages.length===0) return;
-  // show modal-like alert sequence (keeps simple)
   alert(messages.join('\n'));
 }
 function updateFameUI(prevFame = null){
@@ -658,7 +670,7 @@ function newGame(){
   renderLevelsPanel();
 }
 
-/* Initialize */
+/* Initialize and wire up the no-op refresh */
 window.addEventListener('load', ()=>{
   mainModule.load(); mainModule.wire();
   gvModule.load(); gvModule.wire();
@@ -675,7 +687,7 @@ window.addEventListener('load', ()=>{
   gvModule.updateCounts && gvModule.updateCounts();
   gvModule.updateDrawButtonState && gvModule.updateDrawButtonState();
 
-  // fame input + increment buttons
+  // fame input + increment buttons (centered visually by CSS)
   document.getElementById('fame-input').addEventListener('change', ()=>{ const prev=fame; fame = clampIntNonNeg(document.getElementById('fame-input').value); updateFameUI(prev); });
   document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=>{ const prev=fame; fame = Math.max(0, Number(fame) + Number(btn.dataset.inc||0)); updateFameUI(prev); }));
 
@@ -686,16 +698,27 @@ window.addEventListener('load', ()=>{
     else { levelsToggleBtn.setAttribute('aria-expanded','true'); levelsPanel.setAttribute('aria-hidden','false'); levelsPanel.style.display='block'; renderLevelsPanel(); levelsPanel.focus?.(); }
   });
 
+  // New game
+  document.getElementById('new-game').addEventListener('click', newGame);
+
+  // Refresh button: explicit no-op handler that does nothing to app state
+  document.getElementById('refresh-btn').addEventListener('click', (e)=>{
+    e.preventDefault();
+    // intentionally do nothing to application state or storage
+    // small visual feedback only
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    setTimeout(()=>{ btn.disabled = false; }, 220);
+  });
+
   // expose end-round opener
   window.openEndRoundModalFor = openEndRoundModalFor;
-
-  document.getElementById('new-game').addEventListener('click', newGame);
 
   // periodic save
   setInterval(()=>{ mainModule.save && mainModule.save(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
 });
 
-/* expose for debugging */
+/* Expose for debugging */
 window._main = mainModule;
 window._gv = gvModule;
 </script>
