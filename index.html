@@ -61,13 +61,13 @@
     .level-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
     .level-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
 
-    /* tooltip (press toggle) */
-    .level-tooltip { position: absolute; top: -6px; left: 50%; transform: translate(-50%, -100%); min-width:220px; max-width:280px; background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95)); color: #fff; border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.06); box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index:50; font-size:13px; display:none; }
+    /* tooltip / popup */
+    .level-tooltip { position: absolute; top: -6px; left: 50%; transform: translate(-50%, -100%); min-width:220px; max-width:320px; background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95)); color: #fff; border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.06); box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index:50; font-size:13px; display:none; }
     .level-tooltip.visible { display:block; }
     .tooltip-list { display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; padding-right:6px; }
-    .tooltip-item { display:flex; justify-content:space-between; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color: var(--muted); font-weight:600; }
-    .tooltip-item .lvl { color:#eaf2ff; font-weight:800; }
-    .tooltip-item .reward { color:var(--muted); font-weight:600; }
+    .tooltip-item { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color: var(--muted); font-weight:600; justify-content:space-between; }
+    .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; }
+    .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; }
 
     .dummy-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; color:#eaf2ff; }
     .controls-row { display:flex; gap:8px; justify-content:space-between; margin-top:8px; }
@@ -183,6 +183,7 @@
       const state = {
         repIndex: DEFAULT_REP_INDEX,
         fame: 0,
+        previousLevel: 1, // track last known level to calculate newly gained levels
         dummy: { name:'Dummy Player', hand:5, wounds:0, lastAction:'Idle' },
         volkareNotes: 'General Volkare: Track story events or reminders here.'
       };
@@ -251,25 +252,47 @@
         const level = getLevelForFame(state.fame);
         el.playerLevel.textContent = `Player Level ${level}`;
         el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
-        buildLevelTooltip(level);
+        buildFullTooltip(level);
       }
 
-      function buildLevelTooltip(level) {
+      // full tooltip (all levels up to current) used when user toggles badge
+      function buildFullTooltip(level) {
         el.tooltipList.innerHTML = '';
         for (let l = 1; l <= level; l++) {
-          const item = document.createElement('div');
-          item.className = 'tooltip-item';
-          const text = document.createElement('div');
-          text.className = 'lvl';
-          text.textContent = `Level ${l}:`;
-          const reward = document.createElement('div');
-          reward.className = 'reward';
-          reward.textContent = LEVEL_REWARDS[l] || '—';
-          item.appendChild(text);
-          item.appendChild(reward);
+          const item = createTooltipItem(l, LEVEL_REWARDS[l] || '—');
           el.tooltipList.appendChild(item);
         }
-        el.tooltip.setAttribute('aria-hidden', level === 0 ? 'true' : 'false');
+      }
+
+      // create consistent tooltip item nodes "Level X: description"
+      function createTooltipItem(lvl, text) {
+        const item = document.createElement('div');
+        item.className = 'tooltip-item';
+        const lvlDiv = document.createElement('div');
+        lvlDiv.className = 'lvl';
+        lvlDiv.textContent = `Level ${lvl}:`;
+        const rewardDiv = document.createElement('div');
+        rewardDiv.className = 'reward';
+        rewardDiv.textContent = text;
+        item.appendChild(lvlDiv);
+        item.appendChild(rewardDiv);
+        return item;
+      }
+
+      // build a list for only newly gained levels (prevLevel+1..newLevel)
+      function showGainedLevels(prevLevel, newLevel) {
+        el.tooltipList.innerHTML = '';
+        for (let l = prevLevel + 1; l <= newLevel; l++) {
+          const item = createTooltipItem(l, LEVEL_REWARDS[l] || '—');
+          el.tooltipList.appendChild(item);
+        }
+        if (prevLevel < newLevel) {
+          el.tooltip.classList.add('visible');
+          el.tooltip.setAttribute('aria-hidden','false');
+          el.playerLevel.setAttribute('aria-pressed','true');
+          // auto-hide after short delay
+          setTimeout(() => { el.tooltip.classList.remove('visible'); el.playerLevel.setAttribute('aria-pressed','false'); el.tooltip.setAttribute('aria-hidden','true'); }, 2400);
+        }
       }
 
       function toggleTooltip() {
@@ -279,16 +302,13 @@
           el.tooltip.setAttribute('aria-hidden','true');
           el.playerLevel.setAttribute('aria-pressed','false');
         } else {
+          // show full list up to current level
+          const level = getLevelForFame(state.fame);
+          buildFullTooltip(level);
           el.tooltip.classList.add('visible');
           el.tooltip.setAttribute('aria-hidden','false');
           el.playerLevel.setAttribute('aria-pressed','true');
         }
-      }
-
-      function closeTooltip() {
-        el.tooltip.classList.remove('visible');
-        el.tooltip.setAttribute('aria-hidden','true');
-        el.playerLevel.setAttribute('aria-pressed','false');
       }
 
       function renderDummy() {
@@ -304,26 +324,33 @@
       el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
       el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
 
-      // Fame input binding (default 0)
+      // Fame input: clicking should select all so typing overrides the 0
+      el.fameInput.addEventListener('focus', (e) => {
+        // small timeout to ensure selection works on mobile keyboards
+        setTimeout(() => e.target.select(), 0);
+      });
+
+      // handle input changes: show only rewards for newly gained levels
       el.fameInput.addEventListener('input', (e) => {
         const raw = e.target.value;
         const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw) || 0)) : 0;
-        const prevLevel = getLevelForFame(state.fame);
+        const prevLevel = state.previousLevel || getLevelForFame(state.fame || 0);
+        const newLevel = getLevelForFame(parsed);
         state.fame = parsed;
         renderFameAndLevel();
-        const newLevel = getLevelForFame(state.fame);
+        // if we've gained levels show only newly gained rewards
         if (newLevel > prevLevel) {
-          // show popup briefly for gained levels (user asked to display on press, but show brief on gain)
-          el.tooltip.classList.add('visible');
-          el.tooltip.setAttribute('aria-hidden','false');
-          el.playerLevel.setAttribute('aria-pressed','true');
-          setTimeout(closeTooltip, 2200);
+          showGainedLevels(prevLevel, newLevel);
         }
+        // update previousLevel to current (used for next change)
+        state.previousLevel = newLevel;
         saveToStorage();
       });
 
-      // Player level press/tap toggles tooltip (click and keyboard Enter/Space)
+      // Player level badge toggles full list (press to show all)
       el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
+
+      // keyboard accessibility for badge
       el.playerLevel.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); }
       });
@@ -331,7 +358,11 @@
       // close tooltip when tapping outside
       document.addEventListener('click', (e) => {
         const inside = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target);
-        if (!inside) closeTooltip();
+        if (!inside) {
+          el.tooltip.classList.remove('visible');
+          el.tooltip.setAttribute('aria-hidden','true');
+          el.playerLevel.setAttribute('aria-pressed','false');
+        }
       });
 
       // Dummy controls
@@ -350,15 +381,17 @@
       el.volkareText.addEventListener('input', (e) => state.volkareNotes = e.target.value);
 
       // persistence
-      const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_press';
-      function saveToStorage(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({repIndex:state.repIndex,fame:state.fame,dummy:state.dummy,volkareNotes:state.volkareNotes})); } catch(e){} }
-      function loadFromStorage(){ try { const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return; const parsed=JSON.parse(raw); if(typeof parsed.repIndex==='number' && parsed.repIndex>=0 && parsed.repIndex<REP_TRACK.length) state.repIndex=parsed.repIndex; if(typeof parsed.fame==='number') state.fame=parsed.fame; if(parsed.dummy) state.dummy=Object.assign(state.dummy, parsed.dummy); if(typeof parsed.volkareNotes==='string') state.volkareNotes=parsed.volkareNotes; } catch(e){} }
+      const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_press_v2';
+      function saveToStorage(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({repIndex:state.repIndex,fame:state.fame,previousLevel:state.previousLevel,dummy:state.dummy,volkareNotes:state.volkareNotes})); } catch(e){} }
+      function loadFromStorage(){ try { const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return; const parsed=JSON.parse(raw); if(typeof parsed.repIndex==='number' && parsed.repIndex>=0 && parsed.repIndex<REP_TRACK.length) state.repIndex=parsed.repIndex; if(typeof parsed.fame==='number') state.fame=parsed.fame; if(typeof parsed.previousLevel==='number') state.previousLevel=parsed.previousLevel; if(parsed.dummy) state.dummy=Object.assign(state.dummy, parsed.dummy); if(typeof parsed.volkareNotes==='string') state.volkareNotes=parsed.volkareNotes; } catch(e){} }
 
       // init
       buildRepTrack();
       loadFromStorage();
       if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
       if (typeof state.fame !== 'number') state.fame = 0;
+      // ensure previousLevel set correctly based on stored fame
+      state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
       renderReputation();
       renderFameAndLevel();
       renderDummy();
@@ -371,7 +404,7 @@
       window.addEventListener('keydown', (ev) => {
         if (ev.key === 'ArrowLeft') el.repDown.click();
         if (ev.key === 'ArrowRight') el.repUp.click();
-        if (ev.key === 'f' || ev.key === 'F') { state.fame = clamp(state.fame + 1, 0); renderFameAndLevel(); saveToStorage(); el.tooltip.classList.add('visible'); setTimeout(closeTooltip,1500); }
+        if (ev.key === 'f' || ev.key === 'F') { state.fame = clamp(state.fame + 1, 0); renderFameAndLevel(); saveToStorage(); const newLevel = getLevelForFame(state.fame); if (newLevel > state.previousLevel) { showGainedLevels(state.previousLevel, newLevel); state.previousLevel = newLevel; } }
       });
     })();
   </script>
