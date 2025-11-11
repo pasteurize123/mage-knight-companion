@@ -46,9 +46,10 @@
     .rep-step.active { box-shadow: 0 8px 30px rgba(0,0,0,0.5); transform:scale(1.06); font-weight:800; }
 
     /* Fame & Level */
-    .fame-grid { display:flex; flex-direction:column; gap:8px; align-items:center; }
+    .fame-grid { display:flex; flex-direction:column; gap:8px; align-items:center; width:100%; }
     .fame-row { display:flex; gap:10px; align-items:center; width:100%; justify-content:center; }
     .fame-input { width:110px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance:textfield; }
+    .fame-input[readonly] { background: rgba(255,255,255,0.02); cursor:default; color:#eaf2ff; }
     .fame-input.editing { outline: 2px solid rgba(199,146,79,0.18); }
     .level-badge { position:relative; min-width:200px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
@@ -104,9 +105,16 @@
         <div class="card-header"><div><h2 id="fame-title" class="card-title">Fame</h2></div></div>
         <div class="card-body">
           <div class="fame-grid">
+            <!-- New adjustable input: user enters a delta (e.g. 3 or -2) and commits via Enter or blur -->
             <div class="fame-row">
-              <input id="fame-input" class="fame-input" type="number" inputmode="numeric" min="0" step="1" value="0" aria-label="Fame value" />
+              <input id="add-fame-input" class="fame-input" type="number" inputmode="numeric" placeholder="+0" aria-label="Add or remove fame (use negative values to reduce fame)" />
             </div>
+
+            <!-- Read-only display of committed fame (no direct edits allowed) -->
+            <div class="fame-row">
+              <input id="fame-input" class="fame-input" type="number" value="0" aria-label="Committed fame value" readonly tabindex="-1" />
+            </div>
+
             <div class="fame-row" style="position:relative;">
               <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Player Level 1</div>
               <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
@@ -165,15 +173,12 @@
         previousLevel: 1      // committed level
       };
 
-      // temp editing buffer
-      let tempFame = null;
-      let editing = false;
-
       const el = {
         reputationValue: document.getElementById('reputation-value'),
         repTrackContainer: document.getElementById('rep-track'),
         repUp: document.getElementById('rep-up'),
         repDown: document.getElementById('rep-down'),
+        addFameInput: document.getElementById('add-fame-input'),
         fameInput: document.getElementById('fame-input'),
         playerLevel: document.getElementById('player-level'),
         tooltip: document.getElementById('level-tooltip'),
@@ -224,10 +229,10 @@
         if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
       }
 
-      // render fame input (temp if editing) and committed level badge
+      // render fame input (committed fame is read-only) and committed level badge
       function renderFameAndLevel() {
-        el.fameInput.value = editing && tempFame !== null ? tempFame : state.fame;
-        const level = state.previousLevel; // only committed level shown until confirm
+        el.fameInput.value = state.fame;
+        const level = state.previousLevel; // only committed level shown
         el.playerLevel.textContent = `Player Level ${level}`;
         el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
       }
@@ -289,85 +294,43 @@
       el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
       el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
 
-      // Fame input behavior: editing buffer, select all on focus/click, prevent caret reposition
-      el.fameInput.addEventListener('focus', (e) => {
-        editing = true;
-        el.fameInput.classList.add('editing');
-        // start editing with the committed value pre-filled
-        tempFame = String(state.fame || 0);
-        // select all so typing replaces
-        setTimeout(() => {
-          try { e.target.select(); } catch (err) {}
-        }, 0);
-      });
-      el.fameInput.addEventListener('mouseup', (e) => {
-        // prevent mouseup moving caret after selection
-        e.preventDefault();
-        try { e.target.select(); } catch (err) {}
-      });
-      el.fameInput.addEventListener('touchstart', (e) => {
-        setTimeout(() => {
-          try { e.target.select(); } catch (err) {}
-        }, 0);
-      }, {passive:true});
-
-      // handle typing into the input (temp only)
-      el.fameInput.addEventListener('input', (e) => {
-        const raw = e.target.value;
-        // allow blank while editing
-        if (raw === '') {
-          tempFame = '';
+      // Add-fame input: commit on Enter or blur. Accept positive or negative numbers.
+      function commitAddFameEdit() {
+        const raw = (el.addFameInput.value || '').trim();
+        if (raw === '') return; // no-op
+        // allow formats like "+3", "-2", "5"
+        const parsed = Number(raw);
+        const delta = Number.isFinite(parsed) ? Math.floor(parsed) : 0;
+        if (delta === 0) {
+          // if user explicitly entered 0, still clear input
+          el.addFameInput.value = '';
           return;
         }
-        // sanitize to non-negative integer
-        const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw) || 0)) : 0;
-        tempFame = String(parsed);
-        e.target.value = tempFame;
-      });
-
-      // commit edit on blur or Enter; Escape cancels
-      function commitFameEdit() {
-        if (!editing) return;
-        const raw = tempFame === '' ? '0' : (tempFame || '0');
-        const parsed = Math.max(0, Math.floor(Number(raw) || 0));
         const prevLevel = state.previousLevel;
-        const newLevel = getLevelForFame(parsed);
-        // update committed fame and previousLevel
-        state.fame = parsed;
-        state.previousLevel = newLevel;
-        // show only relevant newly reached levels (prevLevel+1 .. newLevel)
-        if (newLevel > prevLevel) {
-          showGainedLevelsPersist(prevLevel, newLevel);
+        state.fame = clamp(state.fame + delta, 0, 9999);
+        state.previousLevel = getLevelForFame(state.fame);
+        // show gained levels if any
+        if (state.previousLevel > prevLevel) {
+          showGainedLevelsPersist(prevLevel, state.previousLevel);
         }
-        editing = false;
-        tempFame = null;
-        el.fameInput.classList.remove('editing');
-        saveToStorage();
-        renderFameAndLevel(); // will show committed level now
-      }
-      function cancelFameEdit() {
-        editing = false;
-        tempFame = null;
-        el.fameInput.classList.remove('editing');
+        el.addFameInput.value = '';
         renderFameAndLevel();
+        saveToStorage();
       }
 
-      el.fameInput.addEventListener('keydown', (e) => {
+      el.addFameInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
-          // commit
           e.preventDefault();
-          el.fameInput.blur(); // triggers commit via blur handler below
-          commitFameEdit();
+          commitAddFameEdit();
+          el.addFameInput.blur();
         } else if (e.key === 'Escape') {
           e.preventDefault();
-          cancelFameEdit();
-          el.fameInput.blur();
+          el.addFameInput.value = '';
+          el.addFameInput.blur();
         }
       });
-
-      // blur commits (clicking elsewhere)
-      el.fameInput.addEventListener('blur', () => {
-        commitFameEdit();
+      el.addFameInput.addEventListener('blur', () => {
+        commitAddFameEdit();
       });
 
       // Player level badge toggles full list (press)
@@ -380,7 +343,7 @@
 
       // close tooltip when tapping outside (applies to gained-level popup and full list)
       document.addEventListener('click', (e) => {
-        const inside = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.fameInput;
+        const inside = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.addFameInput;
         if (!inside) closeTooltip();
       });
 
@@ -390,10 +353,10 @@
         state.repIndex = DEFAULT_REP_INDEX;
         state.fame = 0;
         state.previousLevel = getLevelForFame(0);
-        // clear editing buffer and close tooltips
-        editing = false;
-        tempFame = null;
+        // close tooltips
         closeTooltip();
+        // clear inputs
+        el.addFameInput.value = '';
         // re-render UI
         renderReputation();
         renderFameAndLevel();
@@ -436,20 +399,10 @@
       // autosave
       setInterval(saveToStorage, 2000);
 
-      // keyboard shortcuts
+      // keyboard shortcuts: keep only reputation arrows; remove 'f' auto increment so fame can only be adjusted via the new input box
       window.addEventListener('keydown', (ev) => {
         if (ev.key === 'ArrowLeft') el.repDown.click();
         if (ev.key === 'ArrowRight') el.repUp.click();
-        if ((ev.key === 'f' || ev.key === 'F') && !editing) {
-          // increment committed fame for quick testing
-          state.fame = clamp(state.fame + 1, 0);
-          const prevLevel = state.previousLevel;
-          const newLevel = getLevelForFame(state.fame);
-          state.previousLevel = newLevel;
-          renderFameAndLevel();
-          saveToStorage();
-          if (newLevel > prevLevel) showGainedLevelsPersist(prevLevel, newLevel);
-        }
       });
     })();
   </script>
