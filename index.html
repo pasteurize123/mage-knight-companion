@@ -116,7 +116,7 @@
             </div>
 
             <div class="fame-row" style="position:relative;">
-              <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Player Level 1</div>
+              <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Level 1</div>
               <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
                 <div style="font-weight:800; margin-bottom:6px;">Level rewards gained</div>
                 <div class="tooltip-list" id="tooltip-list"></div>
@@ -233,8 +233,15 @@
       function renderFameAndLevel() {
         el.fameInput.value = state.fame;
         const level = state.previousLevel; // only committed level shown
-        el.playerLevel.textContent = `Player Level ${level}`;
+        el.playerLevel.textContent = `Level ${level}`;
         el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
+        // make the fame number match the current level color
+        try {
+          const lvlColor = getComputedStyle(el.playerLevel).color;
+          el.fameInput.style.color = lvlColor;
+        } catch (err) {
+          // fallback - leave default color
+        }
       }
 
       function createTooltipItem(lvl, text) {
@@ -288,7 +295,7 @@
         el.playerLevel.setAttribute('aria-pressed','false');
       }
 
-      function clamp(n,min=0,max=999){return Math.max(min,Math.min(max,n));}
+      function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
 
       // Reputation buttons
       el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
