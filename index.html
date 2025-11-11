@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Fame Confirm</title>
+  <title>Mage Knight Companion — Combined</title>
   <style>
     :root{
       --bg:#0f1724;
@@ -12,44 +12,31 @@
       --muted:#9aa4b2;
       --glass: rgba(255,255,255,0.03);
       --radius:14px;
-      --phone-width:380px;
+      --phone-width:960px;
       --track-bg: rgba(255,255,255,0.03);
       --gold:#c7924f;
       --red:#d9534f;
+      --blue:#4aa3e0;
+      --green:#6ac38a;
+      --white:#f0f4f8;
       --yellow:#f6d365;
     }
     * { box-sizing: border-box; }
     html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-    .phone-shell { width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 12px; }
-    .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); display:flex; flex-direction:column; gap:10px; }
-    .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
-    .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); pointer-events:auto; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 12px rgba(0,0,0,0.5); }
-    .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-    .card-title { font-size:16px; margin:0; color:#fff; }
-    .card-body { font-size:14px; color:#e6eef6; }
-
-    /* Reputation */
-    .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; }
-    .stat-value { font-size:28px; font-weight:700; color:var(--accent); }
-
-    .rep-area { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
-    .rep-controls-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 6px; }
-    .thumb-btn { width:44px; height:44px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:#fff; cursor:pointer; font-size:18px; box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
-    .thumb-up { background: linear-gradient(180deg, rgba(199,146,79,0.14), rgba(199,146,79,0.06)); color: #fff; border: 1px solid rgba(199,146,79,0.25); }
-    .thumb-down { background: linear-gradient(180deg, rgba(217,83,79,0.12), rgba(217,83,79,0.06)); color: #fff; border: 1px solid rgba(217,83,79,0.22); }
-    .rep-track { display:flex; gap:8px; align-items:center; overflow:auto; padding:10px 6px; border-radius:10px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
-    .rep-step { min-width:48px; padding:10px 6px; border-radius:10px; background:var(--track-bg); text-align:center; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; cursor:pointer; flex-shrink:0; user-select:none; transition: transform 140ms ease, box-shadow 140ms ease; display:flex; align-items:center; justify-content:center; height:44px; }
-    .rep-step.zero { background: rgba(246,211,101,0.08); color:var(--yellow); border:1px solid rgba(246,211,101,0.18); }
-    .rep-step.positive { background: rgba(199,146,79,0.08); color:var(--gold); border:1px solid rgba(199,146,79,0.18); }
-    .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
-    .rep-step.active { box-shadow: 0 8px 30px rgba(0,0,0,0.5); transform:scale(1.06); font-weight:800; }
-
-    /* Fame & Level */
-    .fame-grid { display:flex; flex-direction:column; gap:8px; align-items:center; }
-    .fame-row { display:flex; gap:10px; align-items:center; width:100%; justify-content:center; }
-    .fame-input { width:110px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance: textfield; }
-    .fame-input.editing { outline: 2px solid rgba(199,146,79,0.18); }
+    .app-shell { padding:20px; display:flex; gap:16px; justify-content:center; align-items:flex-start; min-height:100vh; }
+    .panel { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); border-radius:12px; padding:12px; border:1px solid rgba(255,255,255,0.03); box-shadow: 0 6px 22px rgba(0,0,0,0.5); }
+    .left { width:420px; display:flex; flex-direction:column; gap:12px; }
+    .right { width:420px; display:flex; flex-direction:column; gap:12px; }
+    h1 { margin:0 0 6px 0; font-size:18px; color:var(--muted); }
+    .card-title { margin:0;font-size:15px;color:#fff;font-weight:700; }
+    .card-sub { font-size:13px;color:var(--muted); margin-top:4px; }
+    .card { background:transparent; padding:12px; border-radius:10px; }
+    .row { display:flex; gap:8px; align-items:center; }
+    .btn { padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.01); color:#eaf2ff; cursor:pointer; }
+    .btn.primary { background:linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.06)); border:1px solid rgba(199,146,79,0.18); color:#ffdcb3; font-weight:600; }
+    .stat-large { font-weight:800; font-size:24px; color:var(--accent); }
+    .muted { color:var(--muted); font-size:13px; }
+    input[type="number"] { width:110px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance:textfield; }
     .level-badge { position:relative; min-width:200px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.04); cursor:pointer; }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
     .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
@@ -62,99 +49,152 @@
     .level-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
     .level-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
 
-    /* tooltip / popup: single-line formatting for rewards */
-    .level-tooltip { position: absolute; top: -6px; left: 50%; transform: translate(-50%, -100%); min-width:220px; max-width:320px; background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95)); color: #fff; border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.06); box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index:50; font-size:13px; display:none; }
+    /* Reputation track */
+    .rep-track { display:flex; gap:8px; align-items:center; overflow:auto; padding:10px 6px; border-radius:10px; background:rgba(255,255,255,0.01); }
+    .rep-step { min-width:48px; padding:10px 6px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; height:44px; user-select:none; }
+    .rep-step.zero { background: rgba(246,211,101,0.08); color:var(--yellow); border:1px solid rgba(246,211,101,0.18); }
+    .rep-step.positive { background: rgba(199,146,79,0.08); color:var(--gold); border:1px solid rgba(199,146,79,0.18); }
+    .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
+    .rep-step.active { box-shadow: 0 8px 30px rgba(0,0,0,0.5); transform:scale(1.04); font-weight:800; }
+
+    /* Tooltip / popup */
+    .level-tooltip { position:absolute; top:-10px; left:50%; transform:translate(-50%,-100%); min-width:260px; max-width:360px; background: linear-gradient(180deg, rgba(10,10,10,0.96), rgba(20,20,20,0.96)); color:#fff; border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.06); box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index:50; font-size:13px; display:none; }
     .level-tooltip.visible { display:block; }
-    .tooltip-list { display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; padding-right:6px; }
+    .tooltip-list { display:flex; flex-direction:column; gap:6px; max-height:260px; overflow:auto; padding-right:6px; }
     .tooltip-item { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color: var(--muted); font-weight:600; justify-content:space-between; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
+    .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:100px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    .dummy-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; color:#eaf2ff; }
-    .controls-row { display:flex; gap:8px; justify-content:space-between; margin-top:8px; }
-    .controls-row button { flex:1; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); color:#eaf2ff; cursor:pointer; }
-    .controls-row button.primary { background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.08)); border: 1px solid rgba(199,146,79,0.25); color: #ffdcb3; font-weight:600; }
-    .volkare-text { width:100%; resize:vertical; border-radius:8px; border:1px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.01); color: #eaf2ff; padding:8px; font-size:13px; min-height:74px; }
-    .footer { margin-top:8px; text-align:center; color:var(--muted); font-size:12px; }
-    @media (max-width:400px) { :root { --phone-width:94vw; } .topbar { left:50%; transform:translateX(-50%); width:94vw; } }
+    /* Dummy deck & crystals styles */
+    .crystals { display:flex; gap:8px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+    .crystal { min-width:56px; padding:6px; border-radius:8px; text-align:center; font-weight:700; color:#061226; }
+    .crystal.red { background:var(--red); color:#fff; }
+    .crystal.blue { background:var(--blue); color:#021a2b; }
+    .crystal.green { background:var(--green); color:#052216; }
+    .crystal.white { background:var(--white); color:#021218; }
+    .counters { display:flex; gap:12px; align-items:center; margin-top:8px; }
+    .counter { display:flex; flex-direction:column; align-items:center; padding:8px; border-radius:8px; background: rgba(255,255,255,0.02); min-width:84px; }
+    .counter .label { color:var(--muted); font-size:12px; }
+    .counter .value { font-weight:800; font-size:18px; }
+
+    textarea { width:100%; min-height:80px; margin-top:8px; padding:8px; border-radius:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.03); color:#eaf2ff; }
+
+    @media (max-width:980px) {
+      .app-shell { flex-direction:column; align-items:stretch; padding:12px; }
+      .left, .right { width:100%; }
+    }
   </style>
 </head>
 <body>
-  <div class="phone-shell">
-    <div class="frame" role="application" aria-label="Mage Knight Companion">
-      <header class="topbar"><h1>Mage Knight Companion</h1></header>
-
-      <!-- Reputation -->
-      <section class="card" id="reputation-card" aria-labelledby="rep-title">
-        <div class="card-header"><div><h2 id="rep-title" class="card-title">Reputation</h2></div></div>
-        <div class="card-body">
-          <div class="stat-row"><div class="stat-value" id="reputation-value">—</div></div>
-          <div class="rep-area">
-            <div class="rep-controls-row" aria-hidden="false">
-              <button id="rep-down" class="thumb-btn thumb-down" title="Decrease reputation one step" aria-label="Thumbs down to decrease reputation">👎</button>
-              <div style="flex:1"></div>
-              <button id="rep-up" class="thumb-btn thumb-up" title="Increase reputation one step" aria-label="Thumbs up to increase reputation">👍</button>
+  <div style="max-width:1100px;margin:18px auto;">
+    <h1>Mage Knight Companion</h1>
+    <div class="app-shell">
+      <div class="left panel">
+        <!-- Reputation -->
+        <div class="card">
+          <div class="card-title">Reputation</div>
+          <div class="card-sub">Quick reputation track</div>
+          <div style="height:8px"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="text-align:center">
+              <div class="muted">Current</div>
+              <div id="reputation-value" class="stat-large">—</div>
             </div>
-            <div class="rep-track" id="rep-track" role="list" aria-label="Reputation track"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Fame -->
-      <section class="card" id="fame-card" aria-labelledby="fame-title">
-        <div class="card-header"><div><h2 id="fame-title" class="card-title">Fame</h2></div></div>
-        <div class="card-body">
-          <div class="fame-grid">
-            <div class="fame-row">
-              <input id="fame-input" class="fame-input" type="number" inputmode="numeric" min="0" step="1" value="0" aria-label="Fame value" />
-            </div>
-            <div class="fame-row" style="position:relative;">
-              <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Player Level 1</div>
-              <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
-                <div style="font-weight:800; margin-bottom:6px;">Level rewards gained</div>
-                <div class="tooltip-list" id="tooltip-list"></div>
+            <div style="flex:1;margin-left:12px">
+              <div class="rep-controls" style="display:flex;justify-content:space-between;align-items:center;">
+                <button id="rep-down" class="btn">👎</button>
+                <div style="width:12px"></div>
+                <button id="rep-up" class="btn primary">👍</button>
               </div>
+              <div style="height:8px"></div>
+              <div class="rep-track" id="rep-track" role="list" aria-label="Reputation track"></div>
             </div>
           </div>
         </div>
-      </section>
 
-      <!-- Dummy Player -->
-      <section class="card" id="dummy-card" aria-labelledby="dummy-title">
-        <div class="card-header"><div><h2 id="dummy-title" class="card-title">Dummy Player</h2><div class="card-sub" id="dummy-sub">Dummy</div></div></div>
-        <div class="card-body">
-          <div class="dummy-grid">
-            <div>Hand: <strong id="dummy-hand">5</strong></div>
-            <div>Wounds: <strong id="dummy-wounds">0</strong></div>
-            <div style="grid-column:1 / -1">Last: <em id="dummy-last">Idle</em></div>
+        <!-- Fame -->
+        <div class="card" style="margin-top:6px;">
+          <div class="card-title">Fame</div>
+          <div class="card-sub">Enter Fame then press Enter or click away to confirm</div>
+          <div style="height:8px"></div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <input id="fame-input" type="number" min="0" step="1" value="0" aria-label="Fame value" />
+            <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Player Level 1</div>
+            <!-- tooltip positioned relative to badge -->
+            <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
+              <div style="font-weight:800;margin-bottom:6px;">Level rewards</div>
+              <div class="tooltip-list" id="tooltip-list"></div>
+            </div>
           </div>
-          <div class="controls-row" role="group" aria-label="Dummy controls">
-            <button id="play-1">Play 1</button>
-            <button id="draw-1">Draw 1</button>
-            <button id="auto-action" class="primary">Auto Action</button>
-          </div>
-          <div style="margin-top:8px; display:flex; gap:8px;">
-            <button id="heal-1">Heal 1</button>
-            <button id="reset-dummy">Reset Dummy</button>
-          </div>
+          <div style="height:10px"></div>
+          <div class="muted">Notes</div>
+          <textarea id="volkare-text">General Volkare: Track story events or reminders here.</textarea>
         </div>
-      </section>
 
-      <!-- General Volkare -->
-      <section class="card" id="volkare-card" aria-labelledby="volkare-title">
-        <div class="card-header"><div><h2 id="volkare-title" class="card-title">General Volkare</h2><div class="card-sub">Notes / reminders</div></div></div>
-        <div class="card-body"><textarea id="volkare-text" class="volkare-text">General Volkare: Track story events or reminders here.</textarea></div>
-      </section>
+      </div>
 
-      <footer class="footer"><small>Phone layout • Lightweight companion</small></footer>
+      <div class="right panel">
+        <!-- Dummy Player -->
+        <div class="card">
+          <div class="card-title">Dummy Player</div>
+          <div class="card-sub">Deck, crystals, draw/discard</div>
+
+          <div style="height:8px"></div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div style="flex:1">
+              <div class="muted">Name</div>
+              <div id="dummy-name" class="stat-large">Dummy</div>
+            </div>
+
+            <div class="counter">
+              <div class="label">Hand</div>
+              <div id="dummy-hand" class="value">0</div>
+            </div>
+            <div class="counter">
+              <div class="label">Discard</div>
+              <div id="dummy-discard" class="value">0</div>
+            </div>
+            <div class="counter">
+              <div class="label">Deck</div>
+              <div id="dummy-deck-count" class="value">16</div>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div style="display:flex;gap:8px;">
+            <button id="draw-btn" class="btn primary">Draw 1</button>
+            <button id="discard-btn" class="btn">Discard 1</button>
+            <button id="shuffle-btn" class="btn">Shuffle Deck</button>
+            <button id="reset-deck" class="btn">Reset Deck</button>
+          </div>
+
+          <div style="height:10px"></div>
+
+          <div class="muted">Crystals (inventory)</div>
+          <div class="crystals" id="crystal-list"></div>
+
+          <div style="height:8px"></div>
+          <div class="muted">Deck composition (remaining)</div>
+          <div id="deck-composition" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"></div>
+
+          <div style="height:8px"></div>
+          <div class="muted">Dummy notes</div>
+          <textarea id="dummy-notes"></textarea>
+        </div>
+
+      </div>
     </div>
   </div>
 
   <script>
     (function () {
+      /* ---------------------------
+         Constants and configuration
+         --------------------------- */
+      const STORAGE_KEY = 'mk_companion_combined_v1';
       const REP_TRACK = ["X","-5","-3","-2","-1","-1","0","0","0","+1","+1","+2","+2","+3","+5"];
       const DEFAULT_REP_INDEX = 7;
-
       const LEVEL_RANGES = [
         { level:1, min:0, max:2 },
         { level:2, min:3, max:7 },
@@ -167,7 +207,6 @@
         { level:9, min:80, max:98 },
         { level:10, min:99, max:119 }
       ];
-
       const LEVEL_REWARDS = {
         1: 'Command Token',
         2: 'Skill + Advanced Action',
@@ -181,35 +220,135 @@
         10: 'Skill + Advanced Action'
       };
 
-      // stored state (fame only updates when confirmed)
+      // Dummy deck config
+      const COLORS = ['red','blue','green','white'];
+      const INITIAL_COUNT_PER_COLOR = 4;
+
+      /* ---------------------------
+         Utility
+         --------------------------- */
+      function clamp(n, min=0, max=999) { return Math.max(min, Math.min(max, n)); }
+      function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+      }
+      function buildInitialDeck() {
+        const deck = [];
+        COLORS.forEach(color => {
+          for (let i = 0; i < INITIAL_COUNT_PER_COLOR; i++) deck.push(color);
+        });
+        shuffleArray(deck);
+        return deck;
+      }
+      function initialCrystals() {
+        const first = COLORS[Math.floor(Math.random()*COLORS.length)];
+        let second = first;
+        while (second === first) second = COLORS[Math.floor(Math.random()*COLORS.length)];
+        const c = {};
+        COLORS.forEach(col => c[col] = 0);
+        c[first] = 2;
+        c[second] = 1;
+        return c;
+      }
+      function getLevelForFame(fame) {
+        const f = Math.max(0, Math.floor(Number(fame) || 0));
+        for (let r of LEVEL_RANGES) if (f >= r.min && f <= r.max) return r.level;
+        return LEVEL_RANGES[LEVEL_RANGES.length - 1].level;
+      }
+
+      /* ---------------------------
+         State
+         - committed fame and level only update on confirm
+         - editing buffer for fame while user types
+         --------------------------- */
       const state = {
+        // reputation
         repIndex: DEFAULT_REP_INDEX,
-        fame: 0,               // committed fame
-        previousLevel: 1,      // committed level
-        dummy: { name:'Dummy Player', hand:5, wounds:0, lastAction:'Idle' },
-        volkareNotes: 'General Volkare: Track story events or reminders here.'
+        // fame/level (committed)
+        fame: 0,
+        previousLevel: 1,
+        // dummy deck
+        deck: buildInitialDeck(),
+        discard: [],
+        hand: [],
+        crystals: initialCrystals(),
+        // misc
+        volkareNotes: 'General Volkare: Track story events or reminders here.',
+        dummyNotes: ''
       };
-
-      // temp editing buffer
-      let tempFame = null;
       let editing = false;
+      let tempFame = null;
 
+      /* ---------------------------
+         DOM elements
+         --------------------------- */
       const el = {
+        // reputation
         reputationValue: document.getElementById('reputation-value'),
         repTrackContainer: document.getElementById('rep-track'),
         repUp: document.getElementById('rep-up'),
         repDown: document.getElementById('rep-down'),
+        // fame / level
         fameInput: document.getElementById('fame-input'),
         playerLevel: document.getElementById('player-level'),
         tooltip: document.getElementById('level-tooltip'),
         tooltipList: document.getElementById('tooltip-list'),
+        volkareText: document.getElementById('volkare-text'),
+        // dummy
+        dummyName: document.getElementById('dummy-name'),
         dummyHand: document.getElementById('dummy-hand'),
-        dummyWounds: document.getElementById('dummy-wounds'),
-        dummyLast: document.getElementById('dummy-last'),
-        dummySub: document.getElementById('dummy-sub'),
-        volkareText: document.getElementById('volkare-text')
+        dummyDiscard: document.getElementById('dummy-discard'),
+        dummyDeckCount: document.getElementById('dummy-deck-count'),
+        drawBtn: document.getElementById('draw-btn'),
+        discardBtn: document.getElementById('discard-btn'),
+        shuffleBtn: document.getElementById('shuffle-btn'),
+        resetDeckBtn: document.getElementById('reset-deck'),
+        crystalList: document.getElementById('crystal-list'),
+        deckComposition: document.getElementById('deck-composition'),
+        dummyNotes: document.getElementById('dummy-notes')
       };
 
+      /* ---------------------------
+         Persistence
+         --------------------------- */
+      function saveToStorage() {
+        try {
+          const payload = {
+            repIndex: state.repIndex,
+            fame: state.fame,
+            previousLevel: state.previousLevel,
+            deck: state.deck,
+            discard: state.discard,
+            hand: state.hand,
+            crystals: state.crystals,
+            volkareNotes: state.volkareNotes,
+            dummyNotes: state.dummyNotes
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        } catch (e) {}
+      }
+      function loadFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (typeof parsed.repIndex === 'number') state.repIndex = parsed.repIndex;
+          if (typeof parsed.fame === 'number') state.fame = parsed.fame;
+          if (typeof parsed.previousLevel === 'number') state.previousLevel = parsed.previousLevel;
+          if (Array.isArray(parsed.deck) && parsed.deck.length >= 0) state.deck = parsed.deck;
+          if (Array.isArray(parsed.discard)) state.discard = parsed.discard;
+          if (Array.isArray(parsed.hand)) state.hand = parsed.hand;
+          if (parsed.crystals && typeof parsed.crystals === 'object') state.crystals = parsed.crystals;
+          if (typeof parsed.volkareNotes === 'string') state.volkareNotes = parsed.volkareNotes;
+          if (typeof parsed.dummyNotes === 'string') state.dummyNotes = parsed.dummyNotes;
+        } catch (e) {}
+      }
+
+      /* ---------------------------
+         Reputation UI
+         --------------------------- */
       function classifyLabel(label) {
         if (label === "0") return 'zero';
         if (label === "X" || label.startsWith('-')) return 'negative';
@@ -222,13 +361,6 @@
         if (label.startsWith('+')) return getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#c7924f';
         return getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#9aa4b2';
       }
-
-      function getLevelForFame(fame) {
-        const f = Math.max(0, Math.floor(Number(fame) || 0));
-        for (let r of LEVEL_RANGES) if (f >= r.min && f <= r.max) return r.level;
-        return LEVEL_RANGES[LEVEL_RANGES.length - 1].level;
-      }
-
       function buildRepTrack() {
         el.repTrackContainer.innerHTML = '';
         REP_TRACK.forEach((label, idx) => {
@@ -238,11 +370,14 @@
           step.setAttribute('role','listitem');
           step.setAttribute('aria-label', `Reputation ${label}`);
           step.textContent = label;
-          step.addEventListener('click', () => { state.repIndex = idx; renderReputation(); saveToStorage(); });
+          step.addEventListener('click', () => {
+            state.repIndex = idx;
+            renderReputation();
+            saveToStorage();
+          });
           el.repTrackContainer.appendChild(step);
         });
       }
-
       function renderReputation() {
         const label = REP_TRACK[state.repIndex];
         el.reputationValue.textContent = label;
@@ -253,10 +388,16 @@
         if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
       }
 
-      // render fame input (temp if editing) and committed level badge
+      /* ---------------------------
+         Fame & Level UI
+         - editing buffer allows user to type, not update level until confirm (Enter or blur)
+         - show only newly gained level rewards on commit (prev+1..new)
+         - gained popup persists until tap-off
+         - press badge to toggle full list up to current committed level
+         --------------------------- */
       function renderFameAndLevel() {
-        el.fameInput.value = editing && tempFame !== null ? tempFame : state.fame;
-        const level = state.previousLevel; // only committed level shown until confirm
+        el.fameInput.value = editing && tempFame !== null ? tempFame : String(state.fame || 0);
+        const level = state.previousLevel;
         el.playerLevel.textContent = `Player Level ${level}`;
         el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
       }
@@ -275,7 +416,13 @@
         return item;
       }
 
-      // show only newly reached levels (prevLevel+1 .. newLevel) and persist until tap-off
+      function buildFullTooltip(level) {
+        el.tooltipList.innerHTML = '';
+        for (let l = 1; l <= level; l++) {
+          el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
+        }
+      }
+
       function showGainedLevelsPersist(prevLevel, newLevel) {
         el.tooltipList.innerHTML = '';
         for (let l = prevLevel + 1; l <= newLevel; l++) {
@@ -288,13 +435,12 @@
         }
       }
 
-      // toggle full list (press badge)
-      function buildFullTooltip(level) {
-        el.tooltipList.innerHTML = '';
-        for (let l = 1; l <= level; l++) {
-          el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
-        }
+      function closeTooltip() {
+        el.tooltip.classList.remove('visible');
+        el.tooltip.setAttribute('aria-hidden','true');
+        el.playerLevel.setAttribute('aria-pressed','false');
       }
+
       function toggleTooltip() {
         const isVisible = el.tooltip.classList.contains('visible');
         if (isVisible) {
@@ -306,80 +452,17 @@
           el.playerLevel.setAttribute('aria-pressed','true');
         }
       }
-      function closeTooltip() {
-        el.tooltip.classList.remove('visible');
-        el.tooltip.setAttribute('aria-hidden','true');
-        el.playerLevel.setAttribute('aria-pressed','false');
-      }
 
-      function renderDummy() {
-        el.dummyHand.textContent = state.dummy.hand;
-        el.dummyWounds.textContent = state.dummy.wounds;
-        el.dummyLast.textContent = state.dummy.lastAction;
-        el.dummySub.textContent = state.dummy.name;
-      }
-
-      function clamp(n,min=0,max=999){return Math.max(min,Math.min(max,n));}
-
-      // Reputation buttons
-      el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
-      el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
-
-      // Fame input behavior: editing buffer, select all on focus/click, prevent caret reposition
-      el.fameInput.addEventListener('focus', (e) => {
+      /* ---------------------------
+         Fame input behavior (editing buffer)
+         --------------------------- */
+      function startEditingFame() {
         editing = true;
-        el.fameInput.classList.add('editing');
-        // start editing with the committed value pre-filled
         tempFame = String(state.fame || 0);
-        // select all so typing replaces
+        el.fameInput.classList.add('editing');
         setTimeout(() => {
-          try { e.target.select(); } catch (err) {}
+          try { el.fameInput.select(); } catch (err) {}
         }, 0);
-      });
-      el.fameInput.addEventListener('mouseup', (e) => {
-        // prevent mouseup moving caret after selection
-        e.preventDefault();
-        try { e.target.select(); } catch (err) {}
-      });
-      el.fameInput.addEventListener('touchstart', (e) => {
-        setTimeout(() => {
-          try { e.target.select(); } catch (err) {}
-        }, 0);
-      }, {passive:true});
-
-      // handle typing into the input (temp only)
-      el.fameInput.addEventListener('input', (e) => {
-        const raw = e.target.value;
-        // allow blank while editing
-        if (raw === '') {
-          tempFame = '';
-          return;
-        }
-        // sanitize to non-negative integer
-        const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw) || 0)) : 0;
-        tempFame = String(parsed);
-        e.target.value = tempFame;
-      });
-
-      // commit edit on blur or Enter; Escape cancels
-      function commitFameEdit() {
-        if (!editing) return;
-        const raw = tempFame === '' ? '0' : (tempFame || '0');
-        const parsed = Math.max(0, Math.floor(Number(raw) || 0));
-        const prevLevel = state.previousLevel;
-        const newLevel = getLevelForFame(parsed);
-        // update committed fame and previousLevel
-        state.fame = parsed;
-        state.previousLevel = newLevel;
-        // show only relevant newly reached levels (prevLevel+1 .. newLevel)
-        if (newLevel > prevLevel) {
-          showGainedLevelsPersist(prevLevel, newLevel);
-        }
-        editing = false;
-        tempFame = null;
-        el.fameInput.classList.remove('editing');
-        saveToStorage();
-        renderFameAndLevel(); // will show committed level now
       }
       function cancelFameEdit() {
         editing = false;
@@ -387,13 +470,179 @@
         el.fameInput.classList.remove('editing');
         renderFameAndLevel();
       }
+      function commitFameEdit() {
+        if (!editing) return;
+        const raw = tempFame === '' ? '0' : (tempFame || '0');
+        const parsed = Math.max(0, Math.floor(Number(raw) || 0));
+        const prevLevel = state.previousLevel;
+        const newLevel = getLevelForFame(parsed);
+        state.fame = parsed;
+        state.previousLevel = newLevel;
+        // show only relevant level rewards (prev+1..new)
+        if (newLevel > prevLevel) showGainedLevelsPersist(prevLevel, newLevel);
+        editing = false;
+        tempFame = null;
+        el.fameInput.classList.remove('editing');
+        saveToStorage();
+        renderFameAndLevel();
+      }
 
+      /* ---------------------------
+         Dummy Player: renderers and operations
+         --------------------------- */
+      function renderDeckComposition() {
+        // count remaining cards per color in deck
+        const counts = COLORS.reduce((acc,c)=>{acc[c]=0;return acc;},{});
+        state.deck.forEach(c => counts[c] = (counts[c]||0)+1);
+        el.deckComposition.innerHTML = '';
+        COLORS.forEach(c => {
+          const node = document.createElement('div');
+          node.style.display = 'flex';
+          node.style.flexDirection = 'column';
+          node.style.alignItems = 'center';
+          node.style.minWidth = '72px';
+          node.style.padding = '8px';
+          node.style.borderRadius = '8px';
+          node.style.background = 'rgba(255,255,255,0.01)';
+          const dot = document.createElement('div');
+          dot.style.width = '14px';
+          dot.style.height = '14px';
+          dot.style.borderRadius = '50%';
+          dot.style.marginBottom = '6px';
+          dot.style.background = c === 'red' ? 'var(--red)' : c === 'blue' ? 'var(--blue)' : c === 'green' ? 'var(--green)' : 'var(--white)';
+          const label = document.createElement('div');
+          label.style.fontSize = '12px';
+          label.style.color = 'var(--muted)';
+          label.textContent = c.charAt(0).toUpperCase() + c.slice(1);
+          const num = document.createElement('div');
+          num.style.fontWeight = '800';
+          num.style.marginTop = '6px';
+          num.textContent = counts[c] || 0;
+          node.appendChild(dot);
+          node.appendChild(label);
+          node.appendChild(num);
+          el.deckComposition.appendChild(node);
+        });
+      }
+
+      function renderCrystals() {
+        el.crystalList.innerHTML = '';
+        COLORS.forEach(c => {
+          const qty = state.crystals[c] || 0;
+          const n = document.createElement('div');
+          n.className = 'crystal ' + c;
+          n.innerHTML = `<div style="font-size:12px;opacity:0.9">${qty}×</div><div style="font-size:12px">${c.charAt(0).toUpperCase()+c.slice(1)}</div>`;
+          el.crystalList.appendChild(n);
+        });
+      }
+
+      function renderDummyCounts() {
+        el.dummyHand.textContent = String(state.hand.length);
+        el.dummyDiscard.textContent = String(state.discard.length);
+        el.dummyDeckCount.textContent = String(state.deck.length);
+      }
+
+      function drawOne() {
+        // if deck empty, shuffle discard into deck
+        if (state.deck.length === 0 && state.discard.length > 0) {
+          state.deck = state.discard.slice();
+          state.discard = [];
+          shuffleArray(state.deck);
+        }
+        if (state.deck.length === 0) return;
+        const card = state.deck.pop();
+        state.hand.push(card);
+        saveToStorage();
+        renderAll();
+      }
+      function discardOne() {
+        if (state.hand.length === 0) return;
+        const card = state.hand.pop();
+        state.discard.push(card);
+        saveToStorage();
+        renderAll();
+      }
+      function shuffleDeck() {
+        shuffleArray(state.deck);
+        saveToStorage();
+        renderAll();
+      }
+      function resetDeck() {
+        state.deck = buildInitialDeck();
+        state.discard = [];
+        state.hand = [];
+        state.crystals = initialCrystals();
+        state.dummyNotes = '';
+        saveToStorage();
+        renderAll();
+      }
+
+      /* ---------------------------
+         Global render
+         --------------------------- */
+      function renderAll() {
+        renderReputation();
+        renderFameAndLevel();
+        el.volkareText.value = state.volkareNotes || '';
+        el.dummyNotes.value = state.dummyNotes || '';
+        renderDeckComposition();
+        renderCrystals();
+        renderDummyCounts();
+      }
+
+      /* ---------------------------
+         Event wiring
+         --------------------------- */
+      // reputation controls
+      el.repUp.addEventListener('click', () => {
+        state.repIndex = clamp(state.repIndex + 1, 0, REP_TRACK.length - 1);
+        renderReputation();
+        saveToStorage();
+      });
+      el.repDown.addEventListener('click', () => {
+        state.repIndex = clamp(state.repIndex - 1, 0, REP_TRACK.length - 1);
+        renderReputation();
+        saveToStorage();
+      });
+
+      // rep track clicks built in buildRepTrack
+
+      // fame input: select-on-focus and prevent caret reposition (click replaces)
+      el.fameInput.addEventListener('focus', (e) => {
+        startEditingFame();
+      });
+      el.fameInput.addEventListener('mouseup', (e) => {
+        // prevent mouseup from moving caret; ensure whole selection
+        e.preventDefault();
+        try { el.fameInput.select(); } catch (err) {}
+      });
+      el.fameInput.addEventListener('touchstart', (e) => {
+        setTimeout(() => { try { el.fameInput.select(); } catch (err) {} }, 0);
+      }, { passive: true });
+
+      // capture typing into tempFame
+      el.fameInput.addEventListener('input', (e) => {
+        const raw = e.target.value;
+        if (raw === '') {
+          tempFame = '';
+          return;
+        }
+        const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw) || 0)) : 0;
+        tempFame = String(parsed);
+        e.target.value = tempFame;
+      });
+
+      // commit on blur
+      el.fameInput.addEventListener('blur', (e) => {
+        commitFameEdit();
+      });
+
+      // keyboard: Enter commits, Escape cancels
       el.fameInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
-          // commit
           e.preventDefault();
-          el.fameInput.blur(); // triggers commit via blur handler below
           commitFameEdit();
+          el.fameInput.blur();
         } else if (e.key === 'Escape') {
           e.preventDefault();
           cancelFameEdit();
@@ -401,74 +650,49 @@
         }
       });
 
-      // blur commits (clicking elsewhere)
-      el.fameInput.addEventListener('blur', () => {
-        commitFameEdit();
+      // player level badge toggles full tooltip
+      el.playerLevel.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleTooltip();
       });
-
-      // Player level badge toggles full list (press)
-      el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
-
-      // keyboard accessibility for badge
       el.playerLevel.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); }
       });
 
-      // close tooltip when tapping outside (applies to gained-level popup and full list)
+      // close tooltip on outside click (applies to both gained-level persistent popup and full list)
       document.addEventListener('click', (e) => {
         const inside = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.fameInput;
         if (!inside) closeTooltip();
       });
 
-      // Dummy controls
-      document.getElementById('play-1').addEventListener('click', () => { state.dummy.hand = clamp(state.dummy.hand-1,0); state.dummy.lastAction='Played 1 card'; renderDummy(); saveToStorage(); });
-      document.getElementById('draw-1').addEventListener('click', () => { state.dummy.hand = clamp(state.dummy.hand+1,0); state.dummy.lastAction='Drew 1 card'; renderDummy(); saveToStorage(); });
-      document.getElementById('heal-1').addEventListener('click', () => { state.dummy.wounds = clamp(state.dummy.wounds-1,0); state.dummy.lastAction='Healed 1 wound'; renderDummy(); saveToStorage(); });
-      document.getElementById('reset-dummy').addEventListener('click', () => { state.dummy={name:'Dummy Player',hand:5,wounds:0,lastAction:'Idle'}; renderDummy(); saveToStorage(); });
-      document.getElementById('auto-action').addEventListener('click', () => {
-        if (state.dummy.hand < 3) { state.dummy.hand = clamp(state.dummy.hand + 2, 0); state.dummy.lastAction = 'Auto: Drew 2 cards'; }
-        else if (state.dummy.wounds >= 4) { state.dummy.lastAction = 'Auto: Rested (defensive)'; state.dummy.wounds = clamp(state.dummy.wounds - 1, 0); }
-        else { state.dummy.hand = clamp(state.dummy.hand - 1, 0); state.dummy.wounds = clamp(state.dummy.wounds + 1, 0); state.dummy.lastAction = 'Auto: Attacked (took 1 wound)'; }
-        renderDummy(); saveToStorage();
-      });
+      // volkare & dummy notes binding
+      el.volkareText.addEventListener('input', (e) => { state.volkareNotes = e.target.value; saveToStorage(); });
+      el.dummyNotes.addEventListener('input', (e) => { state.dummyNotes = e.target.value; saveToStorage(); });
 
-      // notes binding
-      el.volkareText.addEventListener('input', (e) => state.volkareNotes = e.target.value);
+      // dummy buttons
+      el.drawBtn.addEventListener('click', () => { drawOne(); });
+      el.discardBtn.addEventListener('click', () => { discardOne(); });
+      el.shuffleBtn.addEventListener('click', () => { shuffleDeck(); });
+      el.resetDeckBtn.addEventListener('click', () => { resetDeck(); });
 
-      // persistence
-      const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_confirm';
-      function saveToStorage(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({repIndex:state.repIndex,fame:state.fame,previousLevel:state.previousLevel,dummy:state.dummy,volkareNotes:state.volkareNotes})); } catch(e){} }
-      function loadFromStorage(){ try { const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return; const parsed=JSON.parse(raw); if(typeof parsed.repIndex==='number' && parsed.repIndex>=0 && parsed.repIndex<REP_TRACK.length) state.repIndex=parsed.repIndex; if(typeof parsed.fame==='number') state.fame=parsed.fame; if(typeof parsed.previousLevel==='number') state.previousLevel=parsed.previousLevel; if(parsed.dummy) state.dummy=Object.assign(state.dummy, parsed.dummy); if(typeof parsed.volkareNotes==='string') state.volkareNotes=parsed.volkareNotes; } catch(e){} }
-
-      // init
+      /* ---------------------------
+         Initialization
+         --------------------------- */
       buildRepTrack();
       loadFromStorage();
+      // ensure minimum defaults
+      if (!Array.isArray(state.deck) || state.deck.length === 0) state.deck = buildInitialDeck();
+      if (!state.crystals || typeof state.crystals !== 'object') state.crystals = initialCrystals();
       if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
       if (typeof state.fame !== 'number') state.fame = 0;
-      state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
-      renderReputation();
-      renderFameAndLevel();
-      renderDummy();
-      document.getElementById('volkare-text').value = state.volkareNotes;
+      if (typeof state.previousLevel !== 'number') state.previousLevel = getLevelForFame(state.fame || 0);
+      renderAll();
 
-      // autosave
+      // autosave interval
       setInterval(saveToStorage, 2000);
 
-      // keyboard shortcuts
-      window.addEventListener('keydown', (ev) => {
-        if (ev.key === 'ArrowLeft') el.repDown.click();
-        if (ev.key === 'ArrowRight') el.repUp.click();
-        if ((ev.key === 'f' || ev.key === 'F') && !editing) {
-          // increment committed fame for quick testing
-          state.fame = clamp(state.fame + 1, 0);
-          const prevLevel = state.previousLevel;
-          const newLevel = getLevelForFame(state.fame);
-          state.previousLevel = newLevel;
-          renderFameAndLevel();
-          saveToStorage();
-          if (newLevel > prevLevel) showGainedLevelsPersist(prevLevel, newLevel);
-        }
-      });
+      // expose state for debugging (remove for production)
+      window.__mkState = state;
     })();
   </script>
 </body>
