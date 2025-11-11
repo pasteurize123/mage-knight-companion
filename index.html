@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mage Knight Companion — Full (with General Volkare S overlay)</title>
+<title>Mage Knight Companion — Full (fixed fame + Levels Achieved)</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -68,6 +68,17 @@
   .rep-row.mid .rep-cell.selected{background:#ffeb99;font-weight:700;color:#111}
   .rep-row.bot .rep-cell.selected{background:#ff6b6b;font-weight:700;color:#fff}
 
+  /* Levels panel */
+  .levels-container{position:relative;display:inline-block}
+  .levels-panel{
+    position:absolute;left:0;top:calc(100% + 8px);
+    display:none;background:#fff;border-radius:8px;padding:10px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.12);
+    min-width:220px;max-width:360px;z-index:50;font-size:14px;
+  }
+  .levels-list{display:flex;flex-direction:column;gap:6px;padding:0;margin:0;list-style:none}
+  .level-line{padding:6px 8px;border-radius:4px;font-weight:600;font-size:14px;background:transparent;color:#111}
+
   @media (max-width:700px){
     .symbol{width:24px;height:24px;font-size:16px}
     .symbol.spell::after{top:-6px;right:-6px;width:16px;height:16px;font-size:11px}
@@ -90,17 +101,17 @@
     <section class="panel" aria-labelledby="fame-title">
       <div class="panel-inner">
         <h2 id="fame-title">Fame</h2>
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-          <div style="flex:1;min-width:220px">
-            <label style="font-weight:700;display:block;margin-bottom:6px">Player Fame</label>
+
+        <!-- Restored layout + behavior from previous versions:
+             - left: fame input and increment buttons
+             - right: player level display
+             - Levels Achieved toggle shows only the list of achieved levels (no "Dummy Player" header)
+        -->
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label style="font-weight:700">Player Fame</label>
             <input id="fame-input" type="number" min="0" value="0" style="width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center" />
-          </div>
-          <div style="min-width:120px;text-align:center">
-            <label style="font-weight:700;display:block;margin-bottom:6px">Player Level</label>
-            <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
-          </div>
-          <div style="flex:1">
-            <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <div style="display:flex;gap:6px;margin-top:4px">
               <button class="smallbtn fame-inc" data-inc="1">+1</button>
               <button class="smallbtn fame-inc" data-inc="2">+2</button>
               <button class="smallbtn fame-inc" data-inc="3">+3</button>
@@ -108,17 +119,20 @@
               <button class="smallbtn fame-inc" data-inc="10">+10</button>
             </div>
           </div>
+
+          <div style="margin-left:auto;text-align:center">
+            <label style="font-weight:700;display:block;margin-bottom:6px">Player Level</label>
+            <div id="player-level" class="output" style="min-width:80px">1</div>
+          </div>
         </div>
 
         <div style="margin-top:10px">
-          <h3 style="margin:8px 0 6px 0;font-size:1rem">
-            <span class="levels-container">
-              <button id="levels-toggle" aria-expanded="false" class="smallbtn">Levels Achieved</button>
-              <div id="levels-panel" style="display:none;position:absolute;background:#fff;padding:10px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.12);margin-top:8px">
-                <ul id="levels-list" style="margin:0;padding:0;list-style:none"><li style="font-weight:600">None yet</li></ul>
-              </div>
-            </span>
-          </h3>
+          <span class="levels-container">
+            <button id="levels-toggle" class="smallbtn" aria-expanded="false" aria-controls="levels-panel" aria-haspopup="true">Levels Achieved</button>
+            <div id="levels-panel" class="levels-panel" role="region" aria-label="Levels achieved panel" aria-hidden="true" tabindex="-1">
+              <ul id="levels-list" class="levels-list"><li class="level-line">None yet</li></ul>
+            </div>
+          </span>
         </div>
       </div>
     </section>
@@ -285,13 +299,8 @@
   </div>
 
 <script>
-/* Full app logic integrated with the previous structure:
-   - Main dummy player behaves as before
-   - General Volkare: deck = 16 Adv (4 of each color) + 4 Spells (1 each); wounds are 'Wound' cards shown as 🩸
-   - Spells display with an 'S' overlay via CSS class .spell on .symbol elements in pill lists and single-card output
-   - GV draws 1 card at a time; when deck is empty Draw button becomes Frenzy and descriptive text shown
-   - Adding wounds inserts Wound card(s) into GV deck; decreasing wounds removes Wound cards from deck/discard
-   - New Game resets GV deck and wounds to base and resets main module to defaults
+/* Integrated app — fame UI restored, Levels Achieved lists mainModule's achieved levels only.
+   All other behavior preserved (GV wound UI, S overlay on spells, GV draws 1, Frenzy state).
 */
 
 const STORAGE_KEY = 'mk_companion_full_vfinal';
@@ -376,7 +385,8 @@ function DummyModule() {
   }
   function reshuffle(){ if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); }
 
-  function renderLevelsList(){ const arr = []; for(let i=0;i<achievedLevels.length;i++){ const L = achievedLevels[i]; const desc = LEVEL_PROMPTS[L]||''; arr.push(`Level ${L}: ${desc}`); } return arr.length?arr:['None yet']; }
+  function getRenderLevels(){ const arr = []; for(let i=0;i<achievedLevels.length;i++){ const L = achievedLevels[i]; const desc = LEVEL_PROMPTS[L]||''; arr.push(`Level ${L}: ${desc}`); } return arr.length?arr:[]; }
+
   function resetInitial(){
     crystals = { red:0, blue:0, green:0, white:0 };
     const keys=['red','blue','green','white'];
@@ -402,7 +412,7 @@ function DummyModule() {
     if(reshuffleEl) reshuffleEl.addEventListener('click', reshuffle);
   }
 
-  return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels: renderLevelsList, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); } };
+  return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); }, achievedLevelsRef: ()=>achievedLevels };
 }
 
 /* ------------------------ General Volkare Module ------------------------ */
@@ -468,7 +478,6 @@ function GVModule(){
   }
 
   function drawOnce(){
-    // GV draws exactly 1 card at a time
     const out = el(ids.dummyOutput);
     if(deck.length === 0){
       updateDrawButtonState();
@@ -479,7 +488,6 @@ function GVModule(){
     discard.push(card);
     if(out){
       if(card.startsWith('Spell-')){
-        // render a span with S overlay visually
         out.innerHTML = `<span class="symbol spell">${SYMBOL[card.split('-')[1]]}</span>`;
       } else if(card === 'Wound'){
         out.innerHTML = `<span class="wound-symbol">${SYMBOL.Wound}</span>`;
@@ -536,7 +544,6 @@ const gvModule = GVModule();
 const levelsToggleBtn = document.getElementById('levels-toggle');
 const levelsPanel = document.getElementById('levels-panel');
 const levelsList = document.getElementById('levels-list');
-const levelModalEl = document.getElementById('level-modal'); // not used but kept
 let fame = 0;
 
 function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
@@ -597,22 +604,24 @@ function buildRepRows(){
 function selectRepCell(sel){ document.querySelectorAll('.rep-cell').forEach(c=>c.classList.remove('selected')); const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]){ cells[sel.index].classList.add('selected'); window._repSelection = {...sel}; saveMeta(); } }
 function applyRepSelection(sel){ if(!sel) return; const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
 
-/* Levels panel rendering (only main included) */
+/* Levels list rendering (ONLY achieved levels, no header) */
 function renderLevelsPanel(){
   levelsList.innerHTML = '';
   const lines = mainModule.getRenderLevels();
-  const header = document.createElement('li'); header.style.fontWeight='600'; header.textContent='Dummy Player:'; levelsList.appendChild(header);
-  lines.forEach(l=>{ const li=document.createElement('li'); li.style.fontWeight='500'; li.style.paddingLeft='10px'; li.textContent = l; levelsList.appendChild(li); });
+  if(lines.length === 0){
+    const li = document.createElement('li'); li.className='level-line'; li.textContent='None yet'; levelsList.appendChild(li); return;
+  }
+  lines.forEach(l=>{ const li=document.createElement('li'); li.className='level-line'; li.textContent = l; levelsList.appendChild(li); });
 }
 
-/* Fame handling */
+/* Fame handling: same behavior as previous versions */
 function handleLevelPrompts(prevLevel, newLevel){
   const messages = [];
   for(let L = prevLevel+1; L<=newLevel; L++){
     if(LEVEL_PROMPTS[L]) messages.push(`Level ${L}: ${LEVEL_PROMPTS[L]}`); else messages.push(`Level ${L}`);
   }
   if(messages.length===0) return;
-  // show simple alert-style prompt sequence
+  // show modal-like alert sequence (keeps simple)
   alert(messages.join('\n'));
 }
 function updateFameUI(prevFame = null){
@@ -659,7 +668,6 @@ window.addEventListener('load', ()=>{
   else { window._repSelection = { row:'mid', index:0 }; applyRepSelection(window._repSelection); saveMeta(); }
 
   mainModule.rebuildDeck();
-  // ensure GV deck exists and wounds display is synced
   gvModule.buildDefaultDeck();
   gvModule.load();
 
@@ -667,28 +675,27 @@ window.addEventListener('load', ()=>{
   gvModule.updateCounts && gvModule.updateCounts();
   gvModule.updateDrawButtonState && gvModule.updateDrawButtonState();
 
+  // fame input + increment buttons
   document.getElementById('fame-input').addEventListener('change', ()=>{ const prev=fame; fame = clampIntNonNeg(document.getElementById('fame-input').value); updateFameUI(prev); });
   document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=>{ const prev=fame; fame = Math.max(0, Number(fame) + Number(btn.dataset.inc||0)); updateFameUI(prev); }));
 
-  // hook up end-round opener for main (draw code in main sets End Round when deck empty)
+  // levels toggle
+  levelsToggleBtn.addEventListener('click', ()=>{
+    const expanded = levelsToggleBtn.getAttribute('aria-expanded') === 'true';
+    if(expanded){ levelsToggleBtn.setAttribute('aria-expanded','false'); levelsPanel.setAttribute('aria-hidden','true'); levelsPanel.style.display='none'; }
+    else { levelsToggleBtn.setAttribute('aria-expanded','true'); levelsPanel.setAttribute('aria-hidden','false'); levelsPanel.style.display='block'; renderLevelsPanel(); levelsPanel.focus?.(); }
+  });
+
+  // expose end-round opener
   window.openEndRoundModalFor = openEndRoundModalFor;
 
   document.getElementById('new-game').addEventListener('click', newGame);
 
-  // levels panel toggle
-  const toggle = document.getElementById('levels-toggle');
-  toggle.addEventListener('click', ()=>{
-    const is = levelsPanel.style.display === 'block';
-    levelsPanel.style.display = is ? 'none' : 'block';
-    if(!is) renderLevelsPanel();
-  });
-
-  // card choice buttons (endround modal) wired above via cardChoices element
-  // periodically save
+  // periodic save
   setInterval(()=>{ mainModule.save && mainModule.save(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
 });
 
-/* expose for debugging in console */
+/* expose for debugging */
 window._main = mainModule;
 window._gv = gvModule;
 </script>
