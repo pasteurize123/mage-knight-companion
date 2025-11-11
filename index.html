@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mage Knight Companion — Reputation fixed</title>
+<title>Mage Knight Companion — Full (with single-line reputation rows)</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -39,8 +39,7 @@
   .levels-list{
     position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
     display:none;min-width:240px;background:#fff;border:1px solid #eee;border-radius:8px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:40;
-    font-size:14px;
-    max-height:340px;overflow:auto;
+    font-size:14px;max-height:340px;overflow:auto;
   }
   .levels-list .level-line{padding:6px 8px;border-bottom:1px dashed #f0f0f0;display:flex;gap:8px;align-items:center}
   .levels-list .level-line:last-child{border-bottom:0}
@@ -50,36 +49,51 @@
   .levels-wrapper:focus-within .levels-list,
   .levels-wrapper[aria-expanded="true"] .levels-list { display:block; }
 
-  /* Reputation — mobile friendly (no horizontal scrolling) */
+  /* Reputation wrapper with forced single-line rows */
   .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:stretch;position:relative;padding:6px}
-  .rep-row{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;padding:6px 0;width:100%}
-  /* fixed square cells so all boxes are same size */
-  .rep-cell{
-    flex:0 0 44px;
-    height:44px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-width:44px;
-    padding:0 6px;
-    background:#e8e8e8;
-    border-radius:6px;
-    text-align:center;
-    cursor:pointer;
-    user-select:none;
-    font-size:14px;
-    box-sizing:border-box;
+
+  /* Force each rep-row to be a single line (no wrap) and size cells so they fit */
+  .rep-row{display:flex;align-items:center;gap:8px;padding:6px 0;width:100%;flex-wrap:nowrap;overflow:visible}
+
+  /* Top row has 7 items exactly */
+  .rep-row.top .rep-cell{
+    flex:0 0 calc((100% - 6 * 8px) / 7);
+    height:auto;
+    min-height:40px;
+    display:flex;align-items:center;justify-content:center;
+    padding:6px;border-radius:6px;background:#e8e8e8;text-align:center;font-size:14px;box-sizing:border-box
   }
+
+  /* Middle row: single cell fills available width */
+  .rep-row.mid{justify-content:center}
+  .rep-row.mid .rep-cell{
+    flex:1 1 auto;min-height:40px;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;background:#e8e8e8;font-size:14px;box-sizing:border-box
+  }
+
+  /* Bottom row has 7 items exactly */
+  .rep-row.bot .rep-cell{
+    flex:0 0 calc((100% - 6 * 8px) / 7);
+    height:auto;
+    min-height:40px;
+    display:flex;align-items:center;justify-content:center;
+    padding:6px;border-radius:6px;background:#e8e8e8;text-align:center;font-size:14px;box-sizing:border-box
+  }
+
+  /* Selected states */
   .rep-row.top .rep-cell.selected{background:var(--gold);font-weight:700;color:#111}
   .rep-row.mid .rep-cell.selected{background:#ffeb99;font-weight:700;color:#111}
   .rep-row.bot .rep-cell.selected{background:#ff6b6b;font-weight:700;color:#fff}
 
-  /* Ensure top row fits on small screens: shrink cells if needed */
+  /* Make cells slightly smaller on narrow screens */
   @media (max-width:420px){
-    .rep-cell{flex:0 0 36px;height:36px;min-width:36px;font-size:13px}
+    .rep-row.top .rep-cell,
+    .rep-row.bot .rep-cell { min-height:34px; font-size:13px; padding:4px }
+    .rep-row.mid .rep-cell { min-height:34px; font-size:13px; padding:4px }
   }
-  @media (max-width:320px){
-    .rep-cell{flex:0 0 30px;height:30px;min-width:30px;font-size:12px}
+  @media (max-width:340px){
+    .rep-row.top .rep-cell,
+    .rep-row.bot .rep-cell { min-height:30px; font-size:12px; padding:3px }
+    .rep-row.mid .rep-cell { min-height:30px; font-size:12px; padding:3px }
   }
 
   /* Dummy player responsive layout (compact) */
@@ -109,7 +123,7 @@
   <h1>Mage Knight Companion</h1>
 
   <div class="container">
-    <!-- Reputation (top row compact 0..+5; mid single 0; bottom 0..X) -->
+    <!-- Reputation (single-line rows) -->
     <section class="panel" aria-labelledby="rep-title">
       <div class="panel-inner">
         <h2 id="rep-title">Reputation</h2>
@@ -145,15 +159,13 @@
 
           <div class="levels-wrapper" id="levels-wrapper" aria-expanded="false">
             <button id="levels-trigger" class="levels-trigger" aria-controls="levels-list" aria-haspopup="true">Levels Achieved</button>
-            <div id="levels-list" class="levels-list" role="list" aria-hidden="true">
-              <!-- JS populates this -->
-            </div>
+            <div id="levels-list" class="levels-list" role="list" aria-hidden="true"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Dummy Player (compact layout) -->
+    <!-- Dummy Player (compact, like previous renditions) -->
     <section class="panel" aria-labelledby="dummy-title">
       <div class="panel-inner" id="dummy-module">
         <h2 id="dummy-title">Dummy Player</h2>
@@ -255,7 +267,7 @@
       </div>
     </section>
 
-    <!-- General Volkare (unchanged) -->
+    <!-- General Volkare -->
     <section class="panel" aria-labelledby="gv-title">
       <div class="panel-inner" id="gv-module">
         <h2 id="gv-title">General Volkare</h2>
@@ -361,16 +373,15 @@
   </div>
 
 <script>
-/* Updated reputation arrays to match user request:
-   Top row: 0, +1, +1, +2, +2, +3, +5
-   Mid row: 0
-   Bot row: 0, -1, -1, -2, -3, -5, X
-   All rep boxes are equal-sized squares and will wrap without horizontal scrolling.
-   Levels Achieved still formatted as "Level X: Description" (prefix bold).
-   Full game logic preserved (fame mapping, dummy & GV, persistence).
+/* Full integrated JS with the single-line reputation rows:
+   Top:  ["0","+1","+1","+2","+2","+3","+5"]
+   Mid:  ["0"]
+   Bot:  ["0","-1","-1","-2","-3","-5","X"]
+   Levels Achieved formatted "Level X: Description" with prefix bold and description normal weight on one line.
+   Dummy player and GV logic included, plus persistence.
 */
 
-const STORAGE_KEY = 'mk_companion_full_v6';
+const STORAGE_KEY = 'mk_companion_full_v7';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
 const FAME_LEVELS = [
@@ -392,7 +403,7 @@ function getFameLevel(val){
   return 10;
 }
 
-/* ---------------- Dummy Module (compact) ---------------- */
+/* ---------------- Dummy Module ---------------- */
 function DummyModule() {
   const ids = {
     red:'red', blue:'blue', green:'green', white:'white',
@@ -670,6 +681,10 @@ function buildRepRows(){
   repWrap.appendChild(top);
   repWrap.appendChild(mid);
   repWrap.appendChild(bot);
+
+  // apply saved selection if exists
+  if(window._repSelection) applyRepSelection(window._repSelection);
+  else { window._repSelection = { row:'mid', index: 0 }; applyRepSelection(window._repSelection); saveMeta(); }
 }
 function selectRepCell(sel){
   document.querySelectorAll('.rep-cell').forEach(c=>c.classList.remove('selected'));
@@ -843,7 +858,7 @@ window.addEventListener('load', ()=>{
   setInterval(()=>{ mainModule.save && mainModule.save(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
 });
 
-/* Expose for debugging */
+/* Expose for quick debug */
 window._main = mainModule;
 window._gv = gvModule;
 </script>
