@@ -57,6 +57,9 @@
     .center-column{display:flex;flex-direction:column;align-items:center;gap:6px}
     .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--overlay);z-index:60}
     .modal{background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
+    /* Ensure level modal lines appear separately */
+    .modal p{margin:0;font-size:0.95rem;line-height:1.35}
+    footer{display:flex;justify-content:center;padding:8px 0} /* center New Game button */
     @media (max-width:700px){ input[type=number]{width:90px} :root{--rep-min:34px} }
   </style>
 </head>
@@ -303,7 +306,6 @@
     // Helpers
     function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
 
-    // determine player level from fame, capped at 10
     function getFameLevel(fameValue){
       const v = Math.max(0, Number(fameValue) || 0);
       for (const b of FAME_LEVELS) if (v >= b.min && v <= b.max) return b.level;
@@ -389,9 +391,11 @@
       const messages = [];
       for(let L = prevLevel + 1; L <= newLevel; L++){
         if(LEVEL_PROMPTS[L]) messages.push(`Level ${L}: ${LEVEL_PROMPTS[L]}`);
+        else messages.push(`Level ${L}`);
       }
       if(messages.length === 0) return;
-      levelMessage.textContent = messages.join('\n');
+      // show each new level as a separate line in the modal
+      levelMessage.innerHTML = messages.map(m => `<div>${m}</div>`).join('');
       levelModal.style.display = 'flex'; levelModal.setAttribute('aria-hidden','false');
     }
     function updateFameUI(prevFame = null){
@@ -571,7 +575,7 @@
         cardCounts = { ...DEFAULT_CARDS };
         rebuildDeckFromCounts();
         achievedLevels = [1];
-        // default reputation mid 0 and persist (user asked for new-game behavior)
+        // default reputation mid 0 and persist
         repSelection = { row: 'mid', index: 0 };
         applyRepSelection(repSelection);
         persistAll();
