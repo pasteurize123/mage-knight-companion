@@ -72,6 +72,9 @@
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
+    .footer-row { display:flex; gap:8px; justify-content:center; align-items:center; padding-top:6px; }
+    .btn.ghost { background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); padding:8px 10px; border-radius:10px; cursor:pointer; }
+
     @media (max-width:420px){ :root { --phone-width:94vw; } }
   </style>
 </head>
@@ -114,6 +117,10 @@
           </div>
         </div>
       </section>
+
+      <div class="footer-row">
+        <button id="new-game" class="btn ghost" title="Start a new game and reset all values">New Game</button>
+      </div>
 
       <footer class="footer" style="text-align:center;color:var(--muted);font-size:12px;padding-top:6px">Phone layout • Lightweight companion</footer>
     </div>
@@ -166,7 +173,8 @@
         fameInput: document.getElementById('fame-input'),
         playerLevel: document.getElementById('player-level'),
         tooltip: document.getElementById('level-tooltip'),
-        tooltipList: document.getElementById('tooltip-list')
+        tooltipList: document.getElementById('tooltip-list'),
+        newGameBtn: document.getElementById('new-game')
       };
 
       // Utilities
@@ -279,7 +287,7 @@
         saveToStorage();
       });
 
-      // Player level badge toggles full list (press)
+      // Player level badge interactions
       el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
       el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
 
@@ -296,6 +304,25 @@
       // persistence
       function saveToStorage(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({repIndex:state.repIndex,fame:state.fame,previousLevel:state.previousLevel})); } catch(e){} }
       function loadFromStorage(){ try { const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return; const parsed=JSON.parse(raw); if(typeof parsed.repIndex==='number' && parsed.repIndex>=0 && parsed.repIndex<REP_TRACK.length) state.repIndex=parsed.repIndex; if(typeof parsed.fame==='number') state.fame=parsed.fame; if(typeof parsed.previousLevel==='number') state.previousLevel=parsed.previousLevel; } catch(e){} }
+
+      // New Game: reset everything back to defaults
+      function newGameReset() {
+        // reset state
+        state.repIndex = DEFAULT_REP_INDEX;
+        state.fame = 0;
+        state.previousLevel = 1;
+        // clear stored key entirely and save fresh defaults
+        try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+        saveToStorage();
+        closeTooltip();
+        renderReputation();
+        renderFameAndLevel();
+      }
+
+      el.newGameBtn.addEventListener('click', () => {
+        if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(30);
+        newGameReset();
+      });
 
       // init
       buildRepTrack();
