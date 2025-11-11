@@ -17,6 +17,7 @@
       --track-active: rgba(199,146,79,0.16);
       --gold:#c7924f;
       --red:#d9534f;
+      --yellow:#f6d365;
     }
     * { box-sizing: border-box; }
     html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
@@ -60,7 +61,7 @@
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
-    .stat-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; } /* centered current reputation */
     .stat-value { font-size:28px; font-weight:700; color:var(--accent); }
 
     /* Reputation track */
@@ -93,16 +94,18 @@
     }
     .rep-track {
       display:flex;
-      gap:6px;
+      gap:8px;
       align-items:center;
       overflow:auto;
-      padding:6px 4px;
+      padding:10px 6px;
       border-radius:10px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.08) transparent;
     }
     .rep-step {
-      min-width:44px;
-      padding:8px 6px;
-      border-radius:8px;
+      min-width:48px;
+      padding:10px 6px;
+      border-radius:10px;
       background:var(--track-bg);
       text-align:center;
       border:1px solid rgba(255,255,255,0.02);
@@ -111,13 +114,19 @@
       cursor:pointer;
       flex-shrink:0;
       user-select:none;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:44px;
     }
+    .rep-step.zero { background: rgba(246,211,101,0.08); color:var(--yellow); border:1px solid rgba(246,211,101,0.18); }
+    .rep-step.positive { background: rgba(199,146,79,0.08); color:var(--gold); border:1px solid rgba(199,146,79,0.18); }
+    .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
     .rep-step.active {
-      background:var(--track-active);
-      color:#ffdcb3;
-      border:1px solid rgba(199,146,79,0.25);
-      font-weight:700;
-      transform:scale(1.04);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      transform:scale(1.06);
+      font-weight:800;
     }
 
     .dummy-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; color:#eaf2ff; }
@@ -201,10 +210,10 @@
         <div class="card-body">
           <div class="stat-row">
             <div class="stat-value" id="fame-value">0</div>
-            <div class="stat-controls" aria-hidden="true">
-              <button id="fame-decrease">-</button>
-              <button id="fame-increase">+</button>
-            </div>
+          </div>
+          <div style="display:flex; justify-content:center; gap:8px; margin-top:8px;">
+            <button id="fame-decrease">-</button>
+            <button id="fame-increase">+</button>
           </div>
         </div>
       </section>
@@ -258,10 +267,14 @@
 
   <script>
     (function () {
+      // Reputation track values (user provided)
       const REP_TRACK = ["X", "-5", "-3", "-2", "-1", "-1", "0", "0", "0", "+1", "+1", "+2", "+2", "+3", "+5"];
 
+      // default to the middle 0 (there are three zeros at indices 6,7,8 -> choose center index 7)
+      const DEFAULT_REP_INDEX = 7;
+
       const state = {
-        repIndex: 6,
+        repIndex: DEFAULT_REP_INDEX,
         fame: 0,
         dummy: { name:'Dummy Player', hand:5, wounds:0, lastAction:'Idle' },
         volkareNotes: 'General Volkare: Track story events or reminders here.'
@@ -280,12 +293,19 @@
         volkareText: document.getElementById('volkare-text')
       };
 
+      function classifyLabel(label) {
+        if (label === "0") return 'zero';
+        if (label === "X" || label.startsWith('-')) return 'negative';
+        if (label.startsWith('+')) return 'positive';
+        return '';
+      }
+
       function buildRepTrack() {
         el.repTrackContainer.innerHTML = '';
         REP_TRACK.forEach((label, idx) => {
           const step = document.createElement('button');
           step.type = 'button';
-          step.className = 'rep-step';
+          step.className = 'rep-step ' + classifyLabel(label);
           step.setAttribute('role','listitem');
           step.setAttribute('aria-label', `Reputation ${label}`);
           step.textContent = label;
@@ -307,6 +327,7 @@
         });
         const active = steps[state.repIndex];
         if (active && typeof active.scrollIntoView === 'function') {
+          // center the active step in the track
           active.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
         }
       }
@@ -322,6 +343,7 @@
 
       function clamp(n, min=0, max=999) { return Math.max(min, Math.min(max, n)); }
 
+      // Up / Down buttons move one step
       el.repUp.addEventListener('click', () => {
         state.repIndex = clamp(state.repIndex + 1, 0, REP_TRACK.length - 1);
         renderReputation();
@@ -333,9 +355,11 @@
         saveToStorage();
       });
 
+      // Fame controls
       document.getElementById('fame-decrease').addEventListener('click', () => { state.fame = clamp(state.fame - 1, 0); renderFame(); saveToStorage(); });
       document.getElementById('fame-increase').addEventListener('click', () => { state.fame = clamp(state.fame + 1, 0); renderFame(); saveToStorage(); });
 
+      // Dummy controls
       document.getElementById('play-1').addEventListener('click', () => {
         state.dummy.hand = clamp(state.dummy.hand - 1, 0);
         state.dummy.lastAction = 'Played 1 card';
@@ -370,10 +394,12 @@
         renderDummy(); saveToStorage();
       });
 
+      // notes binding
       el.volkareText.addEventListener('input', (e) => {
         state.volkareNotes = e.target.value;
       });
 
+      // persistence
       const STORAGE_KEY = 'mk_companion_v1_reptrack';
       function saveToStorage() {
         try {
@@ -398,18 +424,23 @@
         } catch (e) {}
       }
 
+      // init
       buildRepTrack();
       loadFromStorage();
+      // enforce default middle zero only if storage didn't provide a repIndex
+      if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
       renderReputation();
       renderFame();
       renderDummy();
       renderVolkare();
 
+      // autosave every 2s
       setInterval(saveToStorage, 2000);
 
+      // keyboard shortcuts for desktop testing (left/right arrows)
       window.addEventListener('keydown', (ev) => {
-        if (ev.key === 'ArrowLeft') { el.repDown.click(); }
-        if (ev.key === 'ArrowRight') { el.repUp.click(); }
+        if (ev.key === 'ArrowLeft') el.repDown.click();
+        if (ev.key === 'ArrowRight') el.repUp.click();
       });
     })();
   </script>
