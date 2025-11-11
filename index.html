@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Fame Confirm</title>
+  <title>Mage Knight Companion — Fame Confirm (new-only rewards)</title>
   <style>
     :root{
       --bg:#0f1724;
@@ -162,6 +162,7 @@
       const state = {
         repIndex: DEFAULT_REP_INDEX,
         fame: 0,
+        // previousLevel now explicitly stores the last confirmed player level
         previousLevel: 1
       };
 
@@ -226,7 +227,7 @@
         if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
       }
 
-      // Fame rendering: show stored fame/level; do NOT change level while editing
+      // Fame rendering: display stored fame & confirmed level; while editing level doesn't change
       function renderFameAndLevel() {
         el.fameInput.value = editing && tempFame !== null ? tempFame : String(state.fame || 0);
         const level = getLevelForFame(state.fame);
@@ -246,16 +247,18 @@
         item.appendChild(lvlDiv); item.appendChild(rewardDiv); return item;
       }
 
-      // Show newly gained levels only when confirmed (persist until tap-off)
-      function showGainedLevelsPersist(prevLevel, newLevel) {
+      // Show only NEW rewards between last confirmed level (state.previousLevel) and the new confirmed level
+      function showOnlyNewRewards(prevLevel, newLevel) {
         el.tooltipList.innerHTML = '';
-        for (let l = prevLevel + 1; l <= newLevel; l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
-        if (prevLevel < newLevel) {
-          el.tooltip.classList.add('visible');
-          el.tooltip.setAttribute('aria-hidden','false');
-          el.playerLevel.setAttribute('aria-pressed','true');
+        if (newLevel <= prevLevel) return; // nothing new
+        for (let l = prevLevel + 1; l <= newLevel; l++) {
+          el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
         }
+        el.tooltip.classList.add('visible');
+        el.tooltip.setAttribute('aria-hidden','false');
+        el.playerLevel.setAttribute('aria-pressed','true');
       }
+
       function toggleTooltip() {
         const isVisible = el.tooltip.classList.contains('visible');
         if (isVisible) closeTooltip();
@@ -290,17 +293,22 @@
         if (!editing) return;
         const raw = tempFame==='' ? '0' : (tempFame||'0');
         const parsed = Math.max(0, Math.floor(Number(raw)||0));
-        const prevLevel = getLevelForFame(state.fame || 0);
+        const lastConfirmedLevel = state.previousLevel || getLevelForFame(state.fame || 0);
         const newLevel = getLevelForFame(parsed);
+
+        // Update stored fame (confirm)
         state.fame = parsed;
-        // only update displayed player level now (renderFameAndLevel uses stored fame)
-        state.previousLevel = prevLevel; // previousLevel tracks last confirmed level for gained popup logic
-        if (newLevel > prevLevel) showGainedLevelsPersist(prevLevel, newLevel);
-        // after showing popup, update previousLevel to newLevel (confirmed)
+
+        // Only show rewards that are newly reached compared to last confirmed level
+        showOnlyNewRewards(lastConfirmedLevel, newLevel);
+
+        // Update previousLevel to the new confirmed level
         state.previousLevel = newLevel;
+
         editing = false;
         tempFame = null;
         el.fameInput.classList.remove('editing');
+
         saveToStorage();
         renderFameAndLevel();
       }
@@ -311,13 +319,11 @@
       el.fameInput.addEventListener('touchstart', (e) => { setTimeout(()=> el.fameInput.select(), 0); }, {passive:true});
       el.fameInput.addEventListener('input', (e) => {
         const raw = e.target.value;
-        // keep tempFame string to preserve user typing, but sanitize to integers for display if needed
         if (raw === '') tempFame = '';
         else {
           const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw)||0)) : 0;
           tempFame = String(parsed);
         }
-        // reflect temp value in input (prevents caret behind leading zero)
         e.target.value = tempFame;
       });
       el.fameInput.addEventListener('keydown', (e) => {
@@ -380,7 +386,8 @@
           saveToStorage();
           const newLevel = getLevelForFame(state.fame);
           if (newLevel > state.previousLevel) {
-            showGainedLevelsPersist(state.previousLevel, newLevel);
+            // when fame changed programmatically, show only the new rewards vs last confirmed
+            showOnlyNewRewards(state.previousLevel, newLevel);
             state.previousLevel = newLevel;
           }
         }
