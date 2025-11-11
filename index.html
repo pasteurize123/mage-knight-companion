@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Independent Dummy Players</title>
+  <title>Mage Knight Companion — GV deck & wounds</title>
   <style>
     :root{
       --bg:#f4f4f4; --panel:#ececec; --card:#ffffff; --cell:#e8e8e8;
@@ -55,17 +55,16 @@
     .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--overlay);z-index:60}
     .modal{background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
     .modal p{margin:0;font-size:0.95rem;line-height:1.35}
-    footer{display:flex;justify-content:center;padding:8px 0} /* center New Game button */
+    footer{display:flex;justify-content:center;padding:8px 0}
+    .gv-pile{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .gv-pill{background:#f7f7f7;border-radius:6px;padding:6px 8px;border:1px solid #ddd;font-weight:600}
     @media (max-width:700px){ input[type=number]{width:90px} :root{--rep-min:34px} }
-    /* small utility to dim disabled controls */
-    .disabled { opacity:0.6; pointer-events:auto; } 
   </style>
 </head>
 <body>
   <h1>Mage Knight Companion</h1>
 
   <div class="container">
-
     <section class="panel" aria-labelledby="rep-title">
       <div class="panel-inner">
         <h2 id="rep-title">Reputation</h2>
@@ -76,16 +75,13 @@
     <section class="panel" aria-labelledby="fame-title">
       <div class="panel-inner">
         <h2 id="fame-title">Fame</h2>
-
         <div class="center-column" style="width:100%">
           <div class="center" style="width:100%;margin-bottom:6px">
             <div style="text-align:center">
               <label style="font-weight:700;display:block;margin-bottom:6px">Player Fame</label>
               <input id="fame-input" type="number" min="0" value="0" aria-label="Fame value" />
             </div>
-
             <div style="width:18px"></div>
-
             <div style="text-align:center">
               <label style="font-weight:700;display:block;margin-bottom:6px">Player Level</label>
               <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
@@ -116,7 +112,7 @@
       </div>
     </section>
 
-    <!-- Dummy Player module -->
+    <!-- Dummy Player (main) -->
     <section class="panel" aria-labelledby="dummy-title">
       <div class="panel-inner" id="dummy-module">
         <h2 id="dummy-title">Dummy Player</h2>
@@ -127,19 +123,13 @@
             <div class="row" style="align-items:center">
               <div class="mini-group icon-label">🔴 <strong id="red">0</strong></div>
               <div class="mini-group"><button class="smallbtn crystal-btn" data-player="main" data-color="red" data-act="inc">+</button><button class="smallbtn crystal-btn" data-player="main" data-color="red" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">🔵 <strong id="blue">0</strong></div>
               <div class="mini-group"><button class="smallbtn crystal-btn" data-player="main" data-color="blue" data-act="inc">+</button><button class="smallbtn crystal-btn" data-player="main" data-color="blue" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">🟢 <strong id="green">0</strong></div>
               <div class="mini-group"><button class="smallbtn crystal-btn" data-player="main" data-color="green" data-act="inc">+</button><button class="smallbtn crystal-btn" data-player="main" data-color="green" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">⚪ <strong id="white">0</strong></div>
               <div class="mini-group"><button class="smallbtn crystal-btn" data-player="main" data-color="white" data-act="inc">+</button><button class="smallbtn crystal-btn" data-player="main" data-color="white" data-act="dec">−</button></div>
             </div>
@@ -150,23 +140,16 @@
             <div class="row" style="align-items:center">
               <div class="mini-group icon-label">🔴 <strong id="card-red">4</strong></div>
               <div class="mini-group"><button class="smallbtn card-btn" data-player="main" data-color="Red" data-act="inc">+</button><button class="smallbtn card-btn" data-player="main" data-color="Red" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">🔵 <strong id="card-blue">4</strong></div>
               <div class="mini-group"><button class="smallbtn card-btn" data-player="main" data-color="Blue" data-act="inc">+</button><button class="smallbtn card-btn" data-player="main" data-color="Blue" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">🟢 <strong id="card-green">4</strong></div>
               <div class="mini-group"><button class="smallbtn card-btn" data-player="main" data-color="Green" data-act="inc">+</button><button class="smallbtn card-btn" data-player="main" data-color="Green" data-act="dec">−</button></div>
-
               <div style="width:12px"></div>
-
               <div class="mini-group icon-label">⚪ <strong id="card-white">4</strong></div>
               <div class="mini-group"><button class="smallbtn card-btn" data-player="main" data-color="White" data-act="inc">+</button><button class="smallbtn card-btn" data-player="main" data-color="White" data-act="dec">−</button></div>
             </div>
-
             <div style="margin-top:8px" class="muted">Cards in deck: <strong id="deck-count">0</strong></div>
           </div>
         </div>
@@ -185,28 +168,39 @@
       </div>
     </section>
 
-    <!-- General Volkare module (independent) with a wounds counter and specialized deck -->
+    <!-- General Volkare: no crystals; deck = 16 Adv (4 each color) + 4 Spells (1 each color); wounds add wound-cards directly into GV deck -->
     <section class="panel" aria-labelledby="gv-title">
       <div class="panel-inner" id="gv-module">
         <h2 id="gv-title">General Volkare</h2>
 
         <div class="row" style="gap:18px">
-          <!-- No crystals for GV as requested -->
           <div style="flex:1">
             <h3 style="margin:0 0 6px 0;font-size:1rem">Deck Composition</h3>
 
-            <div style="display:flex;flex-direction:column;gap:6px">
-              <div class="muted">Advanced Actions (16 total): <strong id="gv-adv-count">16</strong> — 4 each colour</div>
-              <div class="muted">Spells (4 total): <strong id="gv-spell-count">4</strong> — 1 each colour</div>
-
-              <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
-                <div class="muted">Wounds</div>
-                <button class="smallbtn gv-wound-btn" data-act="dec">−</button>
-                <div style="min-width:32px;text-align:center"><strong id="gv-wounds">0</strong></div>
-                <button class="smallbtn gv-wound-btn" data-act="inc">+</button>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="gv-pile">
+                <div class="gv-pill">Advanced Actions</div>
+                <div class="gv-pill">🔴🔴🔴🔴</div>
+                <div class="gv-pill">🔵🔵🔵🔵</div>
+                <div class="gv-pill">🟢🟢🟢🟢</div>
+                <div class="gv-pill">⚪⚪⚪⚪</div>
               </div>
 
-              <div style="margin-top:8px" class="muted">Cards in deck: <strong id="deck-count-gv">0</strong></div>
+              <div class="gv-pile">
+                <div class="gv-pill">Spells</div>
+                <div class="gv-pill">🔴</div>
+                <div class="gv-pill">🔵</div>
+                <div class="gv-pill">🟢</div>
+                <div class="gv-pill">⚪</div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="muted">Wounds (cards in deck)</div>
+                <button class="smallbtn gv-wound-btn" data-act="dec">−</button>
+                <div style="min-width:36px;text-align:center"><strong id="gv-wounds">0</strong></div>
+                <button class="smallbtn gv-wound-btn" data-act="inc">+</button>
+                <div style="margin-left:12px" class="muted">Deck size: <strong id="deck-count-gv">0</strong></div>
+              </div>
             </div>
           </div>
 
@@ -220,7 +214,7 @@
         </div>
 
         <div style="margin-top:10px">
-          <div id="dummy-output-gv" class="output">Drawn cards appear here</div>
+          <div id="dummy-output-gv" class="output">Drawn cards appear here (symbols)</div>
         </div>
 
         <div style="margin-top:8px">
@@ -234,22 +228,22 @@
     </footer>
   </div>
 
-  <!-- End round modal (shared) -->
+  <!-- End round modal (shared). GV choices show symbol labels -->
   <div id="endround-modal" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="endround-title">
-      <h3 id="endround-title">End Round — Choose Additions</h3>
-      <p>Choose one card to add to the selected dummy player's discard (or deck) as appropriate. For GV, only advanced action or spell is allowed.</p>
+      <h3 id="endround-title">End Round — Choose Card</h3>
+      <p>Choose a card to add. For GV you may pick an Advanced Action (colour) or Spell (colour).</p>
       <div style="margin-top:8px">
         <div style="font-weight:600;margin-bottom:6px;font-size:0.9375rem">Choose card</div>
-        <div id="card-choices" class="choice-row" style="display:flex;gap:8px">
-          <button class="choice-btn" data-val="Adv-Red">Adv 🔴</button>
-          <button class="choice-btn" data-val="Adv-Blue">Adv 🔵</button>
-          <button class="choice-btn" data-val="Adv-Green">Adv 🟢</button>
-          <button class="choice-btn" data-val="Adv-White">Adv ⚪</button>
-          <button class="choice-btn" data-val="Spell-Red">Spell 🔴</button>
-          <button class="choice-btn" data-val="Spell-Blue">Spell 🔵</button>
-          <button class="choice-btn" data-val="Spell-Green">Spell 🟢</button>
-          <button class="choice-btn" data-val="Spell-White">Spell ⚪</button>
+        <div id="card-choices" class="choice-row" style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="choice-btn" data-val="Adv-Red">🔴 Adv</button>
+          <button class="choice-btn" data-val="Adv-Blue">🔵 Adv</button>
+          <button class="choice-btn" data-val="Adv-Green">🟢 Adv</button>
+          <button class="choice-btn" data-val="Adv-White">⚪ Adv</button>
+          <button class="choice-btn" data-val="Spell-Red">🔴 Spell</button>
+          <button class="choice-btn" data-val="Spell-Blue">🔵 Spell</button>
+          <button class="choice-btn" data-val="Spell-Green">🟢 Spell</button>
+          <button class="choice-btn" data-val="Spell-White">⚪ Spell</button>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
@@ -271,12 +265,9 @@
   </div>
 
   <script>
-    /* Multi-module implementation with General Volkare using a custom deck (advanced actions, spells) and wounds counter */
-    const STORAGE_KEY = 'mk_companion_multi_v2';
+    /* Independent modules with GV wounds added directly to GV deck; GV not included in Levels Achieved */
+    const STORAGE_KEY = 'mk_companion_multi_v3';
     const DEFAULT_CARDS = { Red: 4, Blue: 4, Green: 4, White: 4 };
-    const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
-    const REP_MID = ["0"];
-    const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
     const FAME_LEVELS = [
       {level:1, min:0,  max:2},{level:2, min:3,  max:7},{level:3, min:8,  max:14},
       {level:4, min:15, max:23},{level:5, min:24, max:34},{level:6, min:35, max:47},
@@ -288,17 +279,16 @@
       4: "Skill + Advanced Action",5: "Command Token",6: "Skill + Advanced Action",
       7: "Command Token",8: "Skill + Advanced Action",9: "Command Token",10: "Skill + Advanced Action"
     };
-    const COLOR_SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', red:'🔴', blue:'🔵', green:'🟢', white:'⚪' };
+    const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪' };
 
-    /* Main Dummy module (unchanged from previous) */
-    function DummyModule(idPrefix, displayName) {
+    /* Main dummy module (unchanged behavior) */
+    function DummyModule(idPrefix) {
       const ids = {
         red: 'red' + idPrefix, blue: 'blue' + idPrefix, green: 'green' + idPrefix, white: 'white' + idPrefix,
         cardRed: 'card-red' + idPrefix, cardBlue: 'card-blue' + idPrefix, cardGreen: 'card-green' + idPrefix, cardWhite: 'card-white' + idPrefix,
         deckCount: 'deck-count' + idPrefix, drawBtn: (idPrefix ? 'draw-btn-' + idPrefix.replace(/^-/, '') : 'draw-btn'),
-        dummyOutput: 'dummy-output' + idPrefix, discardOutput: 'discard-output' + idPrefix, reshuffleBtn: 'reshuffle-btn' + (idPrefix ? '-' + idPrefix.replace(/^-/, '') : '')
+        dummyOutput: 'dummy-output' + idPrefix, discardOutput: 'discard-output' + idPrefix, reshuffleBtn: 'reshuffle-btn' + (idPrefix ? '-'+idPrefix.replace(/^-/, '') : '')
       };
-
       let crystals = { red:0, blue:0, green:0, white:0 };
       let cardCounts = { ...DEFAULT_CARDS };
       let deck = [];
@@ -307,10 +297,7 @@
       let endRoundFlag = false;
       const SKEY = `${STORAGE_KEY}_${idPrefix || 'main'}`;
 
-      function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
       function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
-      function rebuildDeck(){ deck = []; Object.keys(cardCounts).forEach(color=>{ for(let i=0;i<cardCounts[color];i++) deck.push(`${color} Card`); }); shuffle(deck); updateDeckCount(); save(); }
-
       function el(id){ return document.getElementById(id); }
       function updateCrystalViews(){
         if(el(ids.red)) el(ids.red).textContent = crystals.red;
@@ -325,7 +312,7 @@
         if(el(ids.cardWhite)) el(ids.cardWhite).textContent = cardCounts.White;
       }
       function updateDeckCount(){ const node = el(ids.deckCount); if(node) node.textContent = deck.length; }
-      function updateDiscardView(){ const node = el(ids.discardOutput); if(!node) return; if(discard.length===0) node.textContent='Discard pile is empty.'; else node.textContent = `Discard (${discard.length}): ${discard.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c).join(' ')}`; }
+      function updateDiscardView(){ const node = el(ids.discardOutput); if(!node) return; if(discard.length===0) node.textContent='Discard pile is empty.'; else node.textContent = `Discard (${discard.length}): ${discard.map(c=>c).join(' ')}`; }
 
       function save(){ try{ const s={crystals,cardCounts,deck,discard,achievedLevels,endRoundFlag}; localStorage.setItem(SKEY, JSON.stringify(s)); }catch(e){} }
       function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); crystals = s.crystals || crystals; cardCounts = s.cardCounts || cardCounts; deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; achievedLevels = Array.isArray(s.achievedLevels)?s.achievedLevels:achievedLevels; endRoundFlag = !!s.endRoundFlag; return true; }catch(e){ return false; } }
@@ -339,6 +326,7 @@
         updateDeckCount(); updateDiscardView(); save();
       }
 
+      function rebuildDeck(){ deck = []; Object.keys(cardCounts).forEach(color=>{ for(let i=0;i<cardCounts[color];i++) deck.push(`${color} Card`); }); shuffle(deck); updateDeckCount(); save(); }
       function drawOnce(){
         const drawn=[];
         for(let i=0;i<3 && deck.length>0;i++) drawn.push(deck.pop());
@@ -346,153 +334,133 @@
         const last = drawn[drawn.length-1];
         if(last){ const color = last.split(' ')[0].toLowerCase(); const extra = crystals[color]||0; for(let i=0;i<extra && deck.length>0;i++) drawn.push(deck.pop()); }
         discard.push(...drawn);
-        const syms = drawn.map(c=>COLOR_SYMBOL[c.split(' ')[0]]||c).join(' ');
-        const out = el(ids.dummyOutput); if(out) out.textContent = syms;
+        const out = el(ids.dummyOutput); if(out) out.textContent = drawn.join(' ');
         updateDeckCount(); updateDiscardView(); save();
       }
-
-      function reshuffle(){
-        if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; }
-        deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save();
-      }
-
-      function openEndRoundModal(openCallback){ openCallback(); }
+      function reshuffle(){ if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); }
 
       function renderLevelsList(){ const arr = []; for(let i=0;i<achievedLevels.length;i++){ const L = achievedLevels[i]; const desc = LEVEL_PROMPTS[L]||''; arr.push(`Level ${L}: ${desc}`); } return arr.length?arr:['None yet']; }
-
-      function resetInitial(){
-        crystals = { red:0, blue:0, green:0, white:0 };
-        const keys=['red','blue','green','white']; const first = keys[Math.floor(Math.random()*keys.length)]; let second = keys[Math.floor(Math.random()*keys.length)]; while(second===first) second=keys[Math.floor(Math.random()*keys.length)];
-        crystals[first]=2; crystals[second]=1;
-        cardCounts = {...DEFAULT_CARDS};
-        deck = []; discard = []; achievedLevels=[1]; endRoundFlag=false;
-        rebuildDeck(); updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); save();
-      }
-
+      function resetInitial(){ crystals = { red:0, blue:0, green:0, white:0 }; const keys=['red','blue','green','white']; const first = keys[Math.floor(Math.random()*keys.length)]; let second = keys[Math.floor(Math.random()*keys.length)]; while(second===first) second=keys[Math.floor(Math.random()*keys.length)]; crystals[first]=2; crystals[second]=1; cardCounts = {...DEFAULT_CARDS}; deck = []; discard = []; achievedLevels=[1]; endRoundFlag=false; rebuildDeck(); updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); save(); }
       function wire(){
-        document.querySelectorAll(`.crystal-btn[data-player="${idPrefix || 'main'}"]`).forEach(btn=>{
+        document.querySelectorAll(`.crystal-btn[data-player="main"]`).forEach(btn=>{
           btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCrystal(color, act==='inc'?1:-1); });
         });
-        document.querySelectorAll(`.card-btn[data-player="${idPrefix || 'main'}"]`).forEach(btn=>{
+        document.querySelectorAll(`.card-btn[data-player="main"]`).forEach(btn=>{
           btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCard(color, act==='inc'?1:-1); });
         });
-        const drawBtnEl = el(ids.drawBtn);
-        if(drawBtnEl) drawBtnEl.addEventListener('click', ()=>{ if(endRoundFlag && drawBtnEl.textContent==='End Round'){ openEndRoundModal(()=>openEndRoundForPlayer(idPrefix||'main')); return; } drawOnce(); });
-        const reshuffleEl = el(ids.reshuffleBtn);
+        const drawBtnEl = el('draw-btn');
+        if(drawBtnEl) drawBtnEl.addEventListener('click', ()=>{ if(endRoundFlag && drawBtnEl.textContent==='End Round'){ openEndRoundModalFor('main'); return; } drawOnce(); });
+        const reshuffleEl = el('reshuffle-btn');
         if(reshuffleEl) reshuffleEl.addEventListener('click', reshuffle);
       }
 
-      return {
-        ids, load, save, wire, resetInitial, rebuildDeck, getRenderLevels: renderLevelsList,
-        getState: ()=>({crystals,cardCounts,deck,discard,achievedLevels,endRoundFlag}),
-        setStateFrom: (s)=>{ crystals = s.crystals||crystals; cardCounts = s.cardCounts||cardCounts; deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; achievedLevels = Array.isArray(s.achievedLevels)?s.achievedLevels:achievedLevels; endRoundFlag = !!s.endRoundFlag; updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); save(); },
-        drawOnce, reshuffle, changeCrystal, changeCard, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); }
-      };
+      return { ids, load, save, wire, resetInitial, rebuildDeck, getRenderLevels: renderLevelsList, changeCard, drawOnce, reshuffle, saveState: save, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); } };
     }
 
-    /* General Volkare module with specialized deck and wounds */
+    /* General Volkare module (special deck & wounds) */
     function GVModule() {
-      // no crystals; deck composed of:
-      // - Advanced Actions: Adv-Red x4, Adv-Blue x4, Adv-Green x4, Adv-White x4 (total 16)
-      // - Spells: Spell-Red x1, Spell-Blue x1, Spell-Green x1, Spell-White x1 (total 4)
-      // wounds count starting at 0 (min 0) and can be adjusted via +/- buttons
       const ids = {
         deckCount: 'deck-count-gv',
         drawBtn: 'draw-btn-gv',
         dummyOutput: 'dummy-output-gv',
         discardOutput: 'discard-output-gv',
         reshuffleBtn: 'reshuffle-btn-gv',
-        gvWounds: 'gv-wounds',
-        gvAdvCount: 'gv-adv-count',
-        gvSpellCount: 'gv-spell-count'
+        gvWounds: 'gv-wounds'
       };
-
       let deck = [];
       let discard = [];
       let wounds = 0;
-      const SKEY = `${STORAGE_KEY}_gv_v2`;
+      const SKEY = `${STORAGE_KEY}_gv`;
 
       function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
       function el(id){ return document.getElementById(id); }
 
       function buildDefaultDeck(){
         deck = [];
-        // advanced actions
-        ['Red','Blue','Green','White'].forEach(color=>{
-          for(let i=0;i<4;i++) deck.push(`Adv-${color}`);
-        });
-        // spells
-        ['Red','Blue','Green','White'].forEach(color=>{
-          deck.push(`Spell-${color}`);
-        });
-        shuffle(deck);
-        save();
-        updateCounts();
+        ['Red','Blue','Green','White'].forEach(c=>{ for(let i=0;i<4;i++) deck.push(`Adv-${c}`); });
+        ['Red','Blue','Green','White'].forEach(c=> deck.push(`Spell-${c}`));
+        shuffle(deck); save(); updateCounts();
       }
+
+      function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({deck,discard,wounds})); }catch(e){} }
+      function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s = JSON.parse(raw); deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; wounds = typeof s.wounds==='number'?s.wounds:wounds; updateCounts(); return true; }catch(e){ return false; } }
 
       function updateCounts(){
         if(el(ids.deckCount)) el(ids.deckCount).textContent = deck.length;
-        if(el(ids.discardOutput)) el(ids.discardOutput).textContent = discard.length === 0 ? 'Discard pile is empty.' : `Discard (${discard.length}): ${discard.map(c=>c).join(' ')}`;
-        if(el(ids.gvAdvCount)) el(ids.gvAdvCount).textContent = 16;
-        if(el(ids.gvSpellCount)) el(ids.gvSpellCount).textContent = 4;
         if(el(ids.gvWounds)) el(ids.gvWounds).textContent = wounds;
+        if(el(ids.discardOutput)) el(ids.discardOutput).textContent = discard.length===0 ? 'Discard pile is empty.' : `Discard (${discard.length}): ${discard.map(displayGVCard).join(' ')}`;
+        if(el('gv-adv-count')) document.getElementById('gv-adv-count').textContent = 16;
+        if(el('gv-spell-count')) document.getElementById('gv-spell-count').textContent = 4;
       }
 
-      function save(){ try{ const s={deck,discard,wounds}; localStorage.setItem(SKEY, JSON.stringify(s)); }catch(e){} }
-      function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; wounds = typeof s.wounds === 'number' ? s.wounds : wounds; updateCounts(); return true; }catch(e){ return false; } }
+      function displayGVCard(code){
+        // show advanced/spell cards as color symbols (plus prefix so type is clear)
+        if(!code) return '';
+        if(code.startsWith('Adv-')) return SYMBOL[code.split('-')[1]] || code;
+        if(code.startsWith('Spell-')) return SYMBOL[code.split('-')[1]] || code;
+        if(code === 'Wound') return '🩸';
+        return code;
+      }
 
       function changeWounds(delta){
-        wounds = Math.max(0, wounds + delta);
-        updateCounts();
-        save();
+        const newW = Math.max(0, wounds + delta);
+        const diff = newW - wounds;
+        wounds = newW;
+        // when adding wounds, add that many 'Wound' cards directly into GV deck (random positions)
+        if(diff > 0){
+          for(let i=0;i<diff;i++){
+            const pos = Math.floor(Math.random()*(deck.length+1));
+            deck.splice(pos,0,'Wound');
+          }
+        } else if(diff < 0){
+          // when removing wounds, remove 'Wound' cards from deck first, if not found remove from discard
+          let toRemove = -diff;
+          while(toRemove>0){
+            const idx = deck.indexOf('Wound');
+            if(idx !== -1){ deck.splice(idx,1); toRemove--; continue; }
+            const dj = discard.indexOf('Wound');
+            if(dj !== -1){ discard.splice(dj,1); toRemove--; continue; }
+            break;
+          }
+        }
+        updateCounts(); save();
       }
 
       function drawOnce(){
         const drawn = [];
         for(let i=0;i<3 && deck.length>0;i++) drawn.push(deck.pop());
-        if(drawn.length===0){
-          const btn = el(ids.drawBtn); if(btn) btn.textContent = 'End Round';
-          const out = el(ids.dummyOutput); if(out) out.textContent = 'Nil cards drawn. End of round announced.';
-          save(); updateCounts(); return;
-        }
+        if(drawn.length===0){ const btn = el(ids.drawBtn); if(btn) btn.textContent='End Round'; const out=el(ids.dummyOutput); if(out) out.textContent='Nil cards drawn. End of round announced.'; save(); updateCounts(); return; }
         discard.push(...drawn);
-        const out = el(ids.dummyOutput); if(out) out.textContent = drawn.join(' ');
+        const out = el(ids.dummyOutput); if(out) out.textContent = drawn.map(displayGVCard).join(' ');
         updateCounts(); save();
       }
 
       function reshuffle(){
-        if(discard.length === 0){
-          const out = el(ids.dummyOutput); if(out) out.textContent = 'Discard pile is empty. Nothing to reshuffle.'; return;
-        }
-        deck.push(...discard); discard = []; shuffle(deck); updateCounts(); const out = el(ids.dummyOutput); if(out) out.textContent = 'Deck reshuffled from discard.'; save();
-        const btn = el(ids.drawBtn); if(btn) btn.textContent = 'Draw';
+        if(discard.length===0){ const out=el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; }
+        deck.push(...discard); discard = []; shuffle(deck); updateCounts(); const out=el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save();
+        const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw';
       }
 
       function addCardToDiscard(cardCode){
-        // cardCode expected like 'Adv-Red' or 'Spell-Blue'
+        // cardCode like 'Adv-Red' or 'Spell-Blue' or 'Wound'
         discard.push(cardCode);
         updateCounts(); save();
       }
 
       function wire(){
-        const drawBtn = el(ids.drawBtn); if(drawBtn) drawBtn.addEventListener('click', ()=>{ if(deck.length===0){ drawBtn.textContent = 'End Round'; el(ids.dummyOutput).textContent = 'Nil cards drawn. End of round announced.'; return; } drawOnce(); });
+        const drawBtn = el(ids.drawBtn); if(drawBtn) drawBtn.addEventListener('click', ()=>{ if(deck.length===0){ drawBtn.textContent='End Round'; el(ids.dummyOutput).textContent='Nil cards drawn. End of round announced.'; return; } drawOnce(); });
         const reshuffleBtn = el(ids.reshuffleBtn); if(reshuffleBtn) reshuffleBtn.addEventListener('click', reshuffle);
-        // wound buttons
-        document.querySelectorAll('.gv-wound-btn').forEach(b=>{
-          b.addEventListener('click', ()=>{ const act = b.dataset.act; changeWounds(act==='inc'?1:-1); });
-        });
+        document.querySelectorAll('.gv-wound-btn').forEach(b=> b.addEventListener('click', ()=>{ const act = b.dataset.act; changeWounds(act==='inc'?1:-1); }));
       }
 
-      return {
-        ids, buildDefaultDeck, updateCounts, save, load, wire, drawOnce, reshuffle, addCardToDiscard
-      };
+      return { load, save, wire, buildDefaultDeck, updateCounts, drawOnce, reshuffle, addCardToDiscard, displayGVCard };
     }
 
     // instantiate modules
-    const mainModule = DummyModule('', 'Dummy Player');
+    const mainModule = DummyModule('');
     const gvModule = GVModule();
 
-    // Shared UI parts and fame handling
+    // Shared UI and fame
     const levelsToggleBtn = document.getElementById('levels-toggle');
     const levelsPanel = document.getElementById('levels-panel');
     const levelsList = document.getElementById('levels-list');
@@ -507,7 +475,7 @@
       return 10;
     }
 
-    // End-round modal wiring for choosing cards to add
+    // End-round modal (shared) and wiring
     let endRoundContext = null; // 'main' or 'gv'
     const endroundModal = document.getElementById('endround-modal');
     const cardChoices = document.getElementById('card-choices');
@@ -515,43 +483,36 @@
     const endroundCancel = document.getElementById('endround-cancel');
     let selectedCard = null;
 
-    function openEndRoundForPlayer(playerKey){
+    function openEndRoundModalFor(playerKey){
       endRoundContext = playerKey; selectedCard = null; endroundConfirm.disabled=true;
       endroundModal.style.display='flex'; endroundModal.setAttribute('aria-hidden','false');
       cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));
     }
-    cardChoices.addEventListener('click',(e)=>{ const btn=e.target.closest('.choice-btn'); if(!btn) return; selectedCard=btn.dataset.val; cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.toggle('selected', b===btn)); endroundConfirm.disabled = !(selectedCard); });
-    endroundCancel.addEventListener('click', ()=>{ endroundModal.style.display='none'; endroundModal.setAttribute('aria-hidden','true'); endRoundContext = null; selectedCard = null; });
+    cardChoices.addEventListener('click',(e)=>{ const btn=e.target.closest('.choice-btn'); if(!btn) return; selectedCard = btn.dataset.val; cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.toggle('selected', b===btn)); endroundConfirm.disabled = !(selectedCard); });
+    endroundCancel.addEventListener('click', ()=>{ endroundModal.style.display='none'; endroundModal.setAttribute('aria-hidden','true'); endRoundContext=null; selectedCard=null; });
     endroundConfirm.addEventListener('click', ()=>{
       if(!selectedCard || !endRoundContext) return;
       if(endRoundContext === 'gv'){
-        // GV: add advanced action or spell to discard
+        // add chosen GV card to GV discard (showed as symbols)
         gvModule.addCardToDiscard(selectedCard);
-        gvModule.updateCounts();
+        gvModule.updateCounts && gvModule.updateCounts();
       } else {
-        // main dummy: add a normal color card to deck/discard
-        const colorCode = selectedCard.replace('Adv-','').replace('Spell-','');
-        // treat as adding one colored card into main's deck
-        mainModule.changeCard(colorCode, 1);
+        // main: add a normal color card to main deck (treat Adv/Spell selection as color)
+        const color = selectedCard.replace('Adv-','').replace('Spell-','');
+        mainModule.changeCard(color, 1);
       }
-      endroundModal.style.display='none'; endroundModal.setAttribute('aria-hidden','true'); endRoundContext = null; selectedCard = null;
+      endroundModal.style.display='none'; endroundModal.setAttribute('aria-hidden','true'); endRoundContext=null; selectedCard=null;
     });
 
-    // Levels panel content: show each module's achieved levels independently
+    // Levels panel shows only main player's achieved levels
     function renderLevelsPanel(){
       levelsList.innerHTML = '';
-      const mainLines = mainModule.getRenderLevels();
-      const gvLines = ['(GV levels not used)']; // gv module doesn't track levels here; kept separate if needed
-      const headerMain = document.createElement('li'); headerMain.className='level-line'; headerMain.textContent = 'Dummy Player:'; levelsList.appendChild(headerMain);
-      mainLines.forEach(l=>{ const li=document.createElement('li'); li.className='level-line'; li.style.fontWeight='500'; li.style.paddingLeft='10px'; li.textContent = l; levelsList.appendChild(li); });
-      const headerGV = document.createElement('li'); headerGV.className='level-line'; headerGV.textContent = 'General Volkare:'; headerGV.style.marginTop='6px'; levelsList.appendChild(headerGV);
-      // For GV show deck summary rather than player levels
-      const gvDeckSummary = document.createElement('li'); gvDeckSummary.className='level-line'; gvDeckSummary.style.fontWeight='500'; gvDeckSummary.style.paddingLeft='10px';
-      gvDeckSummary.textContent = `Adv: 16; Spells: 4; Wounds: ${document.getElementById('gv-wounds') ? document.getElementById('gv-wounds').textContent : '0'}`;
-      levelsList.appendChild(gvDeckSummary);
+      const lines = mainModule.getRenderLevels();
+      const header = document.createElement('li'); header.className='level-line'; header.textContent='Dummy Player:'; levelsList.appendChild(header);
+      lines.forEach(l=>{ const li=document.createElement('li'); li.className='level-line'; li.style.fontWeight='500'; li.style.paddingLeft='10px'; li.textContent = l; levelsList.appendChild(li); });
     }
 
-    // Fame prompt behavior (separate lines per level)
+    // Fame prompts: multiple lines for multi-level up
     function handleLevelPrompts(prevLevel, newLevel){
       const messages = [];
       for(let L = prevLevel+1; L<=newLevel; L++){
@@ -571,34 +532,14 @@
       saveMeta();
     }
 
-    // Save meta (fame, rep) separately
-    function saveMeta(){ try{ const repSelection = window._repSelection || null; localStorage.setItem(STORAGE_KEY + '_meta', JSON.stringify({ fame, repSelection })); }catch(e){} }
-    function loadMeta(){ try{ const raw = localStorage.getItem(STORAGE_KEY + '_meta'); if(!raw) return false; const m = JSON.parse(raw); fame = typeof m.fame === 'number' ? m.fame : fame; window._repSelection = m.repSelection || window._repSelection; return true;}catch(e){ return false; } }
-
-    // End-round opener used by modules
-    function openEndRoundForPlayer(playerKey){
-      openEndRoundForPlayer; // no-op placeholder for lint clarity; real open below
-    }
-    // We'll provide a small wrapper used by module wiring
-    function openEndRoundForPlayer(playerKey){
-      // open the shared modal and note context
-      endRoundContext = playerKey;
-      openEndRoundForPlayer; // keep (no effect)
-      openEndRoundForPlayer; // no-op safe
-      openEndRoundForPlayer; // repeated no-op to avoid unused - harmless
-      // Use the earlier defined openEndRoundForPlayer implementation:
-      openEndRoundForPlayer_real(playerKey);
-    }
-    function openEndRoundForPlayer_real(playerKey){
-      endRoundContext = playerKey;
-      selectedCard = null;
-      endroundConfirm.disabled = true;
-      endroundModal.style.display='flex';
-      endroundModal.setAttribute('aria-hidden','false');
-      cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));
-    }
+    // Meta (fame + rep) persistence
+    function saveMeta(){ try{ const rep = window._repSelection || null; localStorage.setItem(STORAGE_KEY + '_meta', JSON.stringify({ fame, rep })); }catch(e){} }
+    function loadMeta(){ try{ const raw = localStorage.getItem(STORAGE_KEY + '_meta'); if(!raw) return false; const m = JSON.parse(raw); fame = typeof m.fame==='number'?m.fame:fame; window._repSelection = m.rep || window._repSelection; return true; }catch(e){ return false; } }
 
     // Reputation UI
+    const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
+    const REP_MID = ["0"];
+    const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
     function buildRepRows(){
       const repWrap = document.getElementById('rep-wrap');
       repWrap.innerHTML = '';
@@ -611,15 +552,11 @@
       repWrap.appendChild(top); repWrap.appendChild(mid); repWrap.appendChild(bot);
     }
     function selectRepCell(sel){
-      const all = document.querySelectorAll('.rep-cell'); all.forEach(c=>c.classList.remove('selected'));
+      document.querySelectorAll('.rep-cell').forEach(c=>c.classList.remove('selected'));
       const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return;
       const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]){ cells[sel.index].classList.add('selected'); window._repSelection = {...sel}; saveMeta(); }
     }
-    function applyRepSelection(sel){
-      if(!sel) return;
-      const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return;
-      const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected');
-    }
+    function applyRepSelection(sel){ if(!sel) return; const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
 
     // Levels panel toggle behavior
     levelsToggleBtn.addEventListener('click', ()=>{
@@ -627,20 +564,18 @@
       if(expanded){ levelsToggleBtn.setAttribute('aria-expanded','false'); levelsPanel.setAttribute('aria-hidden','true'); }
       else { levelsToggleBtn.setAttribute('aria-expanded','true'); levelsPanel.setAttribute('aria-hidden','false'); levelsPanel.focus(); renderLevelsPanel(); }
     });
-    levelsPanel.addEventListener('blur', ()=>{
-      setTimeout(()=>{ if(!levelsPanel.contains(document.activeElement) && document.activeElement !== levelsToggleBtn){ levelsToggleBtn.setAttribute('aria-expanded','false'); levelsPanel.setAttribute('aria-hidden','true'); } }, 10);
-    });
+    levelsPanel.addEventListener('blur', ()=>{ setTimeout(()=>{ if(!levelsPanel.contains(document.activeElement) && document.activeElement !== levelsToggleBtn){ levelsToggleBtn.setAttribute('aria-expanded','false'); levelsPanel.setAttribute('aria-hidden','true'); } }, 10); });
     levelsPanel.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ levelsToggleBtn.setAttribute('aria-expanded','false'); levelsPanel.setAttribute('aria-hidden','true'); levelsToggleBtn.focus(); } });
 
-    // Level modal OK
     document.getElementById('level-ok').addEventListener('click', ()=>{ levelModal.style.display='none'; levelModal.setAttribute('aria-hidden','true'); });
 
-    // newGame resets both modules and GV deck/wounds
+    // newGame resets both modules and GV deck/wounds (wounds become 0, deck restored)
     function newGame(){
       if(!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
       try{
+        // remove module-specific storage
         localStorage.removeItem(`${STORAGE_KEY}_`);
-        localStorage.removeItem(`${STORAGE_KEY}_gv_v2`);
+        localStorage.removeItem(`${STORAGE_KEY}_gv`);
         localStorage.removeItem(STORAGE_KEY + '_meta');
       }catch(e){}
       fame = 0;
@@ -654,47 +589,34 @@
       renderLevelsPanel();
     }
 
-    // init wiring
+    // initialization
     window.addEventListener('load', ()=>{
       mainModule.load(); mainModule.wire();
       gvModule.load(); gvModule.wire();
-
       buildRepRows();
       if(window._repSelection) applyRepSelection(window._repSelection);
-      else { window._repSelection = { row: 'mid', index: 0 }; applyRepSelection(window._repSelection); saveMeta(); }
-
-      // make sure decks exist
+      else { window._repSelection = { row:'mid', index:0 }; applyRepSelection(window._repSelection); saveMeta(); }
       mainModule.rebuildDeck();
-      if(!Array.isArray(window._gv_deck_placeholder)) { gvModule.buildDefaultDeck(); }
-
+      gvModule.buildDefaultDeck();
       mainModule.updateViews();
       gvModule.updateCounts && gvModule.updateCounts();
 
-      document.getElementById('fame-input').addEventListener('change', ()=>{ const prev=fame; fame=clampIntNonNeg(document.getElementById('fame-input').value); updateFameUI(prev); });
+      document.getElementById('fame-input').addEventListener('change', ()=>{ const prev=fame; fame = clampIntNonNeg(document.getElementById('fame-input').value); updateFameUI(prev); });
       document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=>{ const prev=fame; fame = Math.max(0, Number(fame) + Number(btn.dataset.inc||0)); updateFameUI(prev); }));
 
-      // Hook main module draw end-round behaviour to open shared end-round modal
-      // We need to override main module draw button behavior for end-round to open modal with context.
-      // The module wiring already calls openEndRoundForPlayer when appropriate; provide the real opener for module code:
-      window.openEndRoundForPlayer_real = openEndRoundForPlayer_real;
+      // ensure main draw opens end-round modal when deck empty
+      // mainModule already wired; when it needs to open end-round modal, it will call openEndRoundModalFor('main')
+      // we provide a small helper so main module can call the shared modal:
+      window.openEndRoundModalFor = openEndRoundModalFor;
 
-      // connect mainModule's internal openEndRoundForPlayer calls
-      // ensure draw buttons for modules that reached end round open the shared modal
-      document.querySelectorAll('[data-player="main"]').forEach(btn => {
-        // buttons were wired in wire(); add a supplementary handler for end-round flow
-        btn.addEventListener('click', ()=>{ /* no-op for supplementary */ });
-      });
-
-      // wire GV wound buttons and control wiring already done in gvModule.wire()
-
-      // new game
+      // connect main draw button end-round flow
       document.getElementById('new-game').addEventListener('click', newGame);
 
       renderLevelsPanel();
-      setInterval(()=>{ mainModule.save(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
+      setInterval(()=>{ mainModule.saveState && mainModule.saveState(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
     });
 
-    // Expose for debug
+    // expose for debug
     window._main = mainModule;
     window._gv = gvModule;
   </script>
