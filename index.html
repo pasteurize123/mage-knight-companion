@@ -3,49 +3,35 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Fame Confirm (relevant level rewards only)</title>
+  <title>Mage Knight Companion — Fame Confirm (new-only popup, full list on click)</title>
   <style>
     :root{
-      --bg:#0f1724;
-      --card:#0b1220;
-      --accent:#c7924f;
-      --muted:#9aa4b2;
-      --glass: rgba(255,255,255,0.03);
-      --radius:14px;
-      --phone-width:380px;
-      --track-bg: rgba(255,255,255,0.03);
-      --gold:#c7924f;
-      --red:#d9534f;
-      --white:#f0f4f8;
-      --yellow:#f6d365;
+      --bg:#0f1724; --card:#0b1220; --accent:#c7924f; --muted:#9aa4b2;
+      --glass: rgba(255,255,255,0.03); --radius:14px; --phone-width:380px;
+      --track-bg: rgba(255,255,255,0.03); --gold:#c7924f; --red:#d9534f;
+      --white:#f0f4f8; --yellow:#f6d365;
     }
-    * { box-sizing: border-box; }
-    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-    .phone-shell { width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 12px; }
-    .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); display:flex; flex-direction:column; gap:10px; }
-    .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
-    .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); }
-    .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-    .card-title { font-size:16px; margin:0; color:#fff; }
-    .card-body { font-size:14px; color:#e6eef6; }
-
-    .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; }
-    .stat-value { font-size:28px; font-weight:700; color:var(--accent); }
-
-    .rep-area { display:flex; flex-direction:column; gap:6px; }
-    .rep-controls-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 6px; }
-    .thumb-btn { width:44px; height:44px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:#fff; cursor:pointer; font-size:18px; }
-    .thumb-up { background: linear-gradient(180deg, rgba(199,146,79,0.14), rgba(199,146,79,0.06)); border:1px solid rgba(199,146,79,0.25); }
-    .thumb-down { background: linear-gradient(180deg, rgba(217,83,79,0.12), rgba(217,83,79,0.06)); border:1px solid rgba(217,83,79,0.22); }
-    .rep-track { display:flex; gap:8px; align-items:center; overflow:auto; padding:10px 6px; border-radius:10px; scroll-behavior:smooth; }
-
-    .rep-step { min-width:48px; padding:10px 6px; border-radius:10px; background:var(--track-bg); text-align:center; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; height:44px; }
-    .rep-step.zero { background: rgba(246,211,101,0.08); color:var(--yellow); border:1px solid rgba(246,211,101,0.18); }
-    .rep-step.positive { background: rgba(199,146,79,0.08); color:var(--gold); border:1px solid rgba(199,146,79,0.18); }
-    .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
-    .rep-step.active { box-shadow: 0 8px 30px rgba(0,0,0,0.5); transform:scale(1.06); font-weight:800; }
-
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:linear-gradient(180deg,#071028 0%,#061226 100%);color:#e6eef6}
+    .phone-shell{width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px}
+    .frame{width:var(--phone-width);max-width:94vw;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.04));border-radius:28px;padding:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6);display:flex;flex-direction:column;gap:10px}
+    .topbar{position:fixed;left:50%;transform:translateX(-50%);top:18px;width:var(--phone-width);max-width:94vw;text-align:center;pointer-events:none}
+    .topbar h1{margin:0;font-size:14px;font-weight:600;color:var(--muted)}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.015));border-radius:var(--radius);padding:12px;border:1px solid rgba(255,255,255,0.03)}
+    .card-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .card-title{font-size:16px;margin:0;color:#fff}
+    .card-body{font-size:14px;color:#e6eef6}
+    .stat-row{display:flex;align-items:center;justify-content:center;gap:8px}
+    .stat-value{font-size:28px;font-weight:700;color:var(--accent)}
+    .rep-area{display:flex;flex-direction:column;gap:6px}
+    .rep-controls-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 6px}
+    .thumb-btn{width:44px;height:44px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:#fff;cursor:pointer;font-size:18px}
+    .rep-track{display:flex;gap:8px;align-items:center;overflow:auto;padding:10px 6px;border-radius:10px;scroll-behavior:smooth}
+    .rep-step{min-width:48px;padding:10px 6px;border-radius:10px;background:var(--track-bg);text-align:center;border:1px solid rgba(255,255,255,0.02);color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;height:44px}
+    .rep-step.zero{background:rgba(246,211,101,0.08);color:var(--yellow);border:1px solid rgba(246,211,101,0.18)}
+    .rep-step.positive{background:rgba(199,146,79,0.08);color:var(--gold);border:1px solid rgba(199,146,79,0.18)}
+    .rep-step.negative{background:rgba(217,83,79,0.08);color:var(--red);border:1px solid rgba(217,83,79,0.18)}
+    .rep-step.active{box-shadow:0 8px 30px rgba(0,0,0,0.5);transform:scale(1.06);font-weight:800}
     .fame-grid{display:flex;flex-direction:column;gap:8px;align-items:center}
     .fame-row{display:flex;gap:10px;align-items:center;width:100%;justify-content:center}
     .fame-input{width:110px;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.01);color:#eaf2ff;text-align:center}
@@ -55,13 +41,11 @@
     .level-tooltip.visible{display:block}
     .tooltip-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:auto;padding-right:6px}
     .tooltip-item{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.02);color:var(--muted);font-weight:600;justify-content:space-between;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .tooltip-item .lvl{color:#eaf2ff;font-weight:800;min-width:86px;text-align:left;flex:0 0 auto}
-    .tooltip-item .reward{color:var(--muted);font-weight:600;text-align:right;margin-left:8px;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis}
-
+    .lvl{color:#eaf2ff;font-weight:800;min-width:86px;text-align:left;flex:0 0 auto}
+    .reward{color:var(--muted);font-weight:600;text-align:right;margin-left:8px;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis}
     .footer-row{display:flex;gap:8px;justify-content:center;padding-top:6px}
     .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px 10px;border-radius:10px;cursor:pointer}
-
-    @media (max-width:420px){ :root { --phone-width:94vw; } }
+    @media(max-width:420px){:root{--phone-width:94vw}}
   </style>
 </head>
 <body>
@@ -69,24 +53,22 @@
     <div class="frame" role="application" aria-label="Mage Knight Companion">
       <header class="topbar"><h1>Mage Knight Companion</h1></header>
 
-      <!-- Reputation -->
-      <section class="card" id="reputation-card" aria-labelledby="rep-title">
+      <section class="card" aria-labelledby="rep-title">
         <div class="card-header"><h2 id="rep-title" class="card-title">Reputation</h2></div>
         <div class="card-body">
-          <div class="stat-row"><div class="stat-value" id="reputation-value">—</div></div>
+          <div class="stat-row"><div id="reputation-value" class="stat-value">—</div></div>
           <div class="rep-area">
             <div class="rep-controls-row">
-              <button id="rep-down" class="thumb-btn thumb-down" title="Decrease reputation one step">👎</button>
+              <button id="rep-down" class="thumb-btn" title="Decrease reputation">👎</button>
               <div style="flex:1"></div>
-              <button id="rep-up" class="thumb-btn thumb-up" title="Increase reputation one step">👍</button>
+              <button id="rep-up" class="thumb-btn" title="Increase reputation">👍</button>
             </div>
-            <div class="rep-track" id="rep-track" role="list" aria-label="Reputation track"></div>
+            <div id="rep-track" class="rep-track" role="list" aria-label="Reputation track"></div>
           </div>
         </div>
       </section>
 
-      <!-- Fame -->
-      <section class="card" id="fame-card" aria-labelledby="fame-title">
+      <section class="card" aria-labelledby="fame-title">
         <div class="card-header"><h2 id="fame-title" class="card-title">Fame</h2></div>
         <div class="card-body">
           <div class="fame-grid">
@@ -96,8 +78,8 @@
             <div class="fame-row" style="position:relative;">
               <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Player Level 1</div>
               <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
-                <div style="font-weight:800; margin-bottom:6px;">Level rewards gained</div>
-                <div class="tooltip-list" id="tooltip-list"></div>
+                <div style="font-weight:800;margin-bottom:6px">Level rewards</div>
+                <div id="tooltip-list" class="tooltip-list"></div>
               </div>
             </div>
           </div>
@@ -113,48 +95,32 @@
   </div>
 
   <script>
-    (function () {
+    (function(){
       const REP_TRACK = ["X","-5","-3","-2","-1","-1","0","0","0","+1","+1","+2","+2","+3","+5"];
       const DEFAULT_REP_INDEX = 7;
-
       const LEVEL_RANGES = [
-        { level:1, min:0, max:2 },
-        { level:2, min:3, max:7 },
-        { level:3, min:8, max:14 },
-        { level:4, min:15, max:23 },
-        { level:5, min:24, max:34 },
-        { level:6, min:35, max:47 },
-        { level:7, min:48, max:62 },
-        { level:8, min:63, max:79 },
-        { level:9, min:80, max:98 },
-        { level:10, min:99, max:119 }
+        {level:1,min:0,max:2},{level:2,min:3,max:7},{level:3,min:8,max:14},
+        {level:4,min:15,max:23},{level:5,min:24,max:34},{level:6,min:35,max:47},
+        {level:7,min:48,max:62},{level:8,min:63,max:79},{level:9,min:80,max:98},
+        {level:10,min:99,max:119}
       ];
-
       const LEVEL_REWARDS = {
-        1: 'Command Token',
-        2: 'Skill + Advanced Action',
-        3: 'Command Token',
-        4: 'Skill + Advanced Action',
-        5: 'Command Token',
-        6: 'Skill + Advanced Action',
-        7: 'Command Token',
-        8: 'Skill + Advanced Action',
-        9: 'Command Token',
-        10: 'Skill + Advanced Action'
+        1:'Command Token',2:'Skill + Advanced Action',3:'Command Token',4:'Skill + Advanced Action',
+        5:'Command Token',6:'Skill + Advanced Action',7:'Command Token',8:'Skill + Advanced Action',
+        9:'Command Token',10:'Skill + Advanced Action'
       };
-
-      const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_press_v4';
+      const STORAGE_KEY = 'mk_companion_reptrack_fame_confirm_v1';
 
       const state = {
         repIndex: DEFAULT_REP_INDEX,
         fame: 0,
-        // lastConfirmedLevel stores the last confirmed player level (updated only on confirm)
+        // lastConfirmedLevel is the previously confirmed player level
         lastConfirmedLevel: 1
       };
 
       const el = {
         reputationValue: document.getElementById('reputation-value'),
-        repTrackContainer: document.getElementById('rep-track'),
+        repTrack: document.getElementById('rep-track'),
         repUp: document.getElementById('rep-up'),
         repDown: document.getElementById('rep-down'),
         fameInput: document.getElementById('fame-input'),
@@ -168,219 +134,154 @@
       let tempFame = null;
 
       function clamp(n,min=0,max=999){return Math.max(min,Math.min(max,n));}
-      function classifyLabel(label) {
-        if (label === "0") return 'zero';
-        if (label === "X" || label.startsWith('-')) return 'negative';
-        if (label.startsWith('+')) return 'positive';
-        return '';
-      }
-      function colorForLabel(label) {
-        if (label === "0") return getComputedStyle(document.documentElement).getPropertyValue('--yellow').trim() || '#f6d365';
-        if (label === "X" || label.startsWith('-')) return getComputedStyle(document.documentElement).getPropertyValue('--red').trim() || '#d9534f';
-        if (label.startsWith('+')) return getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#c7924f';
-        return getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#9aa4b2';
-      }
-      function getLevelForFame(fame) {
-        const f = Math.max(0, Math.floor(Number(fame) || 0));
-        for (let r of LEVEL_RANGES) if (f >= r.min && f <= r.max) return r.level;
-        return LEVEL_RANGES[LEVEL_RANGES.length - 1].level;
-      }
+      function classifyLabel(label){ if(label==="0") return 'zero'; if(label==="X"||label.startsWith('-')) return 'negative'; if(label.startsWith('+')) return 'positive'; return ''; }
+      function colorForLabel(label){ if(label==="0") return getComputedStyle(document.documentElement).getPropertyValue('--yellow').trim(); if(label==="X"||label.startsWith('-')) return getComputedStyle(document.documentElement).getPropertyValue('--red').trim(); if(label.startsWith('+')) return getComputedStyle(document.documentElement).getPropertyValue('--gold').trim(); return getComputedStyle(document.documentElement).getPropertyValue('--muted').trim(); }
+      function getLevelForFame(fame){ const f=Math.max(0,Math.floor(Number(fame)||0)); for(const r of LEVEL_RANGES) if(f>=r.min&&f<=r.max) return r.level; return LEVEL_RANGES[LEVEL_RANGES.length-1].level; }
 
-      function buildRepTrack() {
-        el.repTrackContainer.innerHTML = '';
-        REP_TRACK.forEach((label, idx) => {
-          const step = document.createElement('button');
-          step.type = 'button';
-          step.className = 'rep-step ' + classifyLabel(label);
-          step.setAttribute('role','listitem');
-          step.setAttribute('aria-label', `Reputation ${label}`);
-          step.textContent = label;
-          step.addEventListener('click', () => { state.repIndex = idx; renderReputation(); saveToStorage(); });
-          el.repTrackContainer.appendChild(step);
+      function buildRepTrack(){
+        el.repTrack.innerHTML='';
+        REP_TRACK.forEach((label,idx)=>{
+          const b=document.createElement('button');
+          b.type='button'; b.className='rep-step '+classifyLabel(label); b.textContent=label;
+          b.setAttribute('role','listitem'); b.setAttribute('aria-label',`Reputation ${label}`);
+          b.addEventListener('click',()=>{ state.repIndex=idx; renderReputation(); save(); });
+          el.repTrack.appendChild(b);
         });
       }
 
-      function renderReputation() {
-        const label = REP_TRACK[state.repIndex];
+      function renderReputation(){
+        const label=REP_TRACK[state.repIndex];
         el.reputationValue.textContent = label;
         el.reputationValue.style.color = colorForLabel(label);
-        const steps = el.repTrackContainer.querySelectorAll('.rep-step');
-        steps.forEach((s,i) => s.classList.toggle('active', i === state.repIndex));
+        const steps = el.repTrack.querySelectorAll('.rep-step');
+        steps.forEach((s,i)=> s.classList.toggle('active', i===state.repIndex));
         const active = steps[state.repIndex];
-        if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
+        if(active && typeof active.scrollIntoView==='function') active.scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'});
       }
 
-      function buildFullTooltip(level) {
-        el.tooltipList.innerHTML = '';
-        for (let l = 1; l <= level; l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
-      }
-      function createTooltipItem(lvl, text) {
-        const item = document.createElement('div');
-        item.className = 'tooltip-item';
-        const lvlDiv = document.createElement('div'); lvlDiv.className = 'lvl'; lvlDiv.textContent = `Level ${lvl}:`;
-        const rewardDiv = document.createElement('div'); rewardDiv.className = 'reward'; rewardDiv.textContent = text;
-        item.appendChild(lvlDiv); item.appendChild(rewardDiv); return item;
+      function createTooltipItem(lvl, text){
+        const item = document.createElement('div'); item.className='tooltip-item';
+        const a = document.createElement('div'); a.className='lvl'; a.textContent = `Level ${lvl}:`;
+        const b = document.createElement('div'); b.className='reward'; b.textContent = text;
+        item.appendChild(a); item.appendChild(b); return item;
       }
 
-      // Render fame/level using confirmed fame (do not show tentative level during edit)
-      function renderFameAndLevel() {
-        el.fameInput.value = editing && tempFame !== null ? tempFame : String(state.fame || 0);
+      function buildFullTooltip(level){
+        el.tooltipList.innerHTML='';
+        for(let l=1;l<=level;l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l]||'—'));
+      }
+
+      // Show only newly reached rewards between lastConfirmedLevel and newConfirmedLevel (inclusive)
+      function showNewRewards(prevLevel, newLevel){
+        el.tooltipList.innerHTML='';
+        if(newLevel <= prevLevel) return;
+        for(let L = prevLevel + 1; L <= newLevel; L++){
+          el.tooltipList.appendChild(createTooltipItem(L, LEVEL_REWARDS[L]||'—'));
+        }
+        el.tooltip.classList.add('visible'); el.tooltip.setAttribute('aria-hidden','false'); el.playerLevel.setAttribute('aria-pressed','true');
+      }
+
+      // Toggle full tooltip (shows all rewards up to confirmed level)
+      function showFullTooltip(){
         const level = getLevelForFame(state.fame);
-        el.playerLevel.textContent = `Player Level ${level}`;
-        el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
         buildFullTooltip(level);
+        el.tooltip.classList.add('visible'); el.tooltip.setAttribute('aria-hidden','false'); el.playerLevel.setAttribute('aria-pressed','true');
       }
+      function closeTooltip(){ el.tooltip.classList.remove('visible'); el.tooltip.setAttribute('aria-hidden','true'); el.playerLevel.setAttribute('aria-pressed','false'); }
 
-      // Show only rewards for levels (lastConfirmedLevel + 1) .. newLevel (inclusive)
-      function showRelevantLevelRewards(prevLevel, newLevel) {
-        el.tooltipList.innerHTML = '';
-        if (newLevel <= prevLevel) return; // nothing new
-        for (let L = prevLevel + 1; L <= newLevel; L++) {
-          el.tooltipList.appendChild(createTooltipItem(L, LEVEL_REWARDS[L] || '—'));
-        }
-        el.tooltip.classList.add('visible');
-        el.tooltip.setAttribute('aria-hidden','false');
-        el.playerLevel.setAttribute('aria-pressed','true');
+      // Fame edit lifecycle: temporary edit until confirm (Enter or blur)
+      function startEdit(){
+        editing = true; tempFame = String(state.fame || 0); el.fameInput.classList.add('editing'); setTimeout(()=> el.fameInput.select(),0);
       }
-
-      function toggleTooltip() {
-        const isVisible = el.tooltip.classList.contains('visible');
-        if (isVisible) closeTooltip();
-        else {
-          const level = getLevelForFame(state.fame);
-          buildFullTooltip(level);
-          el.tooltip.classList.add('visible');
-          el.tooltip.setAttribute('aria-hidden','false');
-          el.playerLevel.setAttribute('aria-pressed','true');
-        }
+      function cancelEdit(){
+        editing = false; tempFame = null; el.fameInput.classList.remove('editing'); renderFameAndLevel();
       }
-      function closeTooltip() {
-        el.tooltip.classList.remove('visible');
-        el.tooltip.setAttribute('aria-hidden','true');
-        el.playerLevel.setAttribute('aria-pressed','false');
-      }
-
-      // Fame edit lifecycle (temp value until confirmed)
-      function startEditFame() {
-        editing = true;
-        tempFame = String(state.fame || 0);
-        el.fameInput.classList.add('editing');
-        setTimeout(()=> el.fameInput.select(), 0);
-      }
-      function cancelEditFame() {
-        editing = false;
-        tempFame = null;
-        el.fameInput.classList.remove('editing');
-        renderFameAndLevel();
-      }
-      function commitEditFame() {
-        if (!editing) return;
+      function commitEdit(){
+        if(!editing) return;
         const raw = tempFame==='' ? '0' : (tempFame||'0');
         const parsed = Math.max(0, Math.floor(Number(raw)||0));
-
-        // Determine confirmed new level and the previously confirmed level
-        const prev = state.lastConfirmedLevel || getLevelForFame(state.fame || 0);
+        // determine previous confirmed level and new confirmed level
+        const prevLevel = (typeof state.lastConfirmedLevel === 'number' && state.lastConfirmedLevel >= 1) ? state.lastConfirmedLevel : getLevelForFame(state.fame);
         const newLevel = getLevelForFame(parsed);
-
-        // Store confirmed fame
+        // confirm fame
         state.fame = parsed;
-
-        // Show only rewards relevant to this level-up (prev+1 .. newLevel)
-        showRelevantLevelRewards(prev, newLevel);
-
-        // Update lastConfirmedLevel to the new confirmed level
+        // show only newly reached rewards
+        showNewRewards(prevLevel, newLevel);
+        // update lastConfirmedLevel
         state.lastConfirmedLevel = newLevel;
-
-        editing = false;
-        tempFame = null;
-        el.fameInput.classList.remove('editing');
-        saveToStorage();
-        renderFameAndLevel();
+        editing = false; tempFame = null; el.fameInput.classList.remove('editing');
+        save(); renderFameAndLevel();
       }
 
-      // Input handlers
-      el.fameInput.addEventListener('focus', (e) => { startEditFame(); });
-      el.fameInput.addEventListener('mouseup', (e) => { e.preventDefault(); el.fameInput.select(); });
-      el.fameInput.addEventListener('touchstart', (e) => { setTimeout(()=> el.fameInput.select(), 0); }, {passive:true});
-      el.fameInput.addEventListener('input', (e) => {
+      // Input bindings for fame (temp edits)
+      el.fameInput.addEventListener('focus', ()=> startEdit());
+      el.fameInput.addEventListener('input', (e)=>{
         const raw = e.target.value;
-        if (raw === '') tempFame = '';
+        if(raw === '') tempFame = '';
         else {
           const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw)||0)) : 0;
           tempFame = String(parsed);
         }
         e.target.value = tempFame;
       });
-      el.fameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); commitEditFame(); el.fameInput.blur(); }
-        else if (e.key === 'Escape') { e.preventDefault(); cancelEditFame(); el.fameInput.blur(); }
+      el.fameInput.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){ e.preventDefault(); commitEdit(); el.fameInput.blur(); }
+        else if(e.key === 'Escape'){ e.preventDefault(); cancelEdit(); el.fameInput.blur(); }
       });
-      // blur commits (tap elsewhere confirms)
-      el.fameInput.addEventListener('blur', () => { commitEditFame(); });
+      el.fameInput.addEventListener('blur', ()=> commitEdit());
+      el.fameInput.addEventListener('mouseup', (e)=>{ e.preventDefault(); el.fameInput.select(); });
+      el.fameInput.addEventListener('touchstart', ()=> setTimeout(()=> el.fameInput.select(),0), {passive:true});
 
-      // Player level badge interactions
-      el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
-      el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
+      // player level badge: click shows full list, not only newly reached
+      el.playerLevel.addEventListener('click', (e)=>{ e.stopPropagation(); showFullTooltip(); });
+      el.playerLevel.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); showFullTooltip(); } });
 
-      // close tooltip when tapping outside
-      document.addEventListener('click', (e) => {
+      // clicking outside closes tooltip
+      document.addEventListener('click', (e)=>{
         const inside = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.fameInput;
-        if (!inside) closeTooltip();
+        if(!inside) closeTooltip();
       });
 
-      // rep controls
-      el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
-      el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+      // reputation controls
+      el.repUp.addEventListener('click', ()=>{ state.repIndex = clamp(state.repIndex+1,0,REP_TRACK.length-1); renderReputation(); save(); });
+      el.repDown.addEventListener('click', ()=>{ state.repIndex = clamp(state.repIndex-1,0,REP_TRACK.length-1); renderReputation(); save(); });
 
-      // persistence
-      function saveToStorage(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({repIndex:state.repIndex,fame:state.fame,lastConfirmedLevel:state.lastConfirmedLevel})); } catch(e){} }
-      function loadFromStorage(){ try { const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return; const p=JSON.parse(raw); if(typeof p.repIndex==='number') state.repIndex=p.repIndex; if(typeof p.fame==='number') state.fame=p.fame; if(typeof p.lastConfirmedLevel==='number') state.lastConfirmedLevel=p.lastConfirmedLevel; } catch(e){} }
+      // New Game resets everything
+      el.newGameBtn.addEventListener('click', ()=>{ state.repIndex = DEFAULT_REP_INDEX; state.fame = 0; state.lastConfirmedLevel = getLevelForFame(0); try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} save(); closeTooltip(); renderReputation(); renderFameAndLevel(); });
 
-      // New game
-      function newGameReset(){
-        state.repIndex = DEFAULT_REP_INDEX;
-        state.fame = 0;
-        state.lastConfirmedLevel = getLevelForFame(0);
-        try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
-        saveToStorage(); closeTooltip(); renderReputation(); renderFameAndLevel();
-      }
-      el.newGameBtn.addEventListener('click', () => { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(30); newGameReset(); });
+      // persistence helpers
+      function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({repIndex:state.repIndex,fame:state.fame,lastConfirmedLevel:state.lastConfirmedLevel})); }catch(e){} }
+      function load(){ try{ const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return; const p = JSON.parse(raw); if(typeof p.repIndex === 'number') state.repIndex = p.repIndex; if(typeof p.fame === 'number') state.fame = p.fame; if(typeof p.lastConfirmedLevel === 'number') state.lastConfirmedLevel = p.lastConfirmedLevel; }catch(e){} }
+
+      // render functions
+      function renderFameAndLevel(){ el.fameInput.value = editing && tempFame !== null ? tempFame : String(state.fame || 0); const level = getLevelForFame(state.fame); el.playerLevel.textContent = `Player Level ${level}`; el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level)); buildFullTooltip(level); }
+      function buildFullTooltip(level){ el.tooltipList.innerHTML=''; for(let l=1;l<=level;l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l]||'—')); }
 
       // init
-      buildRepTrack();
-      loadFromStorage();
-      if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
-      if (typeof state.fame !== 'number') state.fame = 0;
-      if (typeof state.lastConfirmedLevel !== 'number' || state.lastConfirmedLevel < 1) state.lastConfirmedLevel = getLevelForFame(state.fame || 0);
-      renderReputation();
-      renderFameAndLevel();
-      setInterval(saveToStorage, 2000);
+      buildRepTrack(); load();
+      if(typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
+      if(typeof state.fame !== 'number') state.fame = 0;
+      if(typeof state.lastConfirmedLevel !== 'number' || state.lastConfirmedLevel < 1) state.lastConfirmedLevel = getLevelForFame(state.fame || 0);
+      renderReputation(); renderFameAndLevel();
+      setInterval(save,2000);
 
-      // keyboard shortcut 'f' increments fame and treats it as an immediate confirmed change
-      window.addEventListener('keydown', (ev) => {
-        if (ev.key === 'ArrowLeft') el.repDown.click();
-        if (ev.key === 'ArrowRight') el.repUp.click();
-        if ((ev.key === 'f' || ev.key === 'F') && !editing) {
-          const prev = state.lastConfirmedLevel || getLevelForFame(state.fame || 0);
+      // keyboard shortcuts: 'f' increments fame and treats as confirmed change
+      window.addEventListener('keydown',(ev)=>{
+        if(ev.key === 'ArrowLeft') el.repDown.click();
+        if(ev.key === 'ArrowRight') el.repUp.click();
+        if((ev.key==='f' || ev.key==='F') && !editing){
+          const prev = state.lastConfirmedLevel || getLevelForFame(state.fame);
           state.fame = clamp(state.fame + 1, 0);
-          const newLevel = getLevelForFame(state.fame);
-          showRelevantLevelRewards(prev, newLevel);
-          state.lastConfirmedLevel = newLevel;
+          const newL = getLevelForFame(state.fame);
+          showNewRewards(prev, newL);
+          state.lastConfirmedLevel = newL;
           renderFameAndLevel();
-          saveToStorage();
+          save();
         }
       });
 
-      // small helper (ensure renderReputation exists in scope)
-      function renderReputation(){
-        const label = REP_TRACK[state.repIndex];
-        el.reputationValue.textContent = label;
-        el.reputationValue.style.color = colorForLabel(label);
-        const steps = el.repTrackContainer.querySelectorAll('.rep-step');
-        steps.forEach((s,i) => s.classList.toggle('active', i === state.repIndex));
-        const active = steps[state.repIndex];
-        if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
-      }
+      // small helper for renderReputation (ensures available in scope)
+      function renderReputation(){ const label = REP_TRACK[state.repIndex]; el.reputationValue.textContent = label; el.reputationValue.style.color = colorForLabel(label); const steps = el.repTrack.querySelectorAll('.rep-step'); steps.forEach((s,i)=> s.classList.toggle('active', i===state.repIndex)); const active = steps[state.repIndex]; if(active && typeof active.scrollIntoView==='function') active.scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'}); }
     })();
   </script>
 </body>
