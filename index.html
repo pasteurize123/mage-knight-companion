@@ -39,11 +39,11 @@
     .thumb-up { background: linear-gradient(180deg, rgba(199,146,79,0.14), rgba(199,146,79,0.06)); color: #fff; border: 1px solid rgba(199,146,79,0.25); }
     .thumb-down { background: linear-gradient(180deg, rgba(217,83,79,0.12), rgba(217,83,79,0.06)); color: #fff; border: 1px solid rgba(217,83,79,0.22); }
     .rep-track { display:flex; gap:8px; align-items:center; overflow:auto; padding:10px 6px; border-radius:10px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
-    .rep-step { min-width:48px; padding:10px 6px; border-radius:10px; background:var(--track-bg); text-align:center; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; cursor:pointer; }
+    .rep-step { min-width:48px; padding:10px 6px; border-radius:10px; background:var(--track-bg); text-align:center; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; cursor:pointer; transition: transform 160ms cubic-bezier(.2,.8,.2,1), box-shadow 160ms ease, border-color 160ms ease; will-change: transform; }
     .rep-step.zero { background: rgba(246,211,101,0.08); color:var(--yellow); border:1px solid rgba(246,211,101,0.18); }
     .rep-step.positive { background: rgba(199,146,79,0.08); color:var(--gold); border:1px solid rgba(199,146,79,0.18); }
     .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
-    .rep-step.active { box-shadow: 0 8px 30px rgba(0,0,0,0.5); transform:scale(1.06); font-weight:800; }
+    .rep-step.active { box-shadow: 0 12px 36px rgba(0,0,0,0.6); transform:scale(1.14); z-index:2; font-weight:900; }
 
     /* Fame & Level */
     .fame-grid { display:flex; flex-direction:column; gap:8px; align-items:center; width:100%; }
