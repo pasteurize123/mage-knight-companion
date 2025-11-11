@@ -45,15 +45,13 @@
     .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
     .rep-step.active { box-shadow: 0 12px 36px rgba(0,0,0,0.6); transform:scale(1.14); z-index:2; font-weight:900; }
 
-    /* Fame & Level */
-    .fame-grid { display:flex; flex-direction:column; gap:8px; align-items:center; width:100%; }
-    .fame-row { display:flex; gap:10px; align-items:center; width:100%; justify-content:center; }
-    .fame-input { width:110px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance:textfield; }
+    /* Fame & Level (stacked column) */
+    .fame-grid { display:flex; flex-direction:column; gap:6px; align-items:center; width:100%; }
+    .fame-stack { display:flex; flex-direction:column; gap:10px; align-items:center; width:100%; }
+    .fame-input { width:140px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance:textfield; }
     .fame-input[readonly] { background: rgba(255,255,255,0.02); cursor:default; color:#eaf2ff; }
     .fame-input.editing { outline: 2px solid rgba(199,146,79,0.18); }
-    .badges-row { display:flex; gap:8px; align-items:flex-start; justify-content:center; width:100%; }
-    .badge-col { display:flex; flex-direction:column; gap:8px; align-items:center; position:relative; min-width:140px; }
-    .level-badge, .fame-badge { min-width:140px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
+    .level-badge { min-width:160px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
     .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
     .level-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
@@ -64,19 +62,23 @@
     .level-badge.level-8 { color:#d6b3ff; border-color: rgba(214,179,255,0.08); }
     .level-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
     .level-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
-    .fame-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
-    .fame-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
-    .fame-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
-    .fame-badge.level-4 { color:#b3e6ff; border-color: rgba(179,230,255,0.08); }
-    .fame-badge.level-5 { color:#d1f7c4; border-color: rgba(209,247,196,0.08); }
-    .fame-badge.level-6 { color:#ffdcb3; border-color: rgba(255,220,179,0.08); }
-    .fame-badge.level-7 { color:#ffb3b3; border-color: rgba(255,179,179,0.08); }
-    .fame-badge.level-8 { color:#d6b3ff; border-color: rgba(214,179,255,0.08); }
-    .fame-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
-    .fame-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
 
-    /* Centered tooltip styling (now fixed to center of viewport) */
-    .level-tooltip, .fame-tooltip {
+    /* Fame ranges tooltip (positioned near committed fame input via JS) */
+    .fame-tooltip {
+      position: fixed;
+      transform: translate(-50%, -8px);
+      min-width:240px;
+      max-width:90vw;
+      background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98));
+      border-radius:12px;
+      padding:12px;
+      display:none;
+      z-index:1200;
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    }
+    .fame-tooltip.visible { display:block; animation: popin 160ms cubic-bezier(.2,.8,.2,1); transform-origin: center bottom; }
+    .level-tooltip {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -91,7 +93,8 @@
       border:1px solid rgba(255,255,255,0.06);
       box-shadow: 0 18px 50px rgba(0,0,0,0.6);
     }
-    .level-tooltip.visible, .fame-tooltip.visible { display:block; animation: popin 160ms cubic-bezier(.2,.8,.2,1); }
+    .level-tooltip.visible { display:block; animation: popin 160ms cubic-bezier(.2,.8,.2,1); }
+
     @keyframes popin { from { opacity:0; transform: translate(-50%, -50%) scale(0.96); } to { opacity:1; transform: translate(-50%, -50%) scale(1); } }
 
     .tooltip-list { display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; padding-right:6px; }
@@ -104,7 +107,7 @@
     .new-game-btn.primary { background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.08)); border: 1px solid rgba(199,146,79,0.25); color: #ffdcb3; }
 
     .footer { margin-top:8px; text-align:center; color:var(--muted); font-size:12px; }
-    @media (max-width:400px) { :root { --phone-width:94vw; } .topbar { left:50%; transform:translateX(-50%); width:94vw; } .badges-row { gap:6px; } .badge-col { min-width:120px; } .level-tooltip, .fame-tooltip { min-width:200px; } }
+    @media (max-width:400px) { :root { --phone-width:94vw; } .topbar { left:50%; transform:translateX(-50%); width:94vw; } .fame-input { width:120px; } .level-tooltip { min-width:200px; } .fame-tooltip { min-width:200px; } }
   </style>
 </head>
 <body>
@@ -134,26 +137,24 @@
         <div class="card-header"><div><h2 id="fame-title" class="card-title">Fame</h2></div></div>
         <div class="card-body">
           <div class="fame-grid">
-            <div class="badges-row">
-              <!-- left column: add-fame input above fame badge -->
-              <div class="badge-col" id="fame-col">
-                <input id="add-fame-input" class="fame-input" type="number" inputmode="numeric" placeholder="+0" aria-label="Add or remove fame (use negative values to reduce fame)" />
-                <div id="fame-badge" class="fame-badge level-1" role="button" aria-pressed="false" tabindex="0">Fame</div>
-              </div>
+            <div class="fame-stack" role="group" aria-label="Fame controls (top to bottom)">
+              <!-- top: add-fame delta input -->
+              <input id="add-fame-input" class="fame-input" type="number" inputmode="numeric" placeholder="+0" aria-label="Add or remove fame (use negative values to reduce fame)" />
 
-              <!-- right column: fame value above level badge -->
-              <div class="badge-col" id="level-col">
-                <input id="fame-input" class="fame-input" type="number" value="0" aria-label="Committed fame value" readonly tabindex="-1" />
-                <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Level 1</div>
-              </div>
+              <!-- middle: committed fame value (read-only) - clicking this toggles Fame Ranges -->
+              <input id="fame-input" class="fame-input" type="number" value="0" aria-label="Committed fame value (click to view ranges)" readonly tabindex="0" />
+
+              <!-- bottom: level badge -->
+              <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Level 1</div>
             </div>
 
-            <!-- Centered tooltips (rendered in DOM but positioned fixed in CSS) -->
+            <!-- Fame ranges tooltip (position computed near committed fame input) -->
             <div id="fame-tooltip" class="fame-tooltip" role="dialog" aria-hidden="true">
               <div style="font-weight:800; margin-bottom:6px;">Fame Ranges</div>
               <div class="tooltip-list" id="fame-tooltip-list"></div>
             </div>
 
+            <!-- Level ups tooltip stays centered -->
             <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
               <div style="font-weight:800; margin-bottom:6px;">Level Ups</div>
               <div class="tooltip-list" id="tooltip-list"></div>
@@ -217,7 +218,6 @@
         addFameInput: document.getElementById('add-fame-input'),
         fameInput: document.getElementById('fame-input'),
         playerLevel: document.getElementById('player-level'),
-        fameBadge: document.getElementById('fame-badge'),
         tooltip: document.getElementById('level-tooltip'),
         tooltipList: document.getElementById('tooltip-list'),
         fameTooltip: document.getElementById('fame-tooltip'),
@@ -273,9 +273,7 @@
         el.fameInput.value = state.fame;
         const level = state.previousLevel; // only committed level shown
         el.playerLevel.textContent = `Level ${level}`;
-        // update both badges so they reflect current level color/style
         el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
-        el.fameBadge.className = 'fame-badge level-' + Math.max(1, Math.min(10, level));
         // make the fame number match the current level color
         try {
           const lvlColor = getComputedStyle(el.playerLevel).color;
@@ -344,6 +342,27 @@
           el.fameTooltipList.appendChild(createTooltipItem(r.level, rangeText));
         }
       }
+
+      // Position fame tooltip near the committed fame input (above it, centered)
+      function positionFameTooltip() {
+        const tip = el.fameTooltip;
+        if (!tip) return;
+        // show invisibly to measure
+        tip.style.display = 'block';
+        tip.style.visibility = 'hidden';
+        // measure
+        const tipRect = tip.getBoundingClientRect();
+        const inputRect = el.fameInput.getBoundingClientRect();
+        // compute centered above input, offset 10px
+        const left = inputRect.left + inputRect.width / 2;
+        const top = inputRect.top - 10; // we'll use transform to place above
+        // set transform to translate(-50%, -100%) so tip bottom aligns 10px above input top
+        tip.style.left = `${left}px`;
+        tip.style.top = `${top}px`;
+        tip.style.transform = 'translate(-50%, -100%)';
+        tip.style.visibility = 'visible';
+      }
+
       function toggleFameTooltip() {
         const isVisible = el.fameTooltip.classList.contains('visible');
         if (isVisible) {
@@ -352,13 +371,15 @@
           buildFameRangesTooltip();
           el.fameTooltip.classList.add('visible');
           el.fameTooltip.setAttribute('aria-hidden','false');
-          el.fameBadge.setAttribute('aria-pressed','true');
+          positionFameTooltip();
         }
       }
       function closeFameTooltip() {
         el.fameTooltip.classList.remove('visible');
         el.fameTooltip.setAttribute('aria-hidden','true');
-        el.fameBadge.setAttribute('aria-pressed','false');
+        el.fameTooltip.style.left = '';
+        el.fameTooltip.style.top = '';
+        el.fameTooltip.style.transform = '';
       }
 
       function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
@@ -406,26 +427,37 @@
         commitAddFameEdit();
       });
 
-      // Player level badge toggles full list (press)
-      el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
-
-      // fame badge toggles fame ranges list
-      el.fameBadge.addEventListener('click', (e) => { e.stopPropagation(); toggleFameTooltip(); });
-
-      // keyboard accessibility for badges
-      el.playerLevel.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); }
-      });
-      el.fameBadge.addEventListener('keydown', (e) => {
+      // Clicking the committed fame (read-only) toggles the fame ranges popup
+      el.fameInput.addEventListener('click', (e) => { e.stopPropagation(); toggleFameTooltip(); });
+      el.fameInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFameTooltip(); }
       });
 
-      // close tooltips when tapping outside (applies to gained-level popup and full list and fame ranges)
+      // Player level badge toggles full list (press)
+      el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
+
+      // keyboard accessibility for badge
+      el.playerLevel.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); }
+      });
+
+      // close fame/level tooltips when tapping outside
       document.addEventListener('click', (e) => {
-        const insideLevel = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.addFameInput;
-        const insideFame = e.target === el.fameBadge || el.fameBadge.contains(e.target) || el.fameTooltip.contains(e.target) || e.target === el.addFameInput;
+        const insideLevel = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.addFameInput || e.target === el.fameInput;
         if (!insideLevel) closeTooltip();
+        const insideFame = e.target === el.fameInput || el.fameInput.contains(e.target) || el.fameTooltip.contains(e.target) || e.target === el.addFameInput;
         if (!insideFame) closeFameTooltip();
+      });
+
+      // also close tooltips with Escape for convenience
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeTooltip();
+          closeFameTooltip();
+        }
+        // reputation keyboard shortcuts
+        if (e.key === 'ArrowLeft') el.repDown.click();
+        if (e.key === 'ArrowRight') el.repUp.click();
       });
 
       // New Game handler: reset app state to defaults and persist
@@ -480,12 +512,6 @@
 
       // autosave
       setInterval(saveToStorage, 2000);
-
-      // keyboard shortcuts: keep only reputation arrows; remove 'f' auto increment so fame can only be adjusted via the new input box
-      window.addEventListener('keydown', (ev) => {
-        if (ev.key === 'ArrowLeft') el.repDown.click();
-        if (ev.key === 'ArrowRight') el.repUp.click();
-      });
     })();
   </script>
 </body>
