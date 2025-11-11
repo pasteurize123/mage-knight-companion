@@ -300,12 +300,20 @@
         return '';
       }
 
+      function colorForLabel(label) {
+        if (label === "0") return getComputedStyle(document.documentElement).getPropertyValue('--yellow').trim() || '#f6d365';
+        if (label === "X" || label.startsWith('-')) return getComputedStyle(document.documentElement).getPropertyValue('--red').trim() || '#d9534f';
+        if (label.startsWith('+')) return getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#c7924f';
+        return getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#9aa4b2';
+      }
+
       function buildRepTrack() {
         el.repTrackContainer.innerHTML = '';
         REP_TRACK.forEach((label, idx) => {
           const step = document.createElement('button');
           step.type = 'button';
-          step.className = 'rep-step ' + classifyLabel(label);
+          const cls = classifyLabel(label);
+          step.className = 'rep-step ' + cls;
           step.setAttribute('role','listitem');
           step.setAttribute('aria-label', `Reputation ${label}`);
           step.textContent = label;
@@ -321,6 +329,9 @@
       function renderReputation() {
         const label = REP_TRACK[state.repIndex];
         el.reputationValue.textContent = label;
+        // set numeric display color to match label
+        el.reputationValue.style.color = colorForLabel(label);
+
         const steps = el.repTrackContainer.querySelectorAll('.rep-step');
         steps.forEach((s, i) => {
           s.classList.toggle('active', i === state.repIndex);
