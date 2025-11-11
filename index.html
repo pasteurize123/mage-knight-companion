@@ -29,7 +29,7 @@
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
 
-    /* Reputation track */
+    /* Reputation */
     .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; }
     .stat-value { font-size:28px; font-weight:700; color:var(--accent); }
 
@@ -45,11 +45,11 @@
     .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
     .rep-step.active { box-shadow: 0 8px 30px rgba(0,0,0,0.5); transform:scale(1.06); font-weight:800; }
 
-    /* Fame inputs */
+    /* Fame & Level */
     .fame-grid { display:flex; flex-direction:column; gap:8px; align-items:center; }
     .fame-row { display:flex; gap:10px; align-items:center; width:100%; justify-content:center; }
     .fame-input { width:110px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance: textfield; }
-    .level-badge { position:relative; min-width:120px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.04); cursor:default; }
+    .level-badge { position:relative; min-width:200px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.04); cursor:pointer; }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
     .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
     .level-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
@@ -61,26 +61,9 @@
     .level-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
     .level-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
 
-    /* tooltip */
-    .level-tooltip {
-      position: absolute;
-      top: -6px;
-      left: 50%;
-      transform: translate(-50%, -100%);
-      min-width:200px;
-      max-width:260px;
-      background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95));
-      color: #fff;
-      border-radius:10px;
-      padding:10px;
-      border:1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-      z-index:50;
-      font-size:13px;
-      display:none;
-    }
+    /* tooltip (press toggle) */
+    .level-tooltip { position: absolute; top: -6px; left: 50%; transform: translate(-50%, -100%); min-width:220px; max-width:280px; background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95)); color: #fff; border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.06); box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index:50; font-size:13px; display:none; }
     .level-tooltip.visible { display:block; }
-
     .tooltip-list { display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; padding-right:6px; }
     .tooltip-item { display:flex; justify-content:space-between; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color: var(--muted); font-weight:600; }
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; }
@@ -125,8 +108,8 @@
               <input id="fame-input" class="fame-input" type="number" inputmode="numeric" min="0" step="1" value="0" aria-label="Fame value" />
             </div>
             <div class="fame-row" style="position:relative;">
-              <div id="player-level" class="level-badge level-1" aria-live="polite">Player Level 1</div>
-              <div id="level-tooltip" class="level-tooltip" role="tooltip" aria-hidden="true">
+              <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Player Level 1</div>
+              <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
                 <div style="font-weight:800; margin-bottom:6px;">Level rewards gained</div>
                 <div class="tooltip-list" id="tooltip-list"></div>
               </div>
@@ -168,11 +151,9 @@
 
   <script>
     (function () {
-      // Reputation track values
       const REP_TRACK = ["X","-5","-3","-2","-1","-1","0","0","0","+1","+1","+2","+2","+3","+5"];
-      const DEFAULT_REP_INDEX = 7; // center zero
+      const DEFAULT_REP_INDEX = 7;
 
-      // Fame to Level ranges
       const LEVEL_RANGES = [
         { level:1, min:0, max:2 },
         { level:2, min:3, max:7 },
@@ -186,7 +167,6 @@
         { level:10, min:99, max:119 }
       ];
 
-      // Rewards by level (pattern provided)
       const LEVEL_REWARDS = {
         1: 'Command Token',
         2: 'Skill + Advanced Action',
@@ -223,7 +203,6 @@
         volkareText: document.getElementById('volkare-text')
       };
 
-      // classify and color helpers
       function classifyLabel(label) {
         if (label === "0") return 'zero';
         if (label === "X" || label.startsWith('-')) return 'negative';
@@ -237,14 +216,12 @@
         return getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#9aa4b2';
       }
 
-      // determine player level from fame
       function getLevelForFame(fame) {
         const f = Math.max(0, Math.floor(Number(fame) || 0));
         for (let r of LEVEL_RANGES) if (f >= r.min && f <= r.max) return r.level;
         return LEVEL_RANGES[LEVEL_RANGES.length - 1].level;
       }
 
-      // build reputation track UI
       function buildRepTrack() {
         el.repTrackContainer.innerHTML = '';
         REP_TRACK.forEach((label, idx) => {
@@ -259,7 +236,6 @@
         });
       }
 
-      // render reputation (and numeric color)
       function renderReputation() {
         const label = REP_TRACK[state.repIndex];
         el.reputationValue.textContent = label;
@@ -270,61 +246,51 @@
         if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
       }
 
-      // render fame and level badge
       function renderFameAndLevel() {
         el.fameInput.value = state.fame;
         const level = getLevelForFame(state.fame);
         el.playerLevel.textContent = `Player Level ${level}`;
         el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
-        // rebuild tooltip content for all levels up to current
         buildLevelTooltip(level);
       }
 
-      // build tooltip list of all rewards up to `level`
       function buildLevelTooltip(level) {
         el.tooltipList.innerHTML = '';
-        // show entries for each level gained (1..level)
         for (let l = 1; l <= level; l++) {
           const item = document.createElement('div');
           item.className = 'tooltip-item';
-          const lvl = document.createElement('div');
-          lvl.className = 'lvl';
-          lvl.textContent = `Level ${l}`;
+          const text = document.createElement('div');
+          text.className = 'lvl';
+          text.textContent = `Level ${l}:`;
           const reward = document.createElement('div');
           reward.className = 'reward';
           reward.textContent = LEVEL_REWARDS[l] || '—';
-          item.appendChild(lvl);
+          item.appendChild(text);
           item.appendChild(reward);
           el.tooltipList.appendChild(item);
         }
-        // accessibility
         el.tooltip.setAttribute('aria-hidden', level === 0 ? 'true' : 'false');
       }
 
-      // show/hide tooltip handlers (hover + focus + touch)
-      let touchTimer = null;
-      function showTooltip() { el.tooltip.classList.add('visible'); el.tooltip.setAttribute('aria-hidden','false'); }
-      function hideTooltip() { el.tooltip.classList.remove('visible'); el.tooltip.setAttribute('aria-hidden','true'); }
+      function toggleTooltip() {
+        const isVisible = el.tooltip.classList.contains('visible');
+        if (isVisible) {
+          el.tooltip.classList.remove('visible');
+          el.tooltip.setAttribute('aria-hidden','true');
+          el.playerLevel.setAttribute('aria-pressed','false');
+        } else {
+          el.tooltip.classList.add('visible');
+          el.tooltip.setAttribute('aria-hidden','false');
+          el.playerLevel.setAttribute('aria-pressed','true');
+        }
+      }
 
-      // attach interactions to player-level badge
-      el.playerLevel.addEventListener('mouseenter', showTooltip);
-      el.playerLevel.addEventListener('mouseleave', hideTooltip);
-      el.playerLevel.addEventListener('focus', showTooltip);
-      el.playerLevel.addEventListener('blur', hideTooltip);
+      function closeTooltip() {
+        el.tooltip.classList.remove('visible');
+        el.tooltip.setAttribute('aria-hidden','true');
+        el.playerLevel.setAttribute('aria-pressed','false');
+      }
 
-      // touch: long-press to show
-      el.playerLevel.addEventListener('touchstart', (e) => {
-        if (touchTimer) clearTimeout(touchTimer);
-        touchTimer = setTimeout(() => showTooltip(), 350);
-      }, {passive:true});
-      el.playerLevel.addEventListener('touchend', (e) => {
-        if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
-        // allow brief display on tap
-        showTooltip();
-        setTimeout(hideTooltip, 2500);
-      });
-
-      // render dummy
       function renderDummy() {
         el.dummyHand.textContent = state.dummy.hand;
         el.dummyWounds.textContent = state.dummy.wounds;
@@ -334,28 +300,41 @@
 
       function clamp(n,min=0,max=999){return Math.max(min,Math.min(max,n));}
 
-      // reputation buttons
+      // Reputation buttons
       el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
       el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
 
-      // fame input binding
+      // Fame input binding (default 0)
       el.fameInput.addEventListener('input', (e) => {
         const raw = e.target.value;
         const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw) || 0)) : 0;
         const prevLevel = getLevelForFame(state.fame);
         state.fame = parsed;
         renderFameAndLevel();
-        // if player gained any new levels, briefly flash tooltip to show gained rewards
         const newLevel = getLevelForFame(state.fame);
         if (newLevel > prevLevel) {
-          // show tooltip with all current levels (per request: show all gained levels)
-          showTooltip();
-          setTimeout(hideTooltip, 2500);
+          // show popup briefly for gained levels (user asked to display on press, but show brief on gain)
+          el.tooltip.classList.add('visible');
+          el.tooltip.setAttribute('aria-hidden','false');
+          el.playerLevel.setAttribute('aria-pressed','true');
+          setTimeout(closeTooltip, 2200);
         }
         saveToStorage();
       });
 
-      // dummy controls
+      // Player level press/tap toggles tooltip (click and keyboard Enter/Space)
+      el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
+      el.playerLevel.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); }
+      });
+
+      // close tooltip when tapping outside
+      document.addEventListener('click', (e) => {
+        const inside = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target);
+        if (!inside) closeTooltip();
+      });
+
+      // Dummy controls
       document.getElementById('play-1').addEventListener('click', () => { state.dummy.hand = clamp(state.dummy.hand-1,0); state.dummy.lastAction='Played 1 card'; renderDummy(); saveToStorage(); });
       document.getElementById('draw-1').addEventListener('click', () => { state.dummy.hand = clamp(state.dummy.hand+1,0); state.dummy.lastAction='Drew 1 card'; renderDummy(); saveToStorage(); });
       document.getElementById('heal-1').addEventListener('click', () => { state.dummy.wounds = clamp(state.dummy.wounds-1,0); state.dummy.lastAction='Healed 1 wound'; renderDummy(); saveToStorage(); });
@@ -371,7 +350,7 @@
       el.volkareText.addEventListener('input', (e) => state.volkareNotes = e.target.value);
 
       // persistence
-      const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_tooltip';
+      const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_press';
       function saveToStorage(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({repIndex:state.repIndex,fame:state.fame,dummy:state.dummy,volkareNotes:state.volkareNotes})); } catch(e){} }
       function loadFromStorage(){ try { const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return; const parsed=JSON.parse(raw); if(typeof parsed.repIndex==='number' && parsed.repIndex>=0 && parsed.repIndex<REP_TRACK.length) state.repIndex=parsed.repIndex; if(typeof parsed.fame==='number') state.fame=parsed.fame; if(parsed.dummy) state.dummy=Object.assign(state.dummy, parsed.dummy); if(typeof parsed.volkareNotes==='string') state.volkareNotes=parsed.volkareNotes; } catch(e){} }
 
@@ -392,7 +371,7 @@
       window.addEventListener('keydown', (ev) => {
         if (ev.key === 'ArrowLeft') el.repDown.click();
         if (ev.key === 'ArrowRight') el.repUp.click();
-        if (ev.key === 'f' || ev.key === 'F') { state.fame = clamp(state.fame + 1, 0); renderFameAndLevel(); saveToStorage(); showTooltip(); setTimeout(hideTooltip,1500); }
+        if (ev.key === 'f' || ev.key === 'F') { state.fame = clamp(state.fame + 1, 0); renderFameAndLevel(); saveToStorage(); el.tooltip.classList.add('visible'); setTimeout(closeTooltip,1500); }
       });
     })();
   </script>
