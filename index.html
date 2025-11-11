@@ -51,8 +51,9 @@
     .fame-input { width:110px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance:textfield; }
     .fame-input[readonly] { background: rgba(255,255,255,0.02); cursor:default; color:#eaf2ff; }
     .fame-input.editing { outline: 2px solid rgba(199,146,79,0.18); }
-    .badges-row { display:flex; gap:8px; align-items:center; justify-content:center; width:100%; }
-    .level-badge, .fame-badge { position:relative; min-width:140px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
+    .badges-row { display:flex; gap:8px; align-items:flex-start; justify-content:center; width:100%; }
+    .badge-col { display:flex; flex-direction:column; gap:8px; align-items:center; position:relative; min-width:140px; }
+    .level-badge, .fame-badge { min-width:140px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
     .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
     .level-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
@@ -87,7 +88,7 @@
     .new-game-btn.primary { background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.08)); border: 1px solid rgba(199,146,79,0.25); color: #ffdcb3; }
 
     .footer { margin-top:8px; text-align:center; color:var(--muted); font-size:12px; }
-    @media (max-width:400px) { :root { --phone-width:94vw; } .topbar { left:50%; transform:translateX(-50%); width:94vw; } }
+    @media (max-width:400px) { :root { --phone-width:94vw; } .topbar { left:50%; transform:translateX(-50%); width:94vw; } .badges-row { gap:6px; } .badge-col { min-width:120px; } }
   </style>
 </head>
 <body>
@@ -100,7 +101,6 @@
         <div class="card-header"><div><h2 id="rep-title" class="card-title">Reputation</h2></div></div>
         <div class="card-body">
           <div class="rep-area">
-            <!-- rep-controls-row now contains the thumbs and the central reputation number -->
             <div class="rep-controls-row" aria-hidden="false">
               <button id="rep-down" class="thumb-btn thumb-down" title="Decrease reputation one step" aria-label="Thumbs down to decrease reputation">👎</button>
               <div style="flex:1; text-align:center;">
@@ -118,30 +118,25 @@
         <div class="card-header"><div><h2 id="fame-title" class="card-title">Fame</h2></div></div>
         <div class="card-body">
           <div class="fame-grid">
-            <!-- New adjustable input: user enters a delta (e.g. 3 or -2) and commits via Enter or blur -->
-            <div class="fame-row">
-              <input id="add-fame-input" class="fame-input" type="number" inputmode="numeric" placeholder="+0" aria-label="Add or remove fame (use negative values to reduce fame)" />
-            </div>
-
-            <!-- Read-only display of committed fame (no direct edits allowed) -->
-            <div class="fame-row">
-              <input id="fame-input" class="fame-input" type="number" value="0" aria-label="Committed fame value" readonly tabindex="-1" />
-            </div>
-
-            <div class="fame-row" style="position:relative;">
-              <div class="badges-row">
+            <div class="badges-row">
+              <!-- left column: add-fame input above fame badge -->
+              <div class="badge-col" id="fame-col">
+                <input id="add-fame-input" class="fame-input" type="number" inputmode="numeric" placeholder="+0" aria-label="Add or remove fame (use negative values to reduce fame)" />
                 <div id="fame-badge" class="fame-badge level-1" role="button" aria-pressed="false" tabindex="0">Fame</div>
+                <div id="fame-tooltip" class="fame-tooltip" role="dialog" aria-hidden="true">
+                  <div style="font-weight:800; margin-bottom:6px;">Fame Ranges</div>
+                  <div class="tooltip-list" id="fame-tooltip-list"></div>
+                </div>
+              </div>
+
+              <!-- right column: fame value above level badge -->
+              <div class="badge-col" id="level-col">
+                <input id="fame-input" class="fame-input" type="number" value="0" aria-label="Committed fame value" readonly tabindex="-1" />
                 <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Level 1</div>
-              </div>
-
-              <div id="fame-tooltip" class="fame-tooltip" role="dialog" aria-hidden="true">
-                <div style="font-weight:800; margin-bottom:6px;">Fame Ranges</div>
-                <div class="tooltip-list" id="fame-tooltip-list"></div>
-              </div>
-
-              <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
-                <div style="font-weight:800; margin-bottom:6px;">Level Ups</div>
-                <div class="tooltip-list" id="tooltip-list"></div>
+                <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
+                  <div style="font-weight:800; margin-bottom:6px;">Level Ups</div>
+                  <div class="tooltip-list" id="tooltip-list"></div>
+                </div>
               </div>
             </div>
           </div>
