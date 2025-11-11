@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Fame Confirm on Commit</title>
+  <title>Mage Knight Companion — Fixed</title>
   <style>
     :root{
       --bg:#0f1724; --card:#0b1220; --accent:#c7924f; --muted:#9aa4b2;
@@ -237,9 +237,6 @@
           renderFameAndLevel(); save();
         }
       });
-
-      // helper for renderReputation
-      function renderReputation(){ const label = REP_TRACK[state.repIndex]; el.reputationValue.textContent = label; el.reputationValue.style.color = colorForLabel(label); const steps = el.repTrack.querySelectorAll('.rep-step'); steps.forEach((s,i)=> s.classList.toggle('active', i===state.repIndex)); const active = steps[state.repIndex]; if(active && typeof active.scrollIntoView==='function') active.scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'}); }
     })();
   </script>
 </body>
