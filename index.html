@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mage Knight Companion — Mobile Reputation fixed</title>
+<title>Mage Knight Companion — Reputation fixed</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -361,13 +361,16 @@
   </div>
 
 <script>
-/* Updated: Reputation top row 0..+5, mid row 0, bottom row 0..X.
-   All rep boxes are equal size squares and will wrap as necessary without horizontal scrolling.
-   Levels Achieved lines formatted as "Level X: Description" where prefix is bold and description normal weight on one line.
-   Rest of game logic preserved (fame mapping, dummy/GV, persistence).
+/* Updated reputation arrays to match user request:
+   Top row: 0, +1, +1, +2, +2, +3, +5
+   Mid row: 0
+   Bot row: 0, -1, -1, -2, -3, -5, X
+   All rep boxes are equal-sized squares and will wrap without horizontal scrolling.
+   Levels Achieved still formatted as "Level X: Description" (prefix bold).
+   Full game logic preserved (fame mapping, dummy & GV, persistence).
 */
 
-const STORAGE_KEY = 'mk_companion_full_v5';
+const STORAGE_KEY = 'mk_companion_full_v6';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
 const FAME_LEVELS = [
@@ -622,9 +625,9 @@ const gvModule = GVModule();
 let fame = 0;
 
 /* Reputation values requested by user */
-const REP_TOP = ["0","+1","+2","+3","+4","+5"];      // single top row 0..+5
-const REP_MID = ["0"];                             // single middle 0
-const REP_BOT = ["0","-1","-2","-3","-4","-5","X"]; // bottom 0..X (7 items)
+const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];      // single top row 0..+5 per user
+const REP_MID = ["0"];                                 // single middle 0
+const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];    // bottom 0..X (7 items)
 
 /* Build rep rows */
 function buildRepRows(){
