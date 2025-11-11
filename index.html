@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mage Knight Companion — Full (end-round: force 1 crystal + 1 card)</title>
+<title>Mage Knight Companion — Dummy End Round (force 1 crystal + 1 card and reshuffle)</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -24,7 +24,6 @@
   .gv-pill{background:var(--pill);border-radius:6px;padding:6px 8px;border:1px solid #ddd;font-weight:600}
   .gv-desc{color:var(--accent);font-size:0.92rem;margin-top:6px;display:none}
 
-  /* Fame area layout */
   .fame-block{display:flex;flex-direction:column;align-items:center;gap:10px}
   .fame-row{display:flex;align-items:center;justify-content:center;gap:18px;width:100%}
   .fame-controls{display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -34,7 +33,6 @@
   .player-level-box label{font-weight:700;display:block;text-align:center}
   .player-level-num{min-width:80px;padding:8px;border-radius:6px;background:#fff;text-align:center;border:1px solid #eee;font-weight:700}
 
-  /* Levels Achieved popup */
   .levels-wrapper{position:relative;display:flex;flex-direction:column;align-items:center;margin-top:6px}
   .levels-trigger{background:transparent;border:0;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:700}
   .levels-list{
@@ -50,54 +48,30 @@
   .levels-wrapper:focus-within .levels-list,
   .levels-wrapper[aria-expanded="true"] .levels-list { display:block; }
 
-  /* Reputation wrapper with forced single-line rows */
   .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:stretch;position:relative;padding:6px}
-
-  /* Force each rep-row to be a single line (no wrap) and size cells so they fit */
   .rep-row{display:flex;align-items:center;gap:8px;padding:6px 0;width:100%;flex-wrap:nowrap;overflow:visible}
-
-  /* Top row has 7 items exactly */
   .rep-row.top .rep-cell{
     flex:0 0 calc((100% - 6 * 8px) / 7);
-    height:auto;
-    min-height:40px;
-    display:flex;align-items:center;justify-content:center;
-    padding:6px;border-radius:6px;background:#e8e8e8;text-align:center;font-size:14px;box-sizing:border-box
+    height:auto;min-height:40px;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;background:#e8e8e8;text-align:center;font-size:14px;box-sizing:border-box
   }
-
-  /* Middle row: single cell fills available width */
   .rep-row.mid{justify-content:center}
-  .rep-row.mid .rep-cell{
-    flex:1 1 auto;min-height:40px;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;background:#e8e8e8;font-size:14px;box-sizing:border-box
-  }
-
-  /* Bottom row has 7 items exactly */
+  .rep-row.mid .rep-cell{flex:1 1 auto;min-height:40px;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;background:#e8e8e8;font-size:14px;box-sizing:border-box}
   .rep-row.bot .rep-cell{
     flex:0 0 calc((100% - 6 * 8px) / 7);
-    height:auto;
-    min-height:40px;
-    display:flex;align-items:center;justify-content:center;
-    padding:6px;border-radius:6px;background:#e8e8e8;text-align:center;font-size:14px;box-sizing:border-box
+    height:auto;min-height:40px;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:6px;background:#e8e8e8;text-align:center;font-size:14px;box-sizing:border-box
   }
-
-  /* Selected states */
   .rep-row.top .rep-cell.selected{background:var(--gold);font-weight:700;color:#111}
   .rep-row.mid .rep-cell.selected{background:#ffeb99;font-weight:700;color:#111}
   .rep-row.bot .rep-cell.selected{background:#ff6b6b;font-weight:700;color:#fff}
-
-  /* Make cells slightly smaller on narrow screens */
   @media (max-width:420px){
-    .rep-row.top .rep-cell,
-    .rep-row.bot .rep-cell { min-height:34px; font-size:13px; padding:4px }
+    .rep-row.top .rep-cell,.rep-row.bot .rep-cell { min-height:34px; font-size:13px; padding:4px }
     .rep-row.mid .rep-cell { min-height:34px; font-size:13px; padding:4px }
   }
   @media (max-width:340px){
-    .rep-row.top .rep-cell,
-    .rep-row.bot .rep-cell { min-height:30px; font-size:12px; padding:3px }
+    .rep-row.top .rep-cell,.rep-row.bot .rep-cell { min-height:30px; font-size:12px; padding:3px }
     .rep-row.mid .rep-cell { min-height:30px; font-size:12px; padding:3px }
   }
 
-  /* Dummy player responsive layout (compact) */
   .dummy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
   .section-card{background:var(--card);border-radius:8px;padding:10px;border:1px solid #eee}
   .crystal-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -112,7 +86,6 @@
   .wound-box{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border-radius:6px;background:#fff;border:1px solid #eee;min-width:46px}
   .wound-symbol{font-size:1.2rem;color:var(--accent)}
 
-  /* End-round modal specialized layout */
   .endround-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
   .choice-list{display:flex;flex-direction:column;gap:8px}
   .choice-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:6px;border:1px solid #eee;background:#fff}
@@ -125,7 +98,6 @@
   <h1>Mage Knight Companion</h1>
 
   <div class="container">
-    <!-- Reputation (single-line rows) -->
     <section class="panel" aria-labelledby="rep-title">
       <div class="panel-inner">
         <h2 id="rep-title">Reputation</h2>
@@ -133,18 +105,15 @@
       </div>
     </section>
 
-    <!-- Fame -->
     <section class="panel" aria-labelledby="fame-title">
       <div class="panel-inner">
         <h2 id="fame-title">Fame</h2>
-
         <div class="fame-block" id="fame-block">
           <div class="fame-row" role="group" aria-label="Player fame and level">
             <div class="fame-controls" aria-hidden="false">
               <label style="font-weight:700;display:block;text-align:center">Player Fame</label>
               <input id="fame-input" class="fame-input" type="number" min="0" value="0" aria-label="Player fame" />
             </div>
-
             <div class="player-level-box" aria-live="polite">
               <label for="player-level-num">Player Level</label>
               <div id="player-level-num" class="player-level-num" aria-label="Player level">1</div>
@@ -167,7 +136,6 @@
       </div>
     </section>
 
-    <!-- Dummy Player (compact, with End Round behavior) -->
     <section class="panel" aria-labelledby="dummy-title">
       <div class="panel-inner" id="dummy-module">
         <h2 id="dummy-title">Dummy Player</h2>
@@ -269,15 +237,12 @@
       </div>
     </section>
 
-    <!-- General Volkare -->
     <section class="panel" aria-labelledby="gv-title">
       <div class="panel-inner" id="gv-module">
         <h2 id="gv-title">General Volkare</h2>
-
         <div class="row" style="gap:18px">
           <div style="flex:1">
             <h3 style="margin:0 0 6px 0;font-size:1rem">Deck Composition</h3>
-
             <div style="display:flex;flex-direction:column;gap:8px">
               <div class="gv-pile">
                 <div class="gv-pill">Advanced Actions</div>
@@ -352,11 +317,13 @@
     </footer>
   </div>
 
-  <!-- End round modal for dummy player: force 1 crystal + 1 card -->
+  <!-- End round modal for dummy player: force 1 crystal + 1 Advanced Action (no spells).
+       On confirm: apply choices then reshuffle main player's deck ready for next round.
+  -->
   <div id="endround-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:60">
     <div style="background:#fff;border-radius:10px;padding:16px;max-width:520px;width:96%;max-height:92vh;overflow:auto">
-      <h3 style="margin:0 0 8px 0">End Round — Choose 1 Crystal and 1 Card</h3>
-      <p style="margin:0 0 8px 0" class="muted">Select exactly one crystal and one card to add to the end-round choices. Confirm becomes enabled once both are chosen.</p>
+      <h3 style="margin:0 0 8px 0">End Round — Choose 1 Crystal and 1 Advanced Action</h3>
+      <p style="margin:0 0 8px 0" class="muted">Select exactly one crystal and one Advanced Action to add. Confirm becomes enabled once both are chosen; confirming will reshuffle the deck for the next round.</p>
 
       <div class="endround-grid">
         <div>
@@ -365,27 +332,27 @@
         </div>
 
         <div>
-          <div style="font-weight:700;margin-bottom:8px">Choose a Card</div>
-          <div id="modal-cards" class="choice-list" aria-label="Card choices"></div>
+          <div style="font-weight:700;margin-bottom:8px">Choose an Advanced Action</div>
+          <div id="modal-cards" class="choice-list" aria-label="Advanced Action choices"></div>
         </div>
       </div>
 
       <div class="modal-foot">
         <button id="endround-cancel" class="smallbtn btn-ghost">Cancel</button>
-        <button id="endround-confirm" class="smallbtn" disabled>Confirm</button>
+        <button id="endround-confirm" class="smallbtn" disabled>Confirm and Reshuffle</button>
       </div>
     </div>
   </div>
 
 <script>
-/* Full integrated JS with:
-   - single-line reputation rows (top/mid/bot)
-   - dummy player end-round flow: when triggered, force user to pick 1 crystal and 1 card (then apply)
-   - GV unchanged; end-round modal specifically for the main player
-   - data persisted to localStorage
+/* Version: single-line reputation + dummy end-round forced pick (Advanced Actions only).
+   When End Round for dummy player is triggered:
+   - modal forces player to pick 1 crystal and 1 Advanced Action (no spells)
+   - on confirm: apply crystal + add Adv card, then reshuffle main player's deck (move discard -> deck and shuffle)
+   - clears end-round state so next round proceeds normally
 */
 
-const STORAGE_KEY = 'mk_companion_full_v8';
+const STORAGE_KEY = 'mk_companion_full_v10';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
 const FAME_LEVELS = [
@@ -407,7 +374,7 @@ function getFameLevel(val){
   return 10;
 }
 
-/* ---------------- Dummy Module (compact) with end-round forcing behavior ---------------- */
+/* ---------------- Dummy Module ---------------- */
 function DummyModule() {
   const ids = {
     red:'red', blue:'blue', green:'green', white:'white',
@@ -443,19 +410,28 @@ function DummyModule() {
     if(!code) return '';
     if(code.endsWith('Card')) return SYMBOL[code.split(' ')[0]] || code;
     if(code === 'Wound') return SYMBOL.Wound;
+    if(code.startsWith('Adv-')) return SYMBOL[code.split('-')[1]] || code;
     return code;
   }
   function updateDiscardView(){ const node = el(ids.discardOutput); if(!node) return; if(discard.length===0) node.textContent='Discard pile is empty.'; else node.textContent = `Discard (${discard.length}): ${discard.map(displayMainCard).join(' ')}`; }
 
   function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({crystals,cardCounts,deck,discard,achievedLevels,endRoundFlag})); }catch(e){} }
-  function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); crystals = s.crystals || crystals; cardCounts = s.cardCounts || cardCounts; deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; achievedLevels = Array.isArray(s.achievedLevels)?s.achievedLevels:achievedLevels; endRoundFlag = !!s.endRoundFlag; return true; }catch(e){ return false; } }
+  function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); crystals = s.crystals || crystals; cardCounts = s.cardCounts || cardCounts; deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; achievedLevels = Array.isArray(s.achievedLevels)?s.achievedLevels:achievedLevels; endRoundFlag = !!s.endRoundFlag; updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); return true; }catch(e){ return false; } }
 
   function changeCrystal(color, delta){ crystals[color] = Math.max(0,(crystals[color]||0)+delta); updateCrystalViews(); save(); }
   function changeCard(color, delta){
     cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta);
     updateCardViews();
-    if(delta>0){ const name = `${color} Card`; const pos = Math.floor(Math.random()*(deck.length+1)); deck.splice(pos,0,name); }
-    else { const name = `${color} Card`; const idx = deck.indexOf(name); if(idx!==-1) deck.splice(idx,1); else { const dj=discard.indexOf(name); if(dj!==-1) discard.splice(dj,1); } }
+    if(delta>0){
+      const name = `${color} Card`;
+      const pos = Math.floor(Math.random()*(deck.length+1));
+      deck.splice(pos,0,name);
+    } else {
+      const name = `${color} Card`;
+      const idx = deck.indexOf(name);
+      if(idx!==-1) deck.splice(idx,1);
+      else { const dj=discard.indexOf(name); if(dj!==-1) discard.splice(dj,1); }
+    }
     updateDeckCount(); updateDiscardView(); updateDiscardCount(); save();
   }
 
@@ -482,7 +458,14 @@ function DummyModule() {
     const out = el(ids.dummyOutput); if(out) out.textContent = drawn.map(displayMainCard).join(' ');
     updateDeckCount(); updateDiscardView(); updateDiscardCount(); save();
   }
-  function reshuffle(){ if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); updateDiscardCount(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); }
+  function reshuffle(){ 
+    if(discard.length===0){
+      const out = el(ids.dummyOutput);
+      if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.';
+      return;
+    }
+    deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); updateDiscardCount(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); 
+  }
 
   function getRenderLevels(){ return achievedLevels.slice(); }
   function setAchievedLevels(levels){ if(Array.isArray(levels)) achievedLevels = levels.slice(); save(); }
@@ -512,10 +495,10 @@ function DummyModule() {
     if(reshuffleEl) reshuffleEl.addEventListener('click', reshuffle);
   }
 
-  return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); updateDiscardCount(); }, setAchievedLevels, achievedLevelsRef: ()=>achievedLevels };
+  return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, changeCrystal, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); updateDiscardCount(); }, setAchievedLevels, achievedLevelsRef: ()=>achievedLevels };
 }
 
-/* ---------------- GV Module ---------------- */
+/* ---------------- GV Module (unchanged) ---------------- */
 function GVModule(){
   const ids = {
     deckCount:'deck-count-gv', drawBtn:'draw-btn-gv', dummyOutput:'dummy-output-gv', discardOutput:'discard-output-gv',
@@ -642,7 +625,7 @@ const gvModule = GVModule();
 
 let fame = 0;
 
-/* Reputation values requested by user */
+/* Reputation values */
 const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
 const REP_MID = ["0"];
 const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
@@ -689,7 +672,6 @@ function buildRepRows(){
   repWrap.appendChild(mid);
   repWrap.appendChild(bot);
 
-  // apply saved selection if exists
   if(window._repSelection) applyRepSelection(window._repSelection);
   else { window._repSelection = { row:'mid', index: 0 }; applyRepSelection(window._repSelection); saveMeta(); }
 }
@@ -702,7 +684,7 @@ function selectRepCell(sel){
 }
 function applyRepSelection(sel){ if(!sel) return; const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
 
-/* Levels achieved rendering as requested: "Level X: Description" with prefix bold and description normal weight on one line */
+/* Levels achieved rendering */
 function renderLevelsAchieved(){
   const listEl = document.getElementById('levels-list');
   if(!listEl) return;
@@ -726,13 +708,7 @@ function renderLevelsAchieved(){
   }
 }
 
-/* ---------------- End-round modal behavior for main player ----------------
-   Matches earlier behavior: when End Round triggered for dummy player,
-   force selecting 1 crystal and 1 card. On confirm, apply selections:
-   - add the chosen card to main player's deck (changeCard +1)
-   - add 1 crystal of chosen color to crystals (increment)
-   This modal is independent of GV and only applies to the main player.
-*/
+/* ---------------- End-round modal (Advanced Actions only) ---------------- */
 const endroundModal = document.getElementById('endround-modal');
 const modalCrystals = document.getElementById('modal-crystals');
 const modalCards = document.getElementById('modal-cards');
@@ -745,7 +721,7 @@ function openEndRoundModalForMain(){
   pendingCrystalChoice = null;
   pendingCardChoice = null;
   renderModalChoices();
-  endroundConfirm.disabled = true;
+  updateModalConfirmState();
   if(endroundModal) endroundModal.style.display = 'flex';
 }
 
@@ -757,7 +733,6 @@ function closeEndRoundModal(){
 }
 
 function renderModalChoices(){
-  // crystals: red, blue, green, white
   const crystals = [
     {key:'red', label:'🔴 Red'},
     {key:'blue', label:'🔵 Blue'},
@@ -779,16 +754,12 @@ function renderModalChoices(){
     modalCrystals.appendChild(div);
   });
 
-  // cards: offer Adv-Red/Blue/Green/White and Spell-Red/Blue/Green/White (like earlier renditions)
+  // Cards: ONLY Advanced Actions (no Spell options)
   const cards = [
     {code:'Adv-Red', label:'🔴 Advanced Action'},
     {code:'Adv-Blue', label:'🔵 Advanced Action'},
     {code:'Adv-Green', label:'🟢 Advanced Action'},
-    {code:'Adv-White', label:'⚪ Advanced Action'},
-    {code:'Spell-Red', label:'🔴 Spell'},
-    {code:'Spell-Blue', label:'🔵 Spell'},
-    {code:'Spell-Green', label:'🟢 Spell'},
-    {code:'Spell-White', label:'⚪ Spell'}
+    {code:'Adv-White', label:'⚪ Advanced Action'}
   ];
   modalCards.innerHTML = '';
   cards.forEach(c => {
@@ -811,44 +782,36 @@ function updateModalConfirmState(){
 }
 
 if(endroundCancel) endroundCancel.addEventListener('click', () => {
-  // cancel simply closes the modal but retains endRoundFlag state; user can reopen via Reshuffle or New Game flow
   closeEndRoundModal();
 });
 
 if(endroundConfirm) endroundConfirm.addEventListener('click', () => {
   if(!pendingCrystalChoice || !pendingCardChoice) return;
   // Apply crystal: increment chosen crystal by 1
-  mainModule.changeCrystal ? mainModule.changeCrystal(pendingCrystalChoice, 1) : null;
-  // Apply card: add chosen card to main deck (treat Adv/Spell as adding an "Adv"/"Spell" card to deck)
-  // We'll add as a named code so the draw/display functions can use it if desired.
-  if(pendingCardChoice.startsWith('Adv-') || pendingCardChoice.startsWith('Spell-')){
-    // For compatibility with earlier simpler logic, we'll increment the color count if it's an Adv (matching cardCounts),
-    // or add a Spell marker into discard/deck if Spell selected (simulate adding a spell to discard so GV/draw logic won't confuse)
-    const parts = pendingCardChoice.split('-');
-    const kind = parts[0]; const color = parts[1];
-    if(kind === 'Adv'){
-      // increment cardCounts of that color on mainModule
-      mainModule.changeCard && mainModule.changeCard(color, 1);
-    } else {
-      // For Spell: push a Spell placeholder into discard so the next reshuffle/draw works visually
-      // We'll add to discard so player won't immediately draw it unless reshuffled.
-      // Use format 'Spell-Color' as token.
-      if(mainModule && mainModule.achievedLevelsRef){
-        // attempt to access internal discard via exposed module state if available
-        try{
-          // Best-effort: if mainModule has accessors, use them; else push into localStorage discard structure
-          const key = `${STORAGE_KEY}_main`;
-          const raw = localStorage.getItem(key);
-          if(raw){
-            const s = JSON.parse(raw);
-            s.discard = s.discard || [];
-            s.discard.push(pendingCardChoice);
-            localStorage.setItem(key, JSON.stringify(s));
-          }
-        }catch(e){}
-      }
-    }
+  mainModule.changeCrystal && mainModule.changeCrystal(pendingCrystalChoice, 1);
+
+  // Apply Advanced Action: increment that color's card count on mainModule (adds into deck)
+  const parts = pendingCardChoice.split('-');
+  const kind = parts[0]; const color = parts[1];
+  if(kind === 'Adv'){
+    mainModule.changeCard && mainModule.changeCard(color, 1);
   }
+
+  // After applying choices, reshuffle main player's deck so it's ready for next round.
+  // This moves discard -> deck and shuffles, clears endRoundFlag and sets Draw button text.
+  mainModule.reshuffle && mainModule.reshuffle();
+
+  // Ensure endRoundFlag cleared in saved state
+  try{
+    const key = `${STORAGE_KEY}_main`;
+    const raw = localStorage.getItem(key);
+    if(raw){
+      const s = JSON.parse(raw);
+      s.endRoundFlag = false;
+      localStorage.setItem(key, JSON.stringify(s));
+    }
+  }catch(e){}
+
   closeEndRoundModal();
 });
 
@@ -923,7 +886,7 @@ window.addEventListener('load', ()=>{
   }
   document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=>{ const prev=fame; fame = Math.max(0, Number(fame) + Number(btn.dataset.inc||0)); if(fameInput) fameInput.value = fame; updateFameUI(prev); }));
 
-  // Levels trigger click toggles aria-expanded (hover/focus also show)
+  // Levels trigger handling
   const wrapper = document.getElementById('levels-wrapper');
   const trigger = document.getElementById('levels-trigger');
   const list = document.getElementById('levels-list');
@@ -959,7 +922,7 @@ window.addEventListener('load', ()=>{
   setInterval(()=>{ mainModule.save && mainModule.save(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
 });
 
-/* Expose for quick debug */
+/* Expose for debugging */
 window._main = mainModule;
 window._gv = gvModule;
 </script>
