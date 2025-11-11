@@ -31,7 +31,7 @@
 
     /* Reputation */
     .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; }
-    .stat-value { font-size:28px; font-weight:700; color:var(--accent); }
+    .stat-value { font-size:28px; font-weight:700; color:var(--accent); display:inline-block; line-height:1; }
 
     .rep-area { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
     .rep-controls-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 6px; }
@@ -88,11 +88,13 @@
       <section class="card" id="reputation-card" aria-labelledby="rep-title">
         <div class="card-header"><div><h2 id="rep-title" class="card-title">Reputation</h2></div></div>
         <div class="card-body">
-          <div class="stat-row"><div class="stat-value" id="reputation-value">—</div></div>
           <div class="rep-area">
+            <!-- rep-controls-row now contains the thumbs and the central reputation number -->
             <div class="rep-controls-row" aria-hidden="false">
               <button id="rep-down" class="thumb-btn thumb-down" title="Decrease reputation one step" aria-label="Thumbs down to decrease reputation">👎</button>
-              <div style="flex:1"></div>
+              <div style="flex:1; text-align:center;">
+                <div class="stat-value" id="reputation-value">—</div>
+              </div>
               <button id="rep-up" class="thumb-btn thumb-up" title="Increase reputation one step" aria-label="Thumbs up to increase reputation">👍</button>
             </div>
             <div class="rep-track" id="rep-track" role="list" aria-label="Reputation track"></div>
