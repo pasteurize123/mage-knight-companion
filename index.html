@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mage Knight Companion — Combined</title>
+  <title>Mage Knight Companion — Combined (Fixed)</title>
   <style>
     :root{
       --bg:#0f1724;
@@ -90,7 +90,7 @@
     <h1>Mage Knight Companion</h1>
     <div class="app-shell">
       <div class="left panel">
-        <!-- Reputation -->
+        <!-- Reputation (unchanged) -->
         <div class="card">
           <div class="card-title">Reputation</div>
           <div class="card-sub">Quick reputation track</div>
@@ -112,7 +112,7 @@
           </div>
         </div>
 
-        <!-- Fame -->
+        <!-- Fame (unchanged behavior: commit on Enter/blur, show gained levels only) -->
         <div class="card" style="margin-top:6px;">
           <div class="card-title">Fame</div>
           <div class="card-sub">Enter Fame then press Enter or click away to confirm</div>
@@ -120,7 +120,6 @@
           <div style="display:flex;gap:12px;align-items:center;">
             <input id="fame-input" type="number" min="0" step="1" value="0" aria-label="Fame value" />
             <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Player Level 1</div>
-            <!-- tooltip positioned relative to badge -->
             <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
               <div style="font-weight:800;margin-bottom:6px;">Level rewards</div>
               <div class="tooltip-list" id="tooltip-list"></div>
@@ -130,11 +129,10 @@
           <div class="muted">Notes</div>
           <textarea id="volkare-text">General Volkare: Track story events or reminders here.</textarea>
         </div>
-
       </div>
 
       <div class="right panel">
-        <!-- Dummy Player -->
+        <!-- Dummy Player (new) -->
         <div class="card">
           <div class="card-title">Dummy Player</div>
           <div class="card-sub">Deck, crystals, draw/discard</div>
@@ -182,7 +180,6 @@
           <div class="muted">Dummy notes</div>
           <textarea id="dummy-notes"></textarea>
         </div>
-
       </div>
     </div>
   </div>
@@ -192,7 +189,7 @@
       /* ---------------------------
          Constants and configuration
          --------------------------- */
-      const STORAGE_KEY = 'mk_companion_combined_v1';
+      const STORAGE_KEY = 'mk_companion_fixed_dummy_v1';
       const REP_TRACK = ["X","-5","-3","-2","-1","-1","0","0","0","+1","+1","+2","+2","+3","+5"];
       const DEFAULT_REP_INDEX = 7;
       const LEVEL_RANGES = [
@@ -259,22 +256,16 @@
       }
 
       /* ---------------------------
-         State
-         - committed fame and level only update on confirm
-         - editing buffer for fame while user types
+         State (fame/rep behavior unchanged)
          --------------------------- */
       const state = {
-        // reputation
         repIndex: DEFAULT_REP_INDEX,
-        // fame/level (committed)
-        fame: 0,
-        previousLevel: 1,
-        // dummy deck
+        fame: 0,               // committed fame
+        previousLevel: 1,      // committed level
         deck: buildInitialDeck(),
         discard: [],
         hand: [],
         crystals: initialCrystals(),
-        // misc
         volkareNotes: 'General Volkare: Track story events or reminders here.',
         dummyNotes: ''
       };
@@ -285,18 +276,15 @@
          DOM elements
          --------------------------- */
       const el = {
-        // reputation
         reputationValue: document.getElementById('reputation-value'),
         repTrackContainer: document.getElementById('rep-track'),
         repUp: document.getElementById('rep-up'),
         repDown: document.getElementById('rep-down'),
-        // fame / level
         fameInput: document.getElementById('fame-input'),
         playerLevel: document.getElementById('player-level'),
         tooltip: document.getElementById('level-tooltip'),
         tooltipList: document.getElementById('tooltip-list'),
         volkareText: document.getElementById('volkare-text'),
-        // dummy
         dummyName: document.getElementById('dummy-name'),
         dummyHand: document.getElementById('dummy-hand'),
         dummyDiscard: document.getElementById('dummy-discard'),
@@ -337,7 +325,7 @@
           if (typeof parsed.repIndex === 'number') state.repIndex = parsed.repIndex;
           if (typeof parsed.fame === 'number') state.fame = parsed.fame;
           if (typeof parsed.previousLevel === 'number') state.previousLevel = parsed.previousLevel;
-          if (Array.isArray(parsed.deck) && parsed.deck.length >= 0) state.deck = parsed.deck;
+          if (Array.isArray(parsed.deck)) state.deck = parsed.deck;
           if (Array.isArray(parsed.discard)) state.discard = parsed.discard;
           if (Array.isArray(parsed.hand)) state.hand = parsed.hand;
           if (parsed.crystals && typeof parsed.crystals === 'object') state.crystals = parsed.crystals;
@@ -347,7 +335,7 @@
       }
 
       /* ---------------------------
-         Reputation UI
+         Reputation UI (unchanged)
          --------------------------- */
       function classifyLabel(label) {
         if (label === "0") return 'zero';
@@ -389,11 +377,7 @@
       }
 
       /* ---------------------------
-         Fame & Level UI
-         - editing buffer allows user to type, not update level until confirm (Enter or blur)
-         - show only newly gained level rewards on commit (prev+1..new)
-         - gained popup persists until tap-off
-         - press badge to toggle full list up to current committed level
+         Fame & Level UI (unchanged behavior)
          --------------------------- */
       function renderFameAndLevel() {
         el.fameInput.value = editing && tempFame !== null ? tempFame : String(state.fame || 0);
@@ -454,7 +438,7 @@
       }
 
       /* ---------------------------
-         Fame input behavior (editing buffer)
+         Fame input behavior (unchanged)
          --------------------------- */
       function startEditingFame() {
         editing = true;
@@ -478,7 +462,6 @@
         const newLevel = getLevelForFame(parsed);
         state.fame = parsed;
         state.previousLevel = newLevel;
-        // show only relevant level rewards (prev+1..new)
         if (newLevel > prevLevel) showGainedLevelsPersist(prevLevel, newLevel);
         editing = false;
         tempFame = null;
@@ -491,7 +474,6 @@
          Dummy Player: renderers and operations
          --------------------------- */
       function renderDeckComposition() {
-        // count remaining cards per color in deck
         const counts = COLORS.reduce((acc,c)=>{acc[c]=0;return acc;},{});
         state.deck.forEach(c => counts[c] = (counts[c]||0)+1);
         el.deckComposition.innerHTML = '';
@@ -543,7 +525,6 @@
       }
 
       function drawOne() {
-        // if deck empty, shuffle discard into deck
         if (state.deck.length === 0 && state.discard.length > 0) {
           state.deck = state.discard.slice();
           state.discard = [];
@@ -591,7 +572,7 @@
       }
 
       /* ---------------------------
-         Event wiring
+         Event wiring (unchanged fame/reputation behavior)
          --------------------------- */
       // reputation controls
       el.repUp.addEventListener('click', () => {
@@ -605,59 +586,31 @@
         saveToStorage();
       });
 
-      // rep track clicks built in buildRepTrack
+      // build rep track buttons
+      buildRepTrack();
 
-      // fame input: select-on-focus and prevent caret reposition (click replaces)
-      el.fameInput.addEventListener('focus', (e) => {
-        startEditingFame();
-      });
-      el.fameInput.addEventListener('mouseup', (e) => {
-        // prevent mouseup from moving caret; ensure whole selection
-        e.preventDefault();
-        try { el.fameInput.select(); } catch (err) {}
-      });
-      el.fameInput.addEventListener('touchstart', (e) => {
-        setTimeout(() => { try { el.fameInput.select(); } catch (err) {} }, 0);
-      }, { passive: true });
+      // fame input interactions
+      el.fameInput.addEventListener('focus', (e) => startEditingFame());
+      el.fameInput.addEventListener('mouseup', (e) => { e.preventDefault(); try { el.fameInput.select(); } catch (err) {} });
+      el.fameInput.addEventListener('touchstart', (e) => { setTimeout(() => { try { el.fameInput.select(); } catch (err) {} }, 0); }, { passive: true });
 
-      // capture typing into tempFame
       el.fameInput.addEventListener('input', (e) => {
         const raw = e.target.value;
-        if (raw === '') {
-          tempFame = '';
-          return;
-        }
+        if (raw === '') { tempFame = ''; return; }
         const parsed = Number.isFinite(Number(raw)) ? Math.max(0, Math.floor(Number(raw) || 0)) : 0;
         tempFame = String(parsed);
         e.target.value = tempFame;
       });
 
-      // commit on blur
-      el.fameInput.addEventListener('blur', (e) => {
-        commitFameEdit();
-      });
-
-      // keyboard: Enter commits, Escape cancels
+      el.fameInput.addEventListener('blur', (e) => commitFameEdit());
       el.fameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          commitFameEdit();
-          el.fameInput.blur();
-        } else if (e.key === 'Escape') {
-          e.preventDefault();
-          cancelFameEdit();
-          el.fameInput.blur();
-        }
+        if (e.key === 'Enter') { e.preventDefault(); commitFameEdit(); el.fameInput.blur(); }
+        else if (e.key === 'Escape') { e.preventDefault(); cancelFameEdit(); el.fameInput.blur(); }
       });
 
       // player level badge toggles full tooltip
-      el.playerLevel.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleTooltip();
-      });
-      el.playerLevel.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); }
-      });
+      el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
+      el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
 
       // close tooltip on outside click (applies to both gained-level persistent popup and full list)
       document.addEventListener('click', (e) => {
@@ -678,9 +631,8 @@
       /* ---------------------------
          Initialization
          --------------------------- */
-      buildRepTrack();
       loadFromStorage();
-      // ensure minimum defaults
+      // ensure defaults
       if (!Array.isArray(state.deck) || state.deck.length === 0) state.deck = buildInitialDeck();
       if (!state.crystals || typeof state.crystals !== 'object') state.crystals = initialCrystals();
       if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
@@ -691,7 +643,7 @@
       // autosave interval
       setInterval(saveToStorage, 2000);
 
-      // expose state for debugging (remove for production)
+      // expose state for debugging in console
       window.__mkState = state;
     })();
   </script>
