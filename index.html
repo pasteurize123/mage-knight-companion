@@ -29,8 +29,11 @@
     .rep-row.top .rep-cell.selected{background:var(--gold);font-weight:700;color:#111}
     .rep-row.mid .rep-cell.selected{background:var(--yellow);font-weight:700;color:#111}
     .rep-row.bot .rep-cell.selected{background:var(--danger);font-weight:700;color:#fff}
-    .levels-list{background:#fff;padding:8px;border-radius:6px;min-height:36px;display:flex;gap:6px;flex-wrap:wrap;font-size:0.9375rem}
-    .level-pill{background:#eef;padding:6px 8px;border-radius:999px;font-weight:600;font-size:0.9375rem}
+
+    /* Levels Achieved styling: entries formatted to 14px */
+    .levels-list{background:#fff;padding:8px;border-radius:6px;min-height:36px;display:flex;gap:6px;flex-wrap:wrap;font-size:14px}
+    .level-pill{background:#eef;padding:6px 8px;border-radius:999px;font-weight:600;font-size:14px}
+
     .output{background:#fff;padding:8px;border-radius:6px;min-height:36px;font-size:1rem}
     .center{display:flex;align-items:center;justify-content:center;gap:8px}
     .center-column{display:flex;flex-direction:column;align-items:center;gap:6px}
@@ -74,6 +77,7 @@
               <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
             </div>
           </div>
+
           <div class="center" style="width:100%">
             <div>
               <button class="smallbtn fame-inc" data-inc="1">+1</button>
