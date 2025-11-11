@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mage Knight Companion — Fixed Reputation, Fame, Levels Achieved</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mage Knight Companion — Full (Fame + Levels Achieved)</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -16,7 +16,6 @@
   .container{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
   .panel{background:var(--panel);border-radius:10px;padding:10px}
   .panel-inner{background:var(--card);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .smallbtn{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer}
   .output{background:#fff;padding:8px;border-radius:6px;min-height:36px}
   .muted{color:var(--muted);font-size:0.95rem}
@@ -24,16 +23,30 @@
   .gv-pill{background:var(--pill);border-radius:6px;padding:6px 8px;border:1px solid #ddd;font-weight:600}
   .gv-desc{color:var(--accent);font-size:0.92rem;margin-top:6px;display:none}
 
-  /* Spell symbol S overlay */
-  .symbol { display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;font-size:18px;position:relative;line-height:1;border-radius:50%; }
-  .symbol.spell::after{ content:'S'; position:absolute; top:-7px; right:-8px; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; background:rgba(0,0,0,0.65); border-radius:10px; box-shadow:0 1px 2px rgba(0,0,0,0.2); }
+  /* Fame area layout */
+  .fame-block{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .fame-row{display:flex;align-items:center;justify-content:center;gap:18px;width:100%}
+  .fame-controls{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .fame-input{width:140px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center}
+  .fame-increments{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .player-level{min-width:80px;padding:8px;border-radius:6px;background:#fff;text-align:center;border:1px solid #eee;font-weight:700}
 
-  /* wound visual */
-  .wound-box{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border-radius:6px;background:#fff;border:1px solid #eee;min-width:46px}
-  .wound-num{font-weight:700}
-  .wound-symbol{font-size:1.2rem;color:var(--accent)}
+  /* Levels Achieved block: hidden list on hover or focus-within; click toggles too */
+  .levels-wrapper{position:relative;display:flex;flex-direction:column;align-items:center;margin-top:6px}
+  .levels-trigger{background:transparent;border:0;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:700}
+  .levels-list{
+    position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+    display:none;min-width:240px;background:#fff;border:1px solid #eee;border-radius:8px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:40;
+  }
+  .levels-list .level-line{padding:8px 10px;border-bottom:1px dashed #f0f0f0;font-weight:600}
+  .levels-list .level-line:last-child{border-bottom:0}
 
-  /* reputation */
+  /* show on hover or focus within */
+  .levels-wrapper:hover .levels-list,
+  .levels-wrapper:focus-within .levels-list,
+  .levels-wrapper[aria-expanded="true"] .levels-list { display:block; }
+
+  /* reputation and other UI */
   .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:center;position:relative}
   .rep-row{display:flex;gap:8px;justify-content:center;align-items:center}
   .rep-cell{min-width:44px;padding:6px 10px;background:#e8e8e8;border-radius:6px;text-align:center;cursor:pointer;user-select:none}
@@ -41,23 +54,15 @@
   .rep-row.mid .rep-cell.selected{background:#ffeb99;font-weight:700;color:#111}
   .rep-row.bot .rep-cell.selected{background:#ff6b6b;font-weight:700;color:#fff}
 
-  /* levels list underneath player level */
-  .levels-block{margin-top:8px;align-self:flex-start;}
-  .levels-list{background:#fff;border:1px solid #eee;padding:8px;border-radius:6px;min-width:220px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-  .level-line{padding:6px 8px;border-bottom:1px dashed #f0f0f0;font-weight:600;font-size:14px}
-  .level-line:last-child{border-bottom:0}
+  /* symbols and wounds */
+  .symbol { display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;font-size:18px;position:relative;line-height:1;border-radius:50%; }
+  .symbol.spell::after{ content:'S'; position:absolute; top:-7px; right:-8px; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; background:rgba(0,0,0,0.65); border-radius:10px; box-shadow:0 1px 2px rgba(0,0,0,0.2); }
+  .wound-box{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border-radius:6px;background:#fff;border:1px solid #eee;min-width:46px}
+  .wound-symbol{font-size:1.2rem;color:var(--accent)}
 
-  /* fame row */
-  .fame-row{display:flex;align-items:flex-start;justify-content:center;gap:20px;flex-wrap:wrap}
-  .fame-controls{display:flex;flex-direction:column;align-items:center;gap:8px}
-  .fame-increments{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-  .player-level-box{display:flex;flex-direction:column;align-items:flex-start;min-width:160px}
-
-  @media (max-width:700px){
-    .symbol{width:24px;height:24px;font-size:16px}
-    .symbol.spell::after{top:-6px;right:-6px;width:16px;height:16px;font-size:11px}
-    .rep-cell{min-width:34px}
-    .player-level-box{min-width:120px}
+  @media (max-width:640px){
+    .fame-row{gap:12px}
+    .fame-input{width:110px}
     .levels-list{min-width:180px}
   }
 </style>
@@ -66,6 +71,7 @@
   <h1>Mage Knight Companion</h1>
 
   <div class="container">
+    <!-- Reputation -->
     <section class="panel" aria-labelledby="rep-title">
       <div class="panel-inner">
         <h2 id="rep-title">Reputation</h2>
@@ -73,31 +79,33 @@
       </div>
     </section>
 
+    <!-- Fame -->
     <section class="panel" aria-labelledby="fame-title">
       <div class="panel-inner">
         <h2 id="fame-title">Fame</h2>
 
-        <div class="fame-row" role="group" aria-label="Fame controls">
-          <div class="fame-controls" aria-hidden="false">
-            <label style="font-weight:700">Player Fame</label>
-            <input id="fame-input" type="number" min="0" value="0" style="width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center" />
-            <div class="fame-increments" role="toolbar" aria-label="Add fame">
-              <button class="smallbtn fame-inc" data-inc="1">+1</button>
-              <button class="smallbtn fame-inc" data-inc="2">+2</button>
-              <button class="smallbtn fame-inc" data-inc="3">+3</button>
-              <button class="smallbtn fame-inc" data-inc="5">+5</button>
-              <button class="smallbtn fame-inc" data-inc="10">+10</button>
+        <div class="fame-block" id="fame-block">
+          <div class="fame-row" role="group" aria-label="Player fame and level">
+            <div class="fame-controls" aria-hidden="false">
+              <label style="font-weight:700;display:block;text-align:center">Player Fame</label>
+              <input id="fame-input" class="fame-input" type="number" min="0" value="0" aria-label="Player fame" />
             </div>
+
+            <div class="player-level" aria-live="polite" id="player-level">1</div>
           </div>
 
-          <div class="player-level-box" aria-live="polite">
-            <label style="font-weight:700;display:block;margin-bottom:6px">Player Level</label>
-            <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
+          <div class="fame-increments" role="toolbar" aria-label="Add fame options">
+            <button class="smallbtn fame-inc" data-inc="1">+1</button>
+            <button class="smallbtn fame-inc" data-inc="2">+2</button>
+            <button class="smallbtn fame-inc" data-inc="3">+3</button>
+            <button class="smallbtn fame-inc" data-inc="5">+5</button>
+            <button class="smallbtn fame-inc" data-inc="10">+10</button>
+          </div>
 
-            <div class="levels-block" id="levels-block" aria-hidden="false">
-              <div class="levels-list" id="levels-list" role="list">
-                <div class="level-line">Level 1 — Command Token</div>
-              </div>
+          <div class="levels-wrapper" id="levels-wrapper" aria-expanded="false">
+            <button id="levels-trigger" class="levels-trigger" aria-controls="levels-list" aria-haspopup="true">Levels Achieved</button>
+            <div id="levels-list" class="levels-list" role="list" aria-hidden="true">
+              <!-- JS populates this -->
             </div>
           </div>
         </div>
@@ -243,7 +251,7 @@
     </footer>
   </div>
 
-  <!-- End round modal (shared) -->
+  <!-- End round modal -->
   <div id="endround-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:60">
     <div style="background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%">
       <h3 style="margin:0 0 8px 0">End Round — Choose Card</h3>
@@ -266,14 +274,15 @@
   </div>
 
 <script>
-/* Working integrated JS
-   - Reputation selection persisted and keyboard accessible
-   - Fame input and +fame buttons centered; player level in same row
-   - Levels Achieved lists Level 1..currentLevel with descriptions and lives under Player Level
-   - Dummy and GV modules preserve previous behaviour
+/* Full integrated JS
+   - Fame: centered input + level, centered increments, Levels Achieved shown on hover/focus/click
+   - Reputation: clickable cells persisted
+   - Dummy & GV modules: deck/card/crystal behaviour and save/load preserved
+   - End-round modal and "New Game" included
 */
 
-const STORAGE_KEY = 'mk_companion_full_v2';
+/* Constants */
+const STORAGE_KEY = 'mk_companion_full_v3';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
 const FAME_LEVELS = [
@@ -288,7 +297,15 @@ const LEVEL_PROMPTS = {
   7: "Command Token",8: "Skill + Advanced Action",9: "Command Token",10: "Skill + Advanced Action"
 };
 
-/* ------------------------ Dummy Module ------------------------ */
+/* Helper functions */
+function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
+function getFameLevel(val){
+  const v = Math.max(0, Number(val) || 0);
+  for(const b of FAME_LEVELS) if(v>=b.min && v<=b.max) return b.level;
+  return 10;
+}
+
+/* ---------------- Dummy Module ---------------- */
 function DummyModule() {
   const ids = {
     red:'red', blue:'blue', green:'green', white:'white',
@@ -303,8 +320,9 @@ function DummyModule() {
   let endRoundFlag = false;
   const SKEY = `${STORAGE_KEY}_main`;
 
-  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
   function el(id){ return document.getElementById(id); }
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
+
   function updateCrystalViews(){
     if(el(ids.red)) el(ids.red).textContent = crystals.red;
     if(el(ids.blue)) el(ids.blue).textContent = crystals.blue;
@@ -391,7 +409,7 @@ function DummyModule() {
   return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); }, setAchievedLevels, achievedLevelsRef: ()=>achievedLevels };
 }
 
-/* ------------------------ GV Module ------------------------ */
+/* ---------------- GV Module ---------------- */
 function GVModule(){
   const ids = {
     deckCount:'deck-count-gv', drawBtn:'draw-btn-gv', dummyOutput:'dummy-output-gv', discardOutput:'discard-output-gv',
@@ -402,8 +420,8 @@ function GVModule(){
   let wounds = 0;
   const SKEY = `${STORAGE_KEY}_gv`;
 
-  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
   function el(id){ return document.getElementById(id); }
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
 
   function buildDefaultDeck(){
     deck = [];
@@ -413,9 +431,6 @@ function GVModule(){
     wounds = 0;
     save(); updateCounts(); updateDrawButtonState();
   }
-
-  function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({deck,discard,wounds})); }catch(e){} }
-  function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; wounds = typeof s.wounds === 'number'?s.wounds:wounds; updateCounts(); updateDrawButtonState(); return true; }catch(e){ return false; } }
 
   function displayGVCard(code){
     if(!code) return '';
@@ -430,6 +445,9 @@ function GVModule(){
     if(el(ids.gvWounds)) el(ids.gvWounds).textContent = wounds;
     if(el(ids.discardOutput)) el(ids.discardOutput).textContent = discard.length===0 ? 'Discard pile is empty.' : `Discard (${discard.length}): ${discard.map(displayGVCard).join(' ')}`;
   }
+
+  function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({deck,discard,wounds})); }catch(e){} }
+  function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; wounds = typeof s.wounds === 'number'?s.wounds:wounds; updateCounts(); updateDrawButtonState(); return true; }catch(e){ return false; } }
 
   function changeWounds(delta){
     const newW = Math.max(0, wounds + delta);
@@ -512,24 +530,17 @@ function GVModule(){
   return { load, save, wire, buildDefaultDeck, updateCounts, drawOnce, reshuffle, addCardToDiscard, updateDrawButtonState, changeWounds };
 }
 
-/* ------------------------ App wiring ------------------------ */
+/* ---------------- App wiring ---------------- */
 const mainModule = DummyModule();
 const gvModule = GVModule();
 
 let fame = 0;
 
-/* helpers */
-function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
-function getFameLevel(fameValue){
-  const v = Math.max(0, Number(fameValue) || 0);
-  for (const b of FAME_LEVELS) if (v>=b.min && v<=b.max) return b.level;
-  return 10;
-}
-
-/* Reputation UI */
+/* Reputation */
 const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
 const REP_MID = ["0"];
 const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
+
 function buildRepRows(){
   const repWrap = document.getElementById('rep-wrap');
   repWrap.innerHTML = '';
@@ -548,11 +559,7 @@ function selectRepCell(sel){
   const cells = rowEl.querySelectorAll('.rep-cell');
   if(cells[sel.index]){ cells[sel.index].classList.add('selected'); window._repSelection = {...sel}; saveMeta(); }
 }
-function applyRepSelection(sel){
-  if(!sel) return;
-  const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return;
-  const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected');
-}
+function applyRepSelection(sel){ if(!sel) return; const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
 
 /* Levels achieved rendering under Player Level (Level 1..current) */
 function renderLevelsAchieved(){
@@ -648,7 +655,7 @@ function newGame(){
   renderLevelsAchieved();
 }
 
-/* Initialize wiring */
+/* Initialize */
 window.addEventListener('load', ()=>{
   mainModule.load(); mainModule.wire();
   gvModule.load(); gvModule.wire();
@@ -666,24 +673,51 @@ window.addEventListener('load', ()=>{
   gvModule.updateCounts && gvModule.updateCounts();
   gvModule.updateDrawButtonState && gvModule.updateDrawButtonState();
 
-  // fame input + increments
+  // Fame input + increments
   const fameInput = document.getElementById('fame-input');
   if(fameInput){
-    fameInput.addEventListener('change', ()=>{ const prev=fame; fame = clampIntNonNeg(document.getElementById('fame-input').value); updateFameUI(prev); });
+    fameInput.value = fame;
+    fameInput.addEventListener('change', ()=>{ const prev=fame; fame = clampIntNonNeg(fameInput.value); updateFameUI(prev); });
   }
-  document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=>{ const prev=fame; fame = Math.max(0, Number(fame) + Number(btn.dataset.inc||0)); updateFameUI(prev); }));
+  document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=>{ const prev=fame; fame = Math.max(0, Number(fame) + Number(btn.dataset.inc||0)); if(fameInput) fameInput.value = fame; updateFameUI(prev); }));
 
-  // new game
+  // Levels trigger click toggles aria-expanded (hover/focus also show)
+  const wrapper = document.getElementById('levels-wrapper');
+  const trigger = document.getElementById('levels-trigger');
+  const list = document.getElementById('levels-list');
+  if(trigger && wrapper && list){
+    trigger.addEventListener('click', (e)=>{
+      const expanded = wrapper.getAttribute('aria-expanded') === 'true';
+      wrapper.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      list.setAttribute('aria-hidden', expanded ? 'true' : 'false');
+      if(!expanded) trigger.focus();
+    });
+    document.addEventListener('click', (ev)=>{
+      if(!wrapper.contains(ev.target)){
+        wrapper.setAttribute('aria-expanded','false');
+        list.setAttribute('aria-hidden','true');
+      }
+    });
+    document.addEventListener('keydown', (ev)=>{
+      if(ev.key === 'Escape'){
+        wrapper.setAttribute('aria-expanded','false');
+        list.setAttribute('aria-hidden','true');
+      }
+    });
+  }
+
+  // New game
   document.getElementById('new-game').addEventListener('click', newGame);
 
-  // initial render of levels achieved
+  // initial render
+  updateFameUI(null);
   renderLevelsAchieved();
 
   // periodic save
   setInterval(()=>{ mainModule.save && mainModule.save(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
 });
 
-/* Expose for debugging in console if you want to inspect */
+/* Expose for debugging */
 window._main = mainModule;
 window._gv = gvModule;
 </script>
