@@ -29,7 +29,9 @@
   .fame-controls{display:flex;flex-direction:column;align-items:center;gap:8px}
   .fame-input{width:140px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center}
   .fame-increments{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-  .player-level{min-width:80px;padding:8px;border-radius:6px;background:#fff;text-align:center;border:1px solid #eee;font-weight:700}
+  .player-level-box{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:120px}
+  .player-level-box label{font-weight:700;display:block;text-align:center}
+  .player-level-num{min-width:80px;padding:8px;border-radius:6px;background:#fff;text-align:center;border:1px solid #eee;font-weight:700}
 
   /* Levels Achieved block: hidden list on hover or focus-within; click toggles too */
   .levels-wrapper{position:relative;display:flex;flex-direction:column;align-items:center;margin-top:6px}
@@ -37,11 +39,10 @@
   .levels-list{
     position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
     display:none;min-width:240px;background:#fff;border:1px solid #eee;border-radius:8px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:40;
+    font-size:14px;
   }
   .levels-list .level-line{padding:8px 10px;border-bottom:1px dashed #f0f0f0;font-weight:600}
   .levels-list .level-line:last-child{border-bottom:0}
-
-  /* show on hover or focus within */
   .levels-wrapper:hover .levels-list,
   .levels-wrapper:focus-within .levels-list,
   .levels-wrapper[aria-expanded="true"] .levels-list { display:block; }
@@ -91,7 +92,10 @@
               <input id="fame-input" class="fame-input" type="number" min="0" value="0" aria-label="Player fame" />
             </div>
 
-            <div class="player-level" aria-live="polite" id="player-level">1</div>
+            <div class="player-level-box" aria-live="polite">
+              <label for="player-level-num">Player Level</label>
+              <div id="player-level-num" class="player-level-num" aria-label="Player level">1</div>
+            </div>
           </div>
 
           <div class="fame-increments" role="toolbar" aria-label="Add fame options">
@@ -275,13 +279,11 @@
 
 <script>
 /* Full integrated JS
-   - Fame: centered input + level, centered increments, Levels Achieved shown on hover/focus/click
-   - Reputation: clickable cells persisted
-   - Dummy & GV modules: deck/card/crystal behaviour and save/load preserved
-   - End-round modal and "New Game" included
+   - Fame: centered input + labelled Player Level; increments; Levels Achieved popup shows Level 1..N (14px)
+   - Reputation persisted and keyboard accessible
+   - Dummy & GV modules preserve previous behaviour
 */
 
-/* Constants */
 const STORAGE_KEY = 'mk_companion_full_v3';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
@@ -297,7 +299,6 @@ const LEVEL_PROMPTS = {
   7: "Command Token",8: "Skill + Advanced Action",9: "Command Token",10: "Skill + Advanced Action"
 };
 
-/* Helper functions */
 function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
 function getFameLevel(val){
   const v = Math.max(0, Number(val) || 0);
@@ -536,7 +537,7 @@ const gvModule = GVModule();
 
 let fame = 0;
 
-/* Reputation */
+/* Reputation values */
 const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
 const REP_MID = ["0"];
 const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
@@ -561,7 +562,7 @@ function selectRepCell(sel){
 }
 function applyRepSelection(sel){ if(!sel) return; const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
 
-/* Levels achieved rendering under Player Level (Level 1..current) */
+/* Levels achieved rendering */
 function renderLevelsAchieved(){
   const listEl = document.getElementById('levels-list');
   if(!listEl) return;
@@ -626,7 +627,7 @@ function handleLevelPrompts(prevLevel, newLevel){
 function updateFameUI(prevFame = null){
   const prevLevel = prevFame !== null ? getFameLevel(prevFame) : null;
   const level = getFameLevel(fame);
-  const lvlEl = document.getElementById('player-level');
+  const lvlEl = document.getElementById('player-level-num');
   if(lvlEl) lvlEl.textContent = level;
   const fameInput = document.getElementById('fame-input');
   if(fameInput) fameInput.value = fame;
