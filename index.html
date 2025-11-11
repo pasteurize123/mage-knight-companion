@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mage Knight Companion — Centered Fame + No-op Refresh</title>
+<title>Mage Knight Companion — Fame & Levels</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -68,26 +68,26 @@
   .rep-row.mid .rep-cell.selected{background:#ffeb99;font-weight:700;color:#111}
   .rep-row.bot .rep-cell.selected{background:#ff6b6b;font-weight:700;color:#fff}
 
-  /* Levels panel */
+  /* Levels panel (appears on hover or click of button) */
   .levels-container{position:relative;display:inline-block}
+  .levels-trigger{background:transparent;border:0;padding:0;font-weight:700;cursor:pointer;color:inherit}
   .levels-panel{
     position:absolute;left:0;top:calc(100% + 8px);
     display:none;background:#fff;border-radius:8px;padding:10px;
     box-shadow:0 8px 30px rgba(0,0,0,0.12);
     min-width:220px;max-width:360px;z-index:50;font-size:14px;
   }
+  .levels-container:hover .levels-panel,
+  .levels-container:focus-within .levels-panel,
+  .levels-container[aria-expanded="true"] .levels-panel { display:block; }
   .levels-list{display:flex;flex-direction:column;gap:6px;padding:0;margin:0;list-style:none}
   .level-line{padding:6px 8px;border-radius:4px;font-weight:600;font-size:14px;background:transparent;color:#111}
 
-  /* Center fame area */
+  /* Fame row: player fame and level in same row and centered */
   .fame-row{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
   .fame-controls{display:flex;flex-direction:column;align-items:center;gap:8px}
   .fame-increments{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-  .player-level-box{display:flex;flex-direction:column;align-items:center;min-width:120px}
-
-  /* Refresh button (no-op) */
-  .refresh-btn{padding:6px 10px;border-radius:6px;border:1px dashed #bbb;background:#fff;color:#666;cursor:pointer}
-  .refresh-btn:active{transform:translateY(1px)}
+  .player-level-box{display:flex;flex-direction:column;align-items:center;min-width:80px}
 
   @media (max-width:700px){
     .symbol{width:24px;height:24px;font-size:16px}
@@ -112,12 +112,12 @@
       <div class="panel-inner">
         <h2 id="fame-title">Fame</h2>
 
-        <!-- Centered fame UI -->
+        <!-- Player fame and level on the same centered row -->
         <div class="fame-row" role="group" aria-label="Fame controls">
-          <div class="fame-controls">
+          <div class="fame-controls" aria-hidden="false">
             <label style="font-weight:700">Player Fame</label>
             <input id="fame-input" type="number" min="0" value="0" style="width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center" />
-            <div class="fame-increments">
+            <div class="fame-increments" role="toolbar" aria-label="Add fame">
               <button class="smallbtn fame-inc" data-inc="1">+1</button>
               <button class="smallbtn fame-inc" data-inc="2">+2</button>
               <button class="smallbtn fame-inc" data-inc="3">+3</button>
@@ -131,16 +131,8 @@
             <div id="player-level" class="output" style="min-width:80px;text-align:center">1</div>
           </div>
 
-          <!-- No-op Refresh button: visually present but intentionally does not change app state -->
-          <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-            <button id="refresh-btn" class="refresh-btn" title="Does nothing to app state">Refresh</button>
-            <div class="muted" style="font-size:0.85rem">No-op</div>
-          </div>
-        </div>
-
-        <div style="margin-top:10px">
-          <span class="levels-container">
-            <button id="levels-toggle" class="smallbtn" aria-expanded="false" aria-controls="levels-panel" aria-haspopup="true">Levels Achieved</button>
+          <span class="levels-container" id="levels-container" aria-expanded="false">
+            <button id="levels-toggle" class="levels-trigger smallbtn" aria-haspopup="true" aria-controls="levels-panel">Levels Achieved</button>
             <div id="levels-panel" class="levels-panel" role="region" aria-label="Levels achieved panel" aria-hidden="true" tabindex="-1">
               <ul id="levels-list" class="levels-list"><li class="level-line">None yet</li></ul>
             </div>
@@ -311,10 +303,12 @@
   </div>
 
 <script>
-/* Same integrated logic as before. Key UI changes:
-   - Fame input, level box and +fame buttons are centered with CSS
-   - A Refresh button (id="refresh-btn") is provided and wired to a no-op handler that explicitly does not change app state
-   - New Game still resets Volkare deck & wounds to base
+/* Integrated app logic (keeps previous behavior).
+   Changes from prior versions:
+     - removed the "Refresh" button
+     - player fame and player level sit in the same centered row
+     - Levels Achieved panel shows on hover, focus or click (using aria-expanded for click)
+     - panel content is the current achieved levels from mainModule.getRenderLevels()
 */
 
 const STORAGE_KEY = 'mk_companion_full_vfinal';
@@ -332,8 +326,8 @@ const LEVEL_PROMPTS = {
   7: "Command Token",8: "Skill + Advanced Action",9: "Command Token",10: "Skill + Advanced Action"
 };
 
-/* Modules (main + GV) unchanged from prior version except wiring of refresh no-op below.
-   For brevity the module implementations are the same as previous reply; they are included here intact.
+/* DummyModule and GVModule are same as previous full integration; kept intact for functionality.
+   For brevity they are included without internal comments, matching earlier implementations.
 */
 
 function DummyModule() {
@@ -349,85 +343,23 @@ function DummyModule() {
   let achievedLevels = [1];
   let endRoundFlag = false;
   const SKEY = `${STORAGE_KEY}_main`;
-
   function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
   function el(id){ return document.getElementById(id); }
-  function updateCrystalViews(){
-    if(el(ids.red)) el(ids.red).textContent = crystals.red;
-    if(el(ids.blue)) el(ids.blue).textContent = crystals.blue;
-    if(el(ids.green)) el(ids.green).textContent = crystals.green;
-    if(el(ids.white)) el(ids.white).textContent = crystals.white;
-  }
-  function updateCardViews(){
-    if(el(ids.cardRed)) el(ids.cardRed).textContent = cardCounts.Red;
-    if(el(ids.cardBlue)) el(ids.cardBlue).textContent = cardCounts.Blue;
-    if(el(ids.cardGreen)) el(ids.cardGreen).textContent = cardCounts.Green;
-    if(el(ids.cardWhite)) el(ids.cardWhite).textContent = cardCounts.White;
-  }
+  function updateCrystalViews(){ if(el(ids.red)) el(ids.red).textContent = crystals.red; if(el(ids.blue)) el(ids.blue).textContent = crystals.blue; if(el(ids.green)) el(ids.green).textContent = crystals.green; if(el(ids.white)) el(ids.white).textContent = crystals.white; }
+  function updateCardViews(){ if(el(ids.cardRed)) el(ids.cardRed).textContent = cardCounts.Red; if(el(ids.cardBlue)) el(ids.cardBlue).textContent = cardCounts.Blue; if(el(ids.cardGreen)) el(ids.cardGreen).textContent = cardCounts.Green; if(el(ids.cardWhite)) el(ids.cardWhite).textContent = cardCounts.White; }
   function updateDeckCount(){ const n = el(ids.deckCount); if(n) n.textContent = deck.length; }
-  function displayMainCard(code){
-    if(!code) return '';
-    if(code.endsWith('Card')) return SYMBOL[code.split(' ')[0]] || code;
-    if(code === 'Wound') return SYMBOL.Wound;
-    return code;
-  }
+  function displayMainCard(code){ if(!code) return ''; if(code.endsWith('Card')) return SYMBOL[code.split(' ')[0]] || code; if(code === 'Wound') return SYMBOL.Wound; return code; }
   function updateDiscardView(){ const node = el(ids.discardOutput); if(!node) return; if(discard.length===0) node.textContent='Discard pile is empty.'; else node.textContent = `Discard (${discard.length}): ${discard.map(displayMainCard).join(' ')}`; }
-
   function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({crystals,cardCounts,deck,discard,achievedLevels,endRoundFlag})); }catch(e){} }
   function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); crystals = s.crystals || crystals; cardCounts = s.cardCounts || cardCounts; deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; achievedLevels = Array.isArray(s.achievedLevels)?s.achievedLevels:achievedLevels; endRoundFlag = !!s.endRoundFlag; return true; }catch(e){ return false; } }
-
   function changeCrystal(color, delta){ crystals[color] = Math.max(0,(crystals[color]||0)+delta); updateCrystalViews(); save(); }
-  function changeCard(color, delta){
-    cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta);
-    updateCardViews();
-    if(delta>0){ const name = `${color} Card`; const pos = Math.floor(Math.random()*(deck.length+1)); deck.splice(pos,0,name); }
-    else { const name = `${color} Card`; const idx = deck.indexOf(name); if(idx!==-1) deck.splice(idx,1); else { const dj=discard.indexOf(name); if(dj!==-1) discard.splice(dj,1); } }
-    updateDeckCount(); updateDiscardView(); save();
-  }
-
+  function changeCard(color, delta){ cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta); updateCardViews(); if(delta>0){ const name = `${color} Card`; const pos = Math.floor(Math.random()*(deck.length+1)); deck.splice(pos,0,name); } else { const name = `${color} Card`; const idx = deck.indexOf(name); if(idx!==-1) deck.splice(idx,1); else { const dj=discard.indexOf(name); if(dj!==-1) discard.splice(dj,1); } } updateDeckCount(); updateDiscardView(); save(); }
   function rebuildDeck(){ deck = []; Object.keys(cardCounts).forEach(color=>{ for(let i=0;i<cardCounts[color];i++) deck.push(`${color} Card`); }); shuffle(deck); updateDeckCount(); save(); }
-  function drawOnce(){
-    const drawn=[];
-    for(let i=0;i<3 && deck.length>0;i++) drawn.push(deck.pop());
-    if(drawn.length===0){ endRoundFlag = true; const btn = el(ids.drawBtn); if(btn) btn.textContent = 'End Round'; const out = el(ids.dummyOutput); if(out) out.textContent='Nil cards drawn. End of round announced.'; save(); return; }
-    const last = drawn[drawn.length-1];
-    if(last){
-      const color = last.split(' ')[0].toLowerCase();
-      const extra = crystals[color]||0;
-      for(let i=0;i<extra && deck.length>0;i++) drawn.push(deck.pop());
-    }
-    discard.push(...drawn);
-    const out = el(ids.dummyOutput); if(out) out.textContent = drawn.map(displayMainCard).join(' ');
-    updateDeckCount(); updateDiscardView(); save();
-  }
+  function drawOnce(){ const drawn=[]; for(let i=0;i<3 && deck.length>0;i++) drawn.push(deck.pop()); if(drawn.length===0){ endRoundFlag = true; const btn = el(ids.drawBtn); if(btn) btn.textContent = 'End Round'; const out = el(ids.dummyOutput); if(out) out.textContent='Nil cards drawn. End of round announced.'; save(); return; } const last = drawn[drawn.length-1]; if(last){ const color = last.split(' ')[0].toLowerCase(); const extra = crystals[color]||0; for(let i=0;i<extra && deck.length>0;i++) drawn.push(deck.pop()); } discard.push(...drawn); const out = el(ids.dummyOutput); if(out) out.textContent = drawn.map(displayMainCard).join(' '); updateDeckCount(); updateDiscardView(); save(); }
   function reshuffle(){ if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); }
-
   function getRenderLevels(){ const arr = []; for(let i=0;i<achievedLevels.length;i++){ const L = achievedLevels[i]; const desc = LEVEL_PROMPTS[L]||''; arr.push(`Level ${L}: ${desc}`); } return arr.length?arr:[]; }
-  function resetInitial(){
-    crystals = { red:0, blue:0, green:0, white:0 };
-    const keys=['red','blue','green','white'];
-    const first = keys[Math.floor(Math.random()*keys.length)];
-    let second = keys[Math.floor(Math.random()*keys.length)];
-    while(second===first) second=keys[Math.floor(Math.random()*keys.length)];
-    crystals[first]=2; crystals[second]=1;
-    cardCounts = {...DEFAULT_CARDS};
-    deck = []; discard = []; achievedLevels=[1]; endRoundFlag=false;
-    rebuildDeck(); updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); save();
-  }
-
-  function wire(){
-    document.querySelectorAll('.crystal-btn[data-player="main"]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCrystal(color, act==='inc'?1:-1); });
-    });
-    document.querySelectorAll('.card-btn[data-player="main"]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCard(color, act==='inc'?1:-1); });
-    });
-    const drawBtnEl = el(ids.drawBtn);
-    if(drawBtnEl) drawBtnEl.addEventListener('click', ()=>{ if(endRoundFlag && drawBtnEl.textContent==='End Round'){ openEndRoundModalFor('main'); return; } drawOnce(); });
-    const reshuffleEl = el(ids.reshuffleBtn);
-    if(reshuffleEl) reshuffleEl.addEventListener('click', reshuffle);
-  }
-
+  function resetInitial(){ crystals = { red:0, blue:0, green:0, white:0 }; const keys=['red','blue','green','white']; const first = keys[Math.floor(Math.random()*keys.length)]; let second = keys[Math.floor(Math.random()*keys.length)]; while(second===first) second=keys[Math.floor(Math.random()*keys.length)]; crystals[first]=2; crystals[second]=1; cardCounts = {...DEFAULT_CARDS}; deck = []; discard = []; achievedLevels=[1]; endRoundFlag=false; rebuildDeck(); updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); save(); }
+  function wire(){ document.querySelectorAll('.crystal-btn[data-player="main"]').forEach(btn=>{ btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCrystal(color, act==='inc'?1:-1); }); }); document.querySelectorAll('.card-btn[data-player="main"]').forEach(btn=>{ btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCard(color, act==='inc'?1:-1); }); }); const drawBtnEl = el(ids.drawBtn); if(drawBtnEl) drawBtnEl.addEventListener('click', ()=>{ if(endRoundFlag && drawBtnEl.textContent==='End Round'){ openEndRoundModalFor('main'); return; } drawOnce(); }); const reshuffleEl = el(ids.reshuffleBtn); if(reshuffleEl) reshuffleEl.addEventListener('click', reshuffle); }
   return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); }, achievedLevelsRef: ()=>achievedLevels };
 }
 
@@ -440,147 +372,44 @@ function GVModule(){
   let discard = [];
   let wounds = 0;
   const SKEY = `${STORAGE_KEY}_gv`;
-
   function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
   function el(id){ return document.getElementById(id); }
-
-  function buildDefaultDeck(){
-    deck = [];
-    ['Red','Blue','Green','White'].forEach(c=>{ for(let i=0;i<4;i++) deck.push(`Adv-${c}`); });
-    ['Red','Blue','Green','White'].forEach(c=> deck.push(`Spell-${c}`));
-    shuffle(deck);
-    wounds = 0;
-    save(); updateCounts(); updateDrawButtonState();
-  }
-
+  function buildDefaultDeck(){ deck = []; ['Red','Blue','Green','White'].forEach(c=>{ for(let i=0;i<4;i++) deck.push(`Adv-${c}`); }); ['Red','Blue','Green','White'].forEach(c=> deck.push(`Spell-${c}`)); shuffle(deck); wounds = 0; save(); updateCounts(); updateDrawButtonState(); }
   function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({deck,discard,wounds})); }catch(e){} }
   function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; wounds = typeof s.wounds === 'number'?s.wounds:wounds; updateCounts(); updateDrawButtonState(); return true; }catch(e){ return false; } }
-
-  function displayGVCard(code){
-    if(!code) return '';
-    if(code.startsWith('Adv-')) return SYMBOL[code.split('-')[1]] || code;
-    if(code.startsWith('Spell-')) return 'S' + (SYMBOL[code.split('-')[1]] || code);
-    if(code === 'Wound') return SYMBOL.Wound;
-    return code;
-  }
-
-  function updateCounts(){
-    if(el(ids.deckCount)) el(ids.deckCount).textContent = deck.length;
-    if(el(ids.gvWounds)) el(ids.gvWounds).textContent = wounds;
-    if(el(ids.discardOutput)) el(ids.discardOutput).textContent = discard.length===0 ? 'Discard pile is empty.' : `Discard (${discard.length}): ${discard.map(displayGVCard).join(' ')}`;
-  }
-
-  function changeWounds(delta){
-    const newW = Math.max(0, wounds + delta);
-    const diff = newW - wounds;
-    wounds = newW;
-    if(diff > 0){
-      for(let i=0;i<diff;i++){
-        const pos = Math.floor(Math.random()*(deck.length+1));
-        deck.splice(pos,0,'Wound');
-      }
-    } else if(diff < 0){
-      let toRemove = -diff;
-      while(toRemove>0){
-        const idx = deck.indexOf('Wound');
-        if(idx !== -1){ deck.splice(idx,1); toRemove--; continue; }
-        const dj = discard.indexOf('Wound');
-        if(dj !== -1){ discard.splice(dj,1); toRemove--; continue; }
-        break;
-      }
-    }
-    updateCounts(); save(); updateDrawButtonState();
-  }
-
-  function drawOnce(){
-    const out = el(ids.dummyOutput);
-    if(deck.length === 0){
-      updateDrawButtonState();
-      if(out) out.textContent = 'Deck empty — Frenzy ready. Volkare will act as if a spell was drawn.';
-      return;
-    }
-    const card = deck.pop();
-    discard.push(card);
-    if(out){
-      if(card.startsWith('Spell-')){
-        out.innerHTML = `<span class="symbol spell">${SYMBOL[card.split('-')[1]]}</span>`;
-      } else if(card === 'Wound'){
-        out.innerHTML = `<span class="wound-symbol">${SYMBOL.Wound}</span>`;
-      } else {
-        out.textContent = SYMBOL[card.split('-')[1]] || card;
-      }
-    }
-    updateCounts(); save(); updateDrawButtonState();
-  }
-
-  function reshuffle(){
-    const out = el(ids.dummyOutput);
-    if(discard.length === 0){
-      if(out) out.textContent = 'Discard pile is empty. Nothing to reshuffle.';
-      return;
-    }
-    deck.push(...discard); discard = []; shuffle(deck); updateCounts(); if(out) out.textContent = 'Deck reshuffled from discard.'; save();
-    updateDrawButtonState();
-  }
-
-  function addCardToDiscard(cardCode){
-    discard.push(cardCode);
-    updateCounts(); save(); updateDrawButtonState();
-  }
-
-  function updateDrawButtonState(){
-    const btn = el(ids.drawBtn);
-    const desc = el(ids.gvFrenzyDesc);
-    if(!btn) return;
-    if(deck.length === 0){
-      btn.textContent = 'Frenzy';
-      if(desc) desc.style.display = 'block';
-    } else {
-      btn.textContent = 'Draw';
-      if(desc) desc.style.display = 'none';
-    }
-  }
-
-  function wire(){
-    const drawBtn = el(ids.drawBtn);
-    if(drawBtn) drawBtn.addEventListener('click', ()=>{ if(deck.length === 0){ const out = el(ids.dummyOutput); if(out) out.textContent = 'Frenzy — Volkare will act as if a spell was drawn.'; return; } drawOnce(); });
-    const reshuffleBtn = el(ids.reshuffleBtn); if(reshuffleBtn) reshuffleBtn.addEventListener('click', reshuffle);
-    document.querySelectorAll('.gv-wound-btn').forEach(b=> b.addEventListener('click', ()=>{ const act = b.dataset.act; changeWounds(act==='inc'?1:-1); }));
-  }
-
+  function displayGVCard(code){ if(!code) return ''; if(code.startsWith('Adv-')) return SYMBOL[code.split('-')[1]] || code; if(code.startsWith('Spell-')) return 'S' + (SYMBOL[code.split('-')[1]] || code); if(code === 'Wound') return SYMBOL.Wound; return code; }
+  function updateCounts(){ if(el(ids.deckCount)) el(ids.deckCount).textContent = deck.length; if(el(ids.gvWounds)) el(ids.gvWounds).textContent = wounds; if(el(ids.discardOutput)) el(ids.discardOutput).textContent = discard.length===0 ? 'Discard pile is empty.' : `Discard (${discard.length}): ${discard.map(displayGVCard).join(' ')}`; }
+  function changeWounds(delta){ const newW = Math.max(0, wounds + delta); const diff = newW - wounds; wounds = newW; if(diff > 0){ for(let i=0;i<diff;i++){ const pos = Math.floor(Math.random()*(deck.length+1)); deck.splice(pos,0,'Wound'); } } else if(diff < 0){ let toRemove = -diff; while(toRemove>0){ const idx = deck.indexOf('Wound'); if(idx !== -1){ deck.splice(idx,1); toRemove--; continue; } const dj = discard.indexOf('Wound'); if(dj !== -1){ discard.splice(dj,1); toRemove--; continue; } break; } } updateCounts(); save(); updateDrawButtonState(); }
+  function drawOnce(){ const out = el(ids.dummyOutput); if(deck.length === 0){ updateDrawButtonState(); if(out) out.textContent = 'Deck empty — Frenzy ready. Volkare will act as if a spell was drawn.'; return; } const card = deck.pop(); discard.push(card); if(out){ if(card.startsWith('Spell-')){ out.innerHTML = `<span class="symbol spell">${SYMBOL[card.split('-')[1]]}</span>`; } else if(card === 'Wound'){ out.innerHTML = `<span class="wound-symbol">${SYMBOL.Wound}</span>`; } else { out.textContent = SYMBOL[card.split('-')[1]] || card; } } updateCounts(); save(); updateDrawButtonState(); }
+  function reshuffle(){ const out = el(ids.dummyOutput); if(discard.length === 0){ if(out) out.textContent = 'Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateCounts(); if(out) out.textContent = 'Deck reshuffled from discard.'; save(); updateDrawButtonState(); }
+  function addCardToDiscard(cardCode){ discard.push(cardCode); updateCounts(); save(); updateDrawButtonState(); }
+  function updateDrawButtonState(){ const btn = el(ids.drawBtn); const desc = el(ids.gvFrenzyDesc); if(!btn) return; if(deck.length === 0){ btn.textContent = 'Frenzy'; if(desc) desc.style.display = 'block'; } else { btn.textContent = 'Draw'; if(desc) desc.style.display = 'none'; } }
+  function wire(){ const drawBtn = el(ids.drawBtn); if(drawBtn) drawBtn.addEventListener('click', ()=>{ if(deck.length === 0){ const out = el(ids.dummyOutput); if(out) out.textContent = 'Frenzy — Volkare will act as if a spell was drawn.'; return; } drawOnce(); }); const reshuffleBtn = el(ids.reshuffleBtn); if(reshuffleBtn) reshuffleBtn.addEventListener('click', reshuffle); document.querySelectorAll('.gv-wound-btn').forEach(b=> b.addEventListener('click', ()=>{ const act = b.dataset.act; changeWounds(act==='inc'?1:-1); })); }
   return { load, save, wire, buildDefaultDeck, updateCounts, drawOnce, reshuffle, addCardToDiscard, updateDrawButtonState, changeWounds };
 }
 
-/* App wiring (levels, rep, end-round modal same as before) */
+/* App wiring */
 const mainModule = DummyModule();
 const gvModule = GVModule();
 
+/* Levels & Rep UI wiring */
 const levelsToggleBtn = document.getElementById('levels-toggle');
 const levelsPanel = document.getElementById('levels-panel');
 const levelsList = document.getElementById('levels-list');
+const levelsContainer = document.getElementById('levels-container');
 let fame = 0;
 
 function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
-function getFameLevel(fameValue){
-  const v = Math.max(0, Number(fameValue) || 0);
-  for (const b of FAME_LEVELS) if (v>=b.min && v<=b.max) return b.level;
-  return 10;
-}
+function getFameLevel(fameValue){ const v = Math.max(0, Number(fameValue) || 0); for (const b of FAME_LEVELS) if (v>=b.min && v<=b.max) return b.level; return 10; }
 
-/* End-round modal wiring (same) */
+/* End-round modal wiring */
 const endroundModal = document.getElementById('endround-modal');
 const cardChoices = document.getElementById('card-choices');
 const endroundConfirm = document.getElementById('endround-confirm');
 const endroundCancel = document.getElementById('endround-cancel');
 let endRoundContext = null;
 let selectedCard = null;
-function openEndRoundModalFor(playerKey){
-  endRoundContext = playerKey;
-  selectedCard = null;
-  if(endroundModal) endroundModal.style.display = 'flex';
-  if(endroundConfirm) endroundConfirm.disabled = true;
-  cardChoices && cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));
-}
+function openEndRoundModalFor(playerKey){ endRoundContext = playerKey; selectedCard = null; if(endroundModal) endroundModal.style.display = 'flex'; if(endroundConfirm) endroundConfirm.disabled = true; cardChoices && cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected')); }
 if(cardChoices){
   cardChoices.addEventListener('click',(e)=>{
     const btn = e.target.closest('.choice-btn');
@@ -617,7 +446,7 @@ function buildRepRows(){
 function selectRepCell(sel){ document.querySelectorAll('.rep-cell').forEach(c=>c.classList.remove('selected')); const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]){ cells[sel.index].classList.add('selected'); window._repSelection = {...sel}; saveMeta(); } }
 function applyRepSelection(sel){ if(!sel) return; const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
 
-/* Levels rendering: only the achieved levels list */
+/* Render achieved levels (no header) */
 function renderLevelsPanel(){
   levelsList.innerHTML = '';
   const lines = mainModule.getRenderLevels();
@@ -650,7 +479,7 @@ function updateFameUI(prevFame = null){
 function saveMeta(){ try{ const rep = window._repSelection || null; localStorage.setItem(STORAGE_KEY + '_meta', JSON.stringify({ fame, rep })); }catch(e){} }
 function loadMeta(){ try{ const raw = localStorage.getItem(STORAGE_KEY + '_meta'); if(!raw) return false; const m = JSON.parse(raw); fame = typeof m.fame==='number'?m.fame:fame; window._repSelection = m.rep || window._repSelection; return true;}catch(e){ return false; } }
 
-/* New game resets both modules and GV deck/wounds */
+/* New game */
 function newGame(){
   if(!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
   try{
@@ -670,7 +499,7 @@ function newGame(){
   renderLevelsPanel();
 }
 
-/* Initialize and wire up the no-op refresh */
+/* Initialize */
 window.addEventListener('load', ()=>{
   mainModule.load(); mainModule.wire();
   gvModule.load(); gvModule.wire();
@@ -691,36 +520,43 @@ window.addEventListener('load', ()=>{
   document.getElementById('fame-input').addEventListener('change', ()=>{ const prev=fame; fame = clampIntNonNeg(document.getElementById('fame-input').value); updateFameUI(prev); });
   document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=>{ const prev=fame; fame = Math.max(0, Number(fame) + Number(btn.dataset.inc||0)); updateFameUI(prev); }));
 
-  // levels toggle
-  levelsToggleBtn.addEventListener('click', ()=>{
-    const expanded = levelsToggleBtn.getAttribute('aria-expanded') === 'true';
-    if(expanded){ levelsToggleBtn.setAttribute('aria-expanded','false'); levelsPanel.setAttribute('aria-hidden','true'); levelsPanel.style.display='none'; }
-    else { levelsToggleBtn.setAttribute('aria-expanded','true'); levelsPanel.setAttribute('aria-hidden','false'); levelsPanel.style.display='block'; renderLevelsPanel(); levelsPanel.focus?.(); }
+  // levels toggle click toggles aria-expanded (hover/focus also show panel)
+  levelsToggleBtn.addEventListener('click', (e)=>{
+    const expanded = levelsContainer.getAttribute('aria-expanded') === 'true';
+    if(expanded){
+      levelsContainer.setAttribute('aria-expanded','false');
+      levelsPanel.setAttribute('aria-hidden','true');
+      levelsToggleBtn.setAttribute('aria-expanded','false');
+      levelsPanel.style.display = 'none';
+    } else {
+      renderLevelsPanel();
+      levelsContainer.setAttribute('aria-expanded','true');
+      levelsPanel.setAttribute('aria-hidden','false');
+      levelsToggleBtn.setAttribute('aria-expanded','true');
+      levelsPanel.style.display = 'block';
+      levelsPanel.focus?.();
+    }
   });
 
-  // New game
+  // close levels panel on escape or outside click
+  document.addEventListener('click', (ev)=>{
+    if(!levelsContainer.contains(ev.target)){
+      levelsContainer.setAttribute('aria-expanded','false');
+      levelsPanel.setAttribute('aria-hidden','true');
+      levelsToggleBtn.setAttribute('aria-expanded','false');
+      levelsPanel.style.display = 'none';
+    }
+  });
+  document.addEventListener('keydown', (ev)=>{
+    if(ev.key === 'Escape'){
+      levelsContainer.setAttribute('aria-expanded','false');
+      levelsPanel.setAttribute('aria-hidden','true');
+      levelsToggleBtn.setAttribute('aria-expanded','false');
+      levelsPanel.style.display = 'none';
+    }
+  });
+
+  // new game
   document.getElementById('new-game').addEventListener('click', newGame);
 
-  // Refresh button: explicit no-op handler that does nothing to app state
-  document.getElementById('refresh-btn').addEventListener('click', (e)=>{
-    e.preventDefault();
-    // intentionally do nothing to application state or storage
-    // small visual feedback only
-    const btn = e.currentTarget;
-    btn.disabled = true;
-    setTimeout(()=>{ btn.disabled = false; }, 220);
-  });
-
-  // expose end-round opener
-  window.openEndRoundModalFor = openEndRoundModalFor;
-
-  // periodic save
-  setInterval(()=>{ mainModule.save && mainModule.save(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
-});
-
-/* Expose for debugging */
-window._main = mainModule;
-window._gv = gvModule;
-</script>
-</body>
-</html>
+  // expose end
