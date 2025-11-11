@@ -21,10 +21,10 @@
     * { box-sizing: border-box; }
     html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
     .phone-shell { width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 12px; }
-    .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); display:flex; flex-direction:column; gap:10px; }
+    .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
     .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
     .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); pointer-events:auto; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 12px rgba(0,0,0,0.5); }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 14px rgba(0,0,0,0.45); margin-bottom:12px; }
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
@@ -35,11 +35,11 @@
 
     .rep-area { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
     .rep-controls-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 6px; }
-    .thumb-btn { width:44px; height:44px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:#fff; cursor:pointer; font-size:18px; box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
+    .thumb-btn { width:44px; height:44px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:#eaf2ff; cursor:pointer; font-size:18px; }
     .thumb-up { background: linear-gradient(180deg, rgba(199,146,79,0.14), rgba(199,146,79,0.06)); color: #fff; border: 1px solid rgba(199,146,79,0.25); }
     .thumb-down { background: linear-gradient(180deg, rgba(217,83,79,0.12), rgba(217,83,79,0.06)); color: #fff; border: 1px solid rgba(217,83,79,0.22); }
     .rep-track { display:flex; gap:8px; align-items:center; overflow:auto; padding:10px 6px; border-radius:10px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
-    .rep-step { min-width:48px; padding:10px 6px; border-radius:10px; background:var(--track-bg); text-align:center; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; cursor:pointer; flex-shrink:0; user-select:none; transition: transform 140ms ease, box-shadow 140ms ease; display:flex; align-items:center; justify-content:center; height:44px; }
+    .rep-step { min-width:48px; padding:10px 6px; border-radius:10px; background:var(--track-bg); text-align:center; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; cursor:pointer; }
     .rep-step.zero { background: rgba(246,211,101,0.08); color:var(--yellow); border:1px solid rgba(246,211,101,0.18); }
     .rep-step.positive { background: rgba(199,146,79,0.08); color:var(--gold); border:1px solid rgba(199,146,79,0.18); }
     .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
@@ -48,9 +48,9 @@
     /* Fame & Level */
     .fame-grid { display:flex; flex-direction:column; gap:8px; align-items:center; }
     .fame-row { display:flex; gap:10px; align-items:center; width:100%; justify-content:center; }
-    .fame-input { width:110px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance: textfield; }
+    .fame-input { width:110px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance:textfield; }
     .fame-input.editing { outline: 2px solid rgba(199,146,79,0.18); }
-    .level-badge { position:relative; min-width:200px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.04); cursor:pointer; }
+    .level-badge { position:relative; min-width:200px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
     .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
     .level-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
@@ -63,18 +63,13 @@
     .level-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
 
     /* tooltip / popup: single-line formatting for rewards */
-    .level-tooltip { position: absolute; top: -6px; left: 50%; transform: translate(-50%, -100%); min-width:220px; max-width:320px; background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95)); color: #fff; border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.06); box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index:50; font-size:13px; display:none; }
+    .level-tooltip { position: absolute; top: -6px; left: 50%; transform: translate(-50%, -100%); min-width:220px; max-width:320px; background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(20,20,20,0.95)); border-radius:10px; padding:10px; display:none; z-index:10; border:1px solid rgba(255,255,255,0.04); }
     .level-tooltip.visible { display:block; }
     .tooltip-list { display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; padding-right:6px; }
-    .tooltip-item { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color: var(--muted); font-weight:600; justify-content:space-between; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .tooltip-item { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color: var(--muted); font-weight:600; justify-content:space-between; }
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    .dummy-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; color:#eaf2ff; }
-    .controls-row { display:flex; gap:8px; justify-content:space-between; margin-top:8px; }
-    .controls-row button { flex:1; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); color:#eaf2ff; cursor:pointer; }
-    .controls-row button.primary { background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.08)); border: 1px solid rgba(199,146,79,0.25); color: #ffdcb3; font-weight:600; }
-    .volkare-text { width:100%; resize:vertical; border-radius:8px; border:1px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.01); color: #eaf2ff; padding:8px; font-size:13px; min-height:74px; }
     .footer { margin-top:8px; text-align:center; color:var(--muted); font-size:12px; }
     @media (max-width:400px) { :root { --phone-width:94vw; } .topbar { left:50%; transform:translateX(-50%); width:94vw; } }
   </style>
@@ -119,33 +114,6 @@
         </div>
       </section>
 
-      <!-- Dummy Player -->
-      <section class="card" id="dummy-card" aria-labelledby="dummy-title">
-        <div class="card-header"><div><h2 id="dummy-title" class="card-title">Dummy Player</h2><div class="card-sub" id="dummy-sub">Dummy</div></div></div>
-        <div class="card-body">
-          <div class="dummy-grid">
-            <div>Hand: <strong id="dummy-hand">5</strong></div>
-            <div>Wounds: <strong id="dummy-wounds">0</strong></div>
-            <div style="grid-column:1 / -1">Last: <em id="dummy-last">Idle</em></div>
-          </div>
-          <div class="controls-row" role="group" aria-label="Dummy controls">
-            <button id="play-1">Play 1</button>
-            <button id="draw-1">Draw 1</button>
-            <button id="auto-action" class="primary">Auto Action</button>
-          </div>
-          <div style="margin-top:8px; display:flex; gap:8px;">
-            <button id="heal-1">Heal 1</button>
-            <button id="reset-dummy">Reset Dummy</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- General Volkare -->
-      <section class="card" id="volkare-card" aria-labelledby="volkare-title">
-        <div class="card-header"><div><h2 id="volkare-title" class="card-title">General Volkare</h2><div class="card-sub">Notes / reminders</div></div></div>
-        <div class="card-body"><textarea id="volkare-text" class="volkare-text">General Volkare: Track story events or reminders here.</textarea></div>
-      </section>
-
       <footer class="footer"><small>Phone layout • Lightweight companion</small></footer>
     </div>
   </div>
@@ -185,9 +153,7 @@
       const state = {
         repIndex: DEFAULT_REP_INDEX,
         fame: 0,               // committed fame
-        previousLevel: 1,      // committed level
-        dummy: { name:'Dummy Player', hand:5, wounds:0, lastAction:'Idle' },
-        volkareNotes: 'General Volkare: Track story events or reminders here.'
+        previousLevel: 1      // committed level
       };
 
       // temp editing buffer
@@ -202,12 +168,7 @@
         fameInput: document.getElementById('fame-input'),
         playerLevel: document.getElementById('player-level'),
         tooltip: document.getElementById('level-tooltip'),
-        tooltipList: document.getElementById('tooltip-list'),
-        dummyHand: document.getElementById('dummy-hand'),
-        dummyWounds: document.getElementById('dummy-wounds'),
-        dummyLast: document.getElementById('dummy-last'),
-        dummySub: document.getElementById('dummy-sub'),
-        volkareText: document.getElementById('volkare-text')
+        tooltipList: document.getElementById('tooltip-list')
       };
 
       function classifyLabel(label) {
@@ -312,13 +273,6 @@
         el.playerLevel.setAttribute('aria-pressed','false');
       }
 
-      function renderDummy() {
-        el.dummyHand.textContent = state.dummy.hand;
-        el.dummyWounds.textContent = state.dummy.wounds;
-        el.dummyLast.textContent = state.dummy.lastAction;
-        el.dummySub.textContent = state.dummy.name;
-      }
-
       function clamp(n,min=0,max=999){return Math.max(min,Math.min(max,n));}
 
       // Reputation buttons
@@ -420,25 +374,27 @@
         if (!inside) closeTooltip();
       });
 
-      // Dummy controls
-      document.getElementById('play-1').addEventListener('click', () => { state.dummy.hand = clamp(state.dummy.hand-1,0); state.dummy.lastAction='Played 1 card'; renderDummy(); saveToStorage(); });
-      document.getElementById('draw-1').addEventListener('click', () => { state.dummy.hand = clamp(state.dummy.hand+1,0); state.dummy.lastAction='Drew 1 card'; renderDummy(); saveToStorage(); });
-      document.getElementById('heal-1').addEventListener('click', () => { state.dummy.wounds = clamp(state.dummy.wounds-1,0); state.dummy.lastAction='Healed 1 wound'; renderDummy(); saveToStorage(); });
-      document.getElementById('reset-dummy').addEventListener('click', () => { state.dummy={name:'Dummy Player',hand:5,wounds:0,lastAction:'Idle'}; renderDummy(); saveToStorage(); });
-      document.getElementById('auto-action').addEventListener('click', () => {
-        if (state.dummy.hand < 3) { state.dummy.hand = clamp(state.dummy.hand + 2, 0); state.dummy.lastAction = 'Auto: Drew 2 cards'; }
-        else if (state.dummy.wounds >= 4) { state.dummy.lastAction = 'Auto: Rested (defensive)'; state.dummy.wounds = clamp(state.dummy.wounds - 1, 0); }
-        else { state.dummy.hand = clamp(state.dummy.hand - 1, 0); state.dummy.wounds = clamp(state.dummy.wounds + 1, 0); state.dummy.lastAction = 'Auto: Attacked (took 1 wound)'; }
-        renderDummy(); saveToStorage();
-      });
-
-      // notes binding
-      el.volkareText.addEventListener('input', (e) => state.volkareNotes = e.target.value);
-
       // persistence
       const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_confirm';
-      function saveToStorage(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({repIndex:state.repIndex,fame:state.fame,previousLevel:state.previousLevel,dummy:state.dummy,volkareNotes:state.volkareNotes})); } catch(e){} }
-      function loadFromStorage(){ try { const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return; const parsed=JSON.parse(raw); if(typeof parsed.repIndex==='number' && parsed.repIndex>=0 && parsed.repIndex<REP_TRACK.length) state.repIndex=parsed.repIndex; if(typeof parsed.fame==='number') state.fame=parsed.fame; if(typeof parsed.previousLevel==='number') state.previousLevel=parsed.previousLevel; if(parsed.dummy) state.dummy=Object.assign(state.dummy, parsed.dummy); if(typeof parsed.volkareNotes==='string') state.volkareNotes=parsed.volkareNotes; } catch(e){} }
+      function saveToStorage(){
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            repIndex: state.repIndex,
+            fame: state.fame,
+            previousLevel: state.previousLevel
+          }));
+        } catch (err) { /* ignore */ }
+      }
+      function loadFromStorage(){
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (typeof parsed.repIndex === 'number' && parsed.repIndex >= 0 && parsed.repIndex < REP_TRACK.length) state.repIndex = parsed.repIndex;
+          if (typeof parsed.fame === 'number') state.fame = parsed.fame;
+          if (typeof parsed.previousLevel === 'number') state.previousLevel = parsed.previousLevel;
+        } catch (err) { /* ignore */ }
+      }
 
       // init
       buildRepTrack();
@@ -448,8 +404,6 @@
       state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
       renderReputation();
       renderFameAndLevel();
-      renderDummy();
-      document.getElementById('volkare-text').value = state.volkareNotes;
 
       // autosave
       setInterval(saveToStorage, 2000);
