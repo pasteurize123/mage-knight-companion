@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mage Knight Companion — Mobile improvements</title>
+<title>Mage Knight Companion — Mobile Reputation fixed</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -42,25 +42,45 @@
     font-size:14px;
     max-height:340px;overflow:auto;
   }
-  .levels-list .level-line{padding:6px 8px;border-bottom:1px dashed #f0f0f0;font-weight:700;white-space:nowrap;display:flex;gap:6px;align-items:center}
+  .levels-list .level-line{padding:6px 8px;border-bottom:1px dashed #f0f0f0;display:flex;gap:8px;align-items:center}
   .levels-list .level-line:last-child{border-bottom:0}
-  .levels-list .level-line .lvl-desc{font-weight:400;margin-left:6px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .levels-list .level-line .lvl-prefix{font-weight:700;white-space:nowrap}
+  .levels-list .level-line .lvl-desc{font-weight:400;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .levels-wrapper:hover .levels-list,
   .levels-wrapper:focus-within .levels-list,
   .levels-wrapper[aria-expanded="true"] .levels-list { display:block; }
 
   /* Reputation — mobile friendly (no horizontal scrolling) */
   .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:stretch;position:relative;padding:6px}
-  .rep-row{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;padding:6px 0;width:100%}
-  /* each rep-cell will shrink/wrap to fit; use percentage basis so rows don't overflow */
-  .rep-cell{flex:1 1 12%;min-width:36px;padding:6px 6px;background:#e8e8e8;border-radius:6px;text-align:center;cursor:pointer;user-select:none;font-size:14px;box-sizing:border-box}
-  /* on small screens increase base width so they wrap into more rows naturally */
-  @media (max-width:420px){
-    .rep-cell{flex:1 1 22%}
+  .rep-row{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;padding:6px 0;width:100%}
+  /* fixed square cells so all boxes are same size */
+  .rep-cell{
+    flex:0 0 44px;
+    height:44px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:44px;
+    padding:0 6px;
+    background:#e8e8e8;
+    border-radius:6px;
+    text-align:center;
+    cursor:pointer;
+    user-select:none;
+    font-size:14px;
+    box-sizing:border-box;
   }
   .rep-row.top .rep-cell.selected{background:var(--gold);font-weight:700;color:#111}
   .rep-row.mid .rep-cell.selected{background:#ffeb99;font-weight:700;color:#111}
   .rep-row.bot .rep-cell.selected{background:#ff6b6b;font-weight:700;color:#fff}
+
+  /* Ensure top row fits on small screens: shrink cells if needed */
+  @media (max-width:420px){
+    .rep-cell{flex:0 0 36px;height:36px;min-width:36px;font-size:13px}
+  }
+  @media (max-width:320px){
+    .rep-cell{flex:0 0 30px;height:30px;min-width:30px;font-size:12px}
+  }
 
   /* Dummy player responsive layout (compact) */
   .dummy-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
@@ -82,7 +102,6 @@
     .fame-input{width:110px}
     .levels-list{min-width:180px}
     .dummy-grid{grid-template-columns:1fr;gap:10px}
-    .rep-cell{font-size:15px;padding:8px}
   }
 </style>
 </head>
@@ -90,7 +109,7 @@
   <h1>Mage Knight Companion</h1>
 
   <div class="container">
-    <!-- Reputation (mobile friendly, wraps without side-scroll) -->
+    <!-- Reputation (top row compact 0..+5; mid single 0; bottom 0..X) -->
     <section class="panel" aria-labelledby="rep-title">
       <div class="panel-inner">
         <h2 id="rep-title">Reputation</h2>
@@ -134,7 +153,7 @@
       </div>
     </section>
 
-    <!-- Dummy Player -->
+    <!-- Dummy Player (compact layout) -->
     <section class="panel" aria-labelledby="dummy-title">
       <div class="panel-inner" id="dummy-module">
         <h2 id="dummy-title">Dummy Player</h2>
@@ -342,12 +361,13 @@
   </div>
 
 <script>
-/* Mobile-friendly reputation + compact dummy; Levels Achieved descriptions formatted as:
-   "Level X: Description" where description is normal weight and single-line (ellipsis if too long).
-   Full game logic (fame mapping, dummy & GV decks, persistence) included.
+/* Updated: Reputation top row 0..+5, mid row 0, bottom row 0..X.
+   All rep boxes are equal size squares and will wrap as necessary without horizontal scrolling.
+   Levels Achieved lines formatted as "Level X: Description" where prefix is bold and description normal weight on one line.
+   Rest of game logic preserved (fame mapping, dummy/GV, persistence).
 */
 
-const STORAGE_KEY = 'mk_companion_full_v4_mobile';
+const STORAGE_KEY = 'mk_companion_full_v5';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
 const FAME_LEVELS = [
@@ -369,7 +389,7 @@ function getFameLevel(val){
   return 10;
 }
 
-/* ---------------- Dummy Module (compact as requested) ---------------- */
+/* ---------------- Dummy Module (compact) ---------------- */
 function DummyModule() {
   const ids = {
     red:'red', blue:'blue', green:'green', white:'white',
@@ -601,21 +621,52 @@ const gvModule = GVModule();
 
 let fame = 0;
 
-/* Reputation values */
-const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
-const REP_MID = ["0"];
-const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
+/* Reputation values requested by user */
+const REP_TOP = ["0","+1","+2","+3","+4","+5"];      // single top row 0..+5
+const REP_MID = ["0"];                             // single middle 0
+const REP_BOT = ["0","-1","-2","-3","-4","-5","X"]; // bottom 0..X (7 items)
 
+/* Build rep rows */
 function buildRepRows(){
   const repWrap = document.getElementById('rep-wrap');
   repWrap.innerHTML = '';
+
   const top=document.createElement('div'); top.className='rep-row top';
-  REP_TOP.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'top',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectRepCell({row:'top',index:i}); saveMeta(); }}); top.appendChild(c); });
+  REP_TOP.forEach((label,i)=>{
+    const c=document.createElement('div');
+    c.className='rep-cell';
+    c.textContent=label;
+    c.tabIndex=0;
+    c.addEventListener('click', ()=>{ selectRepCell({row:'top',index:i}); saveMeta(); });
+    c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectRepCell({row:'top',index:i}); saveMeta(); }});
+    top.appendChild(c);
+  });
+
   const mid=document.createElement('div'); mid.className='rep-row mid';
-  REP_MID.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'mid',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectRepCell({row:'mid',index:i}); saveMeta(); }}); mid.appendChild(c); });
+  REP_MID.forEach((label,i)=>{
+    const c=document.createElement('div');
+    c.className='rep-cell';
+    c.textContent=label;
+    c.tabIndex=0;
+    c.addEventListener('click', ()=>{ selectRepCell({row:'mid',index:i}); saveMeta(); });
+    c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectRepCell({row:'mid',index:i}); saveMeta(); }});
+    mid.appendChild(c);
+  });
+
   const bot=document.createElement('div'); bot.className='rep-row bot';
-  REP_BOT.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'bot',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectRepCell({row:'bot',index:i}); saveMeta(); }}); bot.appendChild(c); });
-  repWrap.appendChild(top); repWrap.appendChild(mid); repWrap.appendChild(bot);
+  REP_BOT.forEach((label,i)=>{
+    const c=document.createElement('div');
+    c.className='rep-cell';
+    c.textContent=label;
+    c.tabIndex=0;
+    c.addEventListener('click', ()=>{ selectRepCell({row:'bot',index:i}); saveMeta(); });
+    c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectRepCell({row:'bot',index:i}); saveMeta(); }});
+    bot.appendChild(c);
+  });
+
+  repWrap.appendChild(top);
+  repWrap.appendChild(mid);
+  repWrap.appendChild(bot);
 }
 function selectRepCell(sel){
   document.querySelectorAll('.rep-cell').forEach(c=>c.classList.remove('selected'));
@@ -626,7 +677,7 @@ function selectRepCell(sel){
 }
 function applyRepSelection(sel){ if(!sel) return; const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
 
-/* Levels achieved rendering as "Level X: Description" with description normal weight on one line */
+/* Levels achieved rendering as requested: "Level X: Description" with prefix bold and description normal weight on one line */
 function renderLevelsAchieved(){
   const listEl = document.getElementById('levels-list');
   if(!listEl) return;
@@ -639,17 +690,16 @@ function renderLevelsAchieved(){
     const div = document.createElement('div'); div.className='level-line';
     const desc = LEVEL_PROMPTS[L] || '';
     if(desc){
-      // format: "Level X: Description" with description not bold and truncated to one line
-      div.innerHTML = `Level ${L}: <span class="lvl-desc">${escapeHtml(desc)}</span>`;
+      const prefix = document.createElement('span'); prefix.className = 'lvl-prefix'; prefix.textContent = `Level ${L}:`;
+      const d = document.createElement('span'); d.className = 'lvl-desc'; d.textContent = ` ${desc}`;
+      div.appendChild(prefix);
+      div.appendChild(d);
     } else {
       div.textContent = `Level ${L}`;
     }
     listEl.appendChild(div);
   }
 }
-
-/* small escape helper for safety */
-function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 /* End-round modal wiring */
 const endroundModal = document.getElementById('endround-modal');
