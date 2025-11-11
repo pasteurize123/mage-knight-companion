@@ -162,7 +162,7 @@
       const state = {
         repIndex: DEFAULT_REP_INDEX,
         fame: 0,
-        // previousLevel now explicitly stores the last confirmed player level
+        // previousLevel explicitly stores last confirmed level
         previousLevel: 1
       };
 
@@ -247,7 +247,7 @@
         item.appendChild(lvlDiv); item.appendChild(rewardDiv); return item;
       }
 
-      // Show only NEW rewards between last confirmed level (state.previousLevel) and the new confirmed level
+      // Show only the newly reached rewards: levels (previousLevel + 1) .. newLevel inclusive
       function showOnlyNewRewards(prevLevel, newLevel) {
         el.tooltipList.innerHTML = '';
         if (newLevel <= prevLevel) return; // nothing new
@@ -293,18 +293,22 @@
         if (!editing) return;
         const raw = tempFame==='' ? '0' : (tempFame||'0');
         const parsed = Math.max(0, Math.floor(Number(raw)||0));
-        const lastConfirmedLevel = state.previousLevel || getLevelForFame(state.fame || 0);
-        const newLevel = getLevelForFame(parsed);
 
-        // Update stored fame (confirm)
+        // Determine last confirmed level (explicit stored previousLevel if present)
+        const lastConfirmedLevel = (typeof state.previousLevel === 'number' && state.previousLevel >= 1) ? state.previousLevel : getLevelForFame(state.fame || 0);
+
+        const newConfirmedLevel = getLevelForFame(parsed);
+
+        // update stored fame to the confirmed parsed value
         state.fame = parsed;
 
-        // Only show rewards that are newly reached compared to last confirmed level
-        showOnlyNewRewards(lastConfirmedLevel, newLevel);
+        // show only the newly reached rewards between lastConfirmedLevel and newConfirmedLevel
+        showOnlyNewRewards(lastConfirmedLevel, newConfirmedLevel);
 
-        // Update previousLevel to the new confirmed level
-        state.previousLevel = newLevel;
+        // update last confirmed level to newConfirmedLevel
+        state.previousLevel = newConfirmedLevel;
 
+        // finish edit lifecycle
         editing = false;
         tempFame = null;
         el.fameInput.classList.remove('editing');
@@ -355,7 +359,7 @@
       function newGameReset() {
         state.repIndex = DEFAULT_REP_INDEX;
         state.fame = 0;
-        state.previousLevel = 1;
+        state.previousLevel = getLevelForFame(0);
         try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
         saveToStorage();
         closeTooltip();
@@ -367,9 +371,16 @@
       // init
       buildRepTrack();
       loadFromStorage();
+
+      // ensure previousLevel is set to confirmed fame level if missing/out-of-sync
+      if (typeof state.previousLevel !== 'number' || state.previousLevel < 1) state.previousLevel = getLevelForFame(state.fame || 0);
+      else {
+        // if previousLevel exists but doesn't match fame-derived level when fame was stored, keep previousLevel as last confirmed; this is intentional
+      }
+
       if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
       if (typeof state.fame !== 'number') state.fame = 0;
-      state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
+
       renderReputation();
       renderFameAndLevel();
 
@@ -381,17 +392,27 @@
         if (ev.key === 'ArrowLeft') document.getElementById('rep-down').click();
         if (ev.key === 'ArrowRight') document.getElementById('rep-up').click();
         if ((ev.key === 'f' || ev.key === 'F') && !editing) {
+          // programmatic fame bump: treat as immediate confirmed change
           state.fame = clamp(state.fame + 1, 0);
+          const newLevel = getLevelForFame(state.fame);
+          // use previousLevel to determine newly reached rewards
+          showOnlyNewRewards(state.previousLevel, newLevel);
+          state.previousLevel = newLevel;
           renderFameAndLevel();
           saveToStorage();
-          const newLevel = getLevelForFame(state.fame);
-          if (newLevel > state.previousLevel) {
-            // when fame changed programmatically, show only the new rewards vs last confirmed
-            showOnlyNewRewards(state.previousLevel, newLevel);
-            state.previousLevel = newLevel;
-          }
         }
       });
+
+      // small helpers needed earlier
+      function renderReputation() {
+        const label = REP_TRACK[state.repIndex];
+        el.reputationValue.textContent = label;
+        el.reputationValue.style.color = colorForLabel(label);
+        const steps = el.repTrackContainer.querySelectorAll('.rep-step');
+        steps.forEach((s,i) => s.classList.toggle('active', i === state.repIndex));
+        const active = steps[state.repIndex];
+        if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
+      }
     })();
   </script>
 </body>
