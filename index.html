@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mage Knight Companion — Fame & Levels</title>
+<title>Mage Knight Companion — Fixed Reputation & Fame</title>
 <style>
   :root{
     --bg:#f4f4f4; --panel:#ececec; --card:#fff; --muted:#666;
@@ -24,43 +24,16 @@
   .gv-pill{background:var(--pill);border-radius:6px;padding:6px 8px;border:1px solid #ddd;font-weight:600}
   .gv-desc{color:var(--accent);font-size:0.92rem;margin-top:6px;display:none}
 
-  /* Spell symbol with S overlay */
-  .symbol {
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    width:28px;
-    height:28px;
-    font-size:18px;
-    position:relative;
-    line-height:1;
-    border-radius:50%;
-    background:transparent;
-  }
-  .symbol.spell::after{
-    content:'S';
-    position:absolute;
-    top:-7px;
-    right:-8px;
-    width:18px;
-    height:18px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    font-size:12px;
-    font-weight:700;
-    color:#fff;
-    background:rgba(0,0,0,0.65);
-    border-radius:10px;
-    box-shadow:0 1px 2px rgba(0,0,0,0.2);
-  }
+  /* Spell symbol S overlay */
+  .symbol { display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;font-size:18px;position:relative;line-height:1;border-radius:50%; }
+  .symbol.spell::after{ content:'S'; position:absolute; top:-7px; right:-8px; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; background:rgba(0,0,0,0.65); border-radius:10px; box-shadow:0 1px 2px rgba(0,0,0,0.2); }
 
-  /* wound visual: number above, blood symbol below */
+  /* wound visual */
   .wound-box{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border-radius:6px;background:#fff;border:1px solid #eee;min-width:46px}
   .wound-num{font-weight:700}
   .wound-symbol{font-size:1.2rem;color:var(--accent)}
 
-  /* reputation cells */
+  /* reputation */
   .rep-wrap{display:flex;flex-direction:column;gap:8px;align-items:center;position:relative}
   .rep-row{display:flex;gap:8px;justify-content:center;align-items:center}
   .rep-cell{min-width:44px;padding:6px 10px;background:#e8e8e8;border-radius:6px;text-align:center;cursor:pointer;user-select:none}
@@ -68,22 +41,15 @@
   .rep-row.mid .rep-cell.selected{background:#ffeb99;font-weight:700;color:#111}
   .rep-row.bot .rep-cell.selected{background:#ff6b6b;font-weight:700;color:#fff}
 
-  /* Levels panel (appears on hover or click of button) */
+  /* levels panel */
   .levels-container{position:relative;display:inline-block}
-  .levels-trigger{background:transparent;border:0;padding:0;font-weight:700;cursor:pointer;color:inherit}
-  .levels-panel{
-    position:absolute;left:0;top:calc(100% + 8px);
-    display:none;background:#fff;border-radius:8px;padding:10px;
-    box-shadow:0 8px 30px rgba(0,0,0,0.12);
-    min-width:220px;max-width:360px;z-index:50;font-size:14px;
-  }
-  .levels-container:hover .levels-panel,
-  .levels-container:focus-within .levels-panel,
-  .levels-container[aria-expanded="true"] .levels-panel { display:block; }
+  .levels-trigger{background:transparent;border:0;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:700}
+  .levels-panel{ position:absolute;left:0;top:calc(100% + 8px); display:none;background:#fff;border-radius:8px;padding:10px; box-shadow:0 8px 30px rgba(0,0,0,0.12); min-width:220px; max-width:360px; z-index:50; font-size:14px; }
+  .levels-container:hover .levels-panel, .levels-container:focus-within .levels-panel, .levels-container[aria-expanded="true"] .levels-panel { display:block; }
   .levels-list{display:flex;flex-direction:column;gap:6px;padding:0;margin:0;list-style:none}
   .level-line{padding:6px 8px;border-radius:4px;font-weight:600;font-size:14px;background:transparent;color:#111}
 
-  /* Fame row: player fame and level in same row and centered */
+  /* fame row */
   .fame-row{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
   .fame-controls{display:flex;flex-direction:column;align-items:center;gap:8px}
   .fame-increments{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
@@ -100,11 +66,10 @@
   <h1>Mage Knight Companion</h1>
 
   <div class="container">
-
     <section class="panel" aria-labelledby="rep-title">
       <div class="panel-inner">
         <h2 id="rep-title">Reputation</h2>
-        <div id="rep-wrap" class="rep-wrap" aria-label="Reputation track"></div>
+        <div id="rep-wrap" class="rep-wrap" aria-label="Reputation track" role="group"></div>
       </div>
     </section>
 
@@ -112,9 +77,8 @@
       <div class="panel-inner">
         <h2 id="fame-title">Fame</h2>
 
-        <!-- Player fame and level on the same centered row -->
         <div class="fame-row" role="group" aria-label="Fame controls">
-          <div class="fame-controls" aria-hidden="false">
+          <div class="fame-controls">
             <label style="font-weight:700">Player Fame</label>
             <input id="fame-input" type="number" min="0" value="0" style="width:120px;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center" />
             <div class="fame-increments" role="toolbar" aria-label="Add fame">
@@ -132,7 +96,7 @@
           </div>
 
           <span class="levels-container" id="levels-container" aria-expanded="false">
-            <button id="levels-toggle" class="levels-trigger smallbtn" aria-haspopup="true" aria-controls="levels-panel">Levels Achieved</button>
+            <button id="levels-toggle" class="levels-trigger" aria-haspopup="true" aria-controls="levels-panel">Levels Achieved</button>
             <div id="levels-panel" class="levels-panel" role="region" aria-label="Levels achieved panel" aria-hidden="true" tabindex="-1">
               <ul id="levels-list" class="levels-list"><li class="level-line">None yet</li></ul>
             </div>
@@ -280,7 +244,7 @@
     </footer>
   </div>
 
-  <!-- End round modal (shared) -->
+  <!-- End round modal -->
   <div id="endround-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:60">
     <div style="background:#fff;border-radius:10px;padding:16px;max-width:520px;width:92%">
       <h3 style="margin:0 0 8px 0">End Round — Choose Card</h3>
@@ -303,15 +267,14 @@
   </div>
 
 <script>
-/* Integrated app logic (keeps previous behavior).
-   Changes from prior versions:
-     - removed the "Refresh" button
-     - player fame and player level sit in the same centered row
-     - Levels Achieved panel shows on hover, focus or click (using aria-expanded for click)
-     - panel content is the current achieved levels from mainModule.getRenderLevels()
+/* Full corrected app logic
+   - reputation selection fixed and persisted
+   - fame and player level centered; level fits same row as fame input
+   - Levels Achieved displays current achieved levels (no header) when hovered or clicked
+   - General Volkare and main dummy modules unchanged in behaviour from earlier integration
 */
 
-const STORAGE_KEY = 'mk_companion_full_vfinal';
+const STORAGE_KEY = 'mk_companion_fixed_v1';
 const SYMBOL = { Red:'🔴', Blue:'🔵', Green:'🟢', White:'⚪', Wound:'🩸' };
 const DEFAULT_CARDS = { Red:4, Blue:4, Green:4, White:4 };
 const FAME_LEVELS = [
@@ -326,10 +289,7 @@ const LEVEL_PROMPTS = {
   7: "Command Token",8: "Skill + Advanced Action",9: "Command Token",10: "Skill + Advanced Action"
 };
 
-/* DummyModule and GVModule are same as previous full integration; kept intact for functionality.
-   For brevity they are included without internal comments, matching earlier implementations.
-*/
-
+/* ------------------------ Dummy Module ------------------------ */
 function DummyModule() {
   const ids = {
     red:'red', blue:'blue', green:'green', white:'white',
@@ -343,26 +303,96 @@ function DummyModule() {
   let achievedLevels = [1];
   let endRoundFlag = false;
   const SKEY = `${STORAGE_KEY}_main`;
+
   function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
   function el(id){ return document.getElementById(id); }
-  function updateCrystalViews(){ if(el(ids.red)) el(ids.red).textContent = crystals.red; if(el(ids.blue)) el(ids.blue).textContent = crystals.blue; if(el(ids.green)) el(ids.green).textContent = crystals.green; if(el(ids.white)) el(ids.white).textContent = crystals.white; }
-  function updateCardViews(){ if(el(ids.cardRed)) el(ids.cardRed).textContent = cardCounts.Red; if(el(ids.cardBlue)) el(ids.cardBlue).textContent = cardCounts.Blue; if(el(ids.cardGreen)) el(ids.cardGreen).textContent = cardCounts.Green; if(el(ids.cardWhite)) el(ids.cardWhite).textContent = cardCounts.White; }
+  function updateCrystalViews(){
+    if(el(ids.red)) el(ids.red).textContent = crystals.red;
+    if(el(ids.blue)) el(ids.blue).textContent = crystals.blue;
+    if(el(ids.green)) el(ids.green).textContent = crystals.green;
+    if(el(ids.white)) el(ids.white).textContent = crystals.white;
+  }
+  function updateCardViews(){
+    if(el(ids.cardRed)) el(ids.cardRed).textContent = cardCounts.Red;
+    if(el(ids.cardBlue)) el(ids.cardBlue).textContent = cardCounts.Blue;
+    if(el(ids.cardGreen)) el(ids.cardGreen).textContent = cardCounts.Green;
+    if(el(ids.cardWhite)) el(ids.cardWhite).textContent = cardCounts.White;
+  }
   function updateDeckCount(){ const n = el(ids.deckCount); if(n) n.textContent = deck.length; }
-  function displayMainCard(code){ if(!code) return ''; if(code.endsWith('Card')) return SYMBOL[code.split(' ')[0]] || code; if(code === 'Wound') return SYMBOL.Wound; return code; }
+  function displayMainCard(code){
+    if(!code) return '';
+    if(code.endsWith('Card')) return SYMBOL[code.split(' ')[0]] || code;
+    if(code === 'Wound') return SYMBOL.Wound;
+    return code;
+  }
   function updateDiscardView(){ const node = el(ids.discardOutput); if(!node) return; if(discard.length===0) node.textContent='Discard pile is empty.'; else node.textContent = `Discard (${discard.length}): ${discard.map(displayMainCard).join(' ')}`; }
+
   function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({crystals,cardCounts,deck,discard,achievedLevels,endRoundFlag})); }catch(e){} }
   function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); crystals = s.crystals || crystals; cardCounts = s.cardCounts || cardCounts; deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; achievedLevels = Array.isArray(s.achievedLevels)?s.achievedLevels:achievedLevels; endRoundFlag = !!s.endRoundFlag; return true; }catch(e){ return false; } }
+
   function changeCrystal(color, delta){ crystals[color] = Math.max(0,(crystals[color]||0)+delta); updateCrystalViews(); save(); }
-  function changeCard(color, delta){ cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta); updateCardViews(); if(delta>0){ const name = `${color} Card`; const pos = Math.floor(Math.random()*(deck.length+1)); deck.splice(pos,0,name); } else { const name = `${color} Card`; const idx = deck.indexOf(name); if(idx!==-1) deck.splice(idx,1); else { const dj=discard.indexOf(name); if(dj!==-1) discard.splice(dj,1); } } updateDeckCount(); updateDiscardView(); save(); }
+  function changeCard(color, delta){
+    cardCounts[color] = Math.max(0,(cardCounts[color]||0)+delta);
+    updateCardViews();
+    if(delta>0){ const name = `${color} Card`; const pos = Math.floor(Math.random()*(deck.length+1)); deck.splice(pos,0,name); }
+    else { const name = `${color} Card`; const idx = deck.indexOf(name); if(idx!==-1) deck.splice(idx,1); else { const dj=discard.indexOf(name); if(dj!==-1) discard.splice(dj,1); } }
+    updateDeckCount(); updateDiscardView(); save();
+  }
+
   function rebuildDeck(){ deck = []; Object.keys(cardCounts).forEach(color=>{ for(let i=0;i<cardCounts[color];i++) deck.push(`${color} Card`); }); shuffle(deck); updateDeckCount(); save(); }
-  function drawOnce(){ const drawn=[]; for(let i=0;i<3 && deck.length>0;i++) drawn.push(deck.pop()); if(drawn.length===0){ endRoundFlag = true; const btn = el(ids.drawBtn); if(btn) btn.textContent = 'End Round'; const out = el(ids.dummyOutput); if(out) out.textContent='Nil cards drawn. End of round announced.'; save(); return; } const last = drawn[drawn.length-1]; if(last){ const color = last.split(' ')[0].toLowerCase(); const extra = crystals[color]||0; for(let i=0;i<extra && deck.length>0;i++) drawn.push(deck.pop()); } discard.push(...drawn); const out = el(ids.dummyOutput); if(out) out.textContent = drawn.map(displayMainCard).join(' '); updateDeckCount(); updateDiscardView(); save(); }
+  function drawOnce(){
+    const drawn=[];
+    for(let i=0;i<3 && deck.length>0;i++) drawn.push(deck.pop());
+    if(drawn.length===0){
+      endRoundFlag = true;
+      const btn = el(ids.drawBtn); if(btn) btn.textContent = 'End Round';
+      const out = el(ids.dummyOutput); if(out) out.textContent='Nil cards drawn. End of round announced.';
+      save(); return;
+    }
+    const last = drawn[drawn.length-1];
+    if(last){
+      const color = last.split(' ')[0].toLowerCase();
+      const extra = crystals[color]||0;
+      for(let i=0;i<extra && deck.length>0;i++) drawn.push(deck.pop());
+    }
+    discard.push(...drawn);
+    const out = el(ids.dummyOutput); if(out) out.textContent = drawn.map(displayMainCard).join(' ');
+    updateDeckCount(); updateDiscardView(); save();
+  }
   function reshuffle(){ if(discard.length===0){ const out = el(ids.dummyOutput); if(out) out.textContent='Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateDeckCount(); updateDiscardView(); endRoundFlag=false; const btn = el(ids.drawBtn); if(btn) btn.textContent='Draw'; const out = el(ids.dummyOutput); if(out) out.textContent='Deck reshuffled from discard.'; save(); }
+
   function getRenderLevels(){ const arr = []; for(let i=0;i<achievedLevels.length;i++){ const L = achievedLevels[i]; const desc = LEVEL_PROMPTS[L]||''; arr.push(`Level ${L}: ${desc}`); } return arr.length?arr:[]; }
-  function resetInitial(){ crystals = { red:0, blue:0, green:0, white:0 }; const keys=['red','blue','green','white']; const first = keys[Math.floor(Math.random()*keys.length)]; let second = keys[Math.floor(Math.random()*keys.length)]; while(second===first) second=keys[Math.floor(Math.random()*keys.length)]; crystals[first]=2; crystals[second]=1; cardCounts = {...DEFAULT_CARDS}; deck = []; discard = []; achievedLevels=[1]; endRoundFlag=false; rebuildDeck(); updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); save(); }
-  function wire(){ document.querySelectorAll('.crystal-btn[data-player="main"]').forEach(btn=>{ btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCrystal(color, act==='inc'?1:-1); }); }); document.querySelectorAll('.card-btn[data-player="main"]').forEach(btn=>{ btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCard(color, act==='inc'?1:-1); }); }); const drawBtnEl = el(ids.drawBtn); if(drawBtnEl) drawBtnEl.addEventListener('click', ()=>{ if(endRoundFlag && drawBtnEl.textContent==='End Round'){ openEndRoundModalFor('main'); return; } drawOnce(); }); const reshuffleEl = el(ids.reshuffleBtn); if(reshuffleEl) reshuffleEl.addEventListener('click', reshuffle); }
-  return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); }, achievedLevelsRef: ()=>achievedLevels };
+  function setAchievedLevels(levels){ achievedLevels = Array.isArray(levels)?levels.slice():achievedLevels; save(); }
+
+  function resetInitial(){
+    crystals = { red:0, blue:0, green:0, white:0 };
+    const keys=['red','blue','green','white'];
+    const first = keys[Math.floor(Math.random()*keys.length)];
+    let second = keys[Math.floor(Math.random()*keys.length)];
+    while(second===first) second=keys[Math.floor(Math.random()*keys.length)];
+    crystals[first]=2; crystals[second]=1;
+    cardCounts = {...DEFAULT_CARDS};
+    deck = []; discard = []; achievedLevels=[1]; endRoundFlag=false;
+    rebuildDeck(); updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); save();
+  }
+
+  function wire(){
+    document.querySelectorAll('.crystal-btn[data-player="main"]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCrystal(color, act==='inc'?1:-1); });
+    });
+    document.querySelectorAll('.card-btn[data-player="main"]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ const color = btn.dataset.color; const act = btn.dataset.act; changeCard(color, act==='inc'?1:-1); });
+    });
+    const drawBtnEl = el(ids.drawBtn);
+    if(drawBtnEl) drawBtnEl.addEventListener('click', ()=>{ if(endRoundFlag && drawBtnEl.textContent==='End Round'){ openEndRoundModalFor('main'); return; } drawOnce(); });
+    const reshuffleEl = el(ids.reshuffleBtn);
+    if(reshuffleEl) reshuffleEl.addEventListener('click', reshuffle);
+  }
+
+  return { load, save, wire, resetInitial, rebuildDeck, getRenderLevels, changeCard, drawOnce, reshuffle, updateViews: ()=>{ updateCrystalViews(); updateCardViews(); updateDeckCount(); updateDiscardView(); }, setAchievedLevels, achievedLevelsRef: ()=>achievedLevels };
 }
 
+/* ------------------------ GV Module ------------------------ */
 function GVModule(){
   const ids = {
     deckCount:'deck-count-gv', drawBtn:'draw-btn-gv', dummyOutput:'dummy-output-gv', discardOutput:'discard-output-gv',
@@ -372,44 +402,188 @@ function GVModule(){
   let discard = [];
   let wounds = 0;
   const SKEY = `${STORAGE_KEY}_gv`;
+
   function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
   function el(id){ return document.getElementById(id); }
-  function buildDefaultDeck(){ deck = []; ['Red','Blue','Green','White'].forEach(c=>{ for(let i=0;i<4;i++) deck.push(`Adv-${c}`); }); ['Red','Blue','Green','White'].forEach(c=> deck.push(`Spell-${c}`)); shuffle(deck); wounds = 0; save(); updateCounts(); updateDrawButtonState(); }
+
+  function buildDefaultDeck(){
+    deck = [];
+    ['Red','Blue','Green','White'].forEach(c=>{ for(let i=0;i<4;i++) deck.push(`Adv-${c}`); });
+    ['Red','Blue','Green','White'].forEach(c=> deck.push(`Spell-${c}`));
+    shuffle(deck);
+    wounds = 0;
+    save(); updateCounts(); updateDrawButtonState();
+  }
+
   function save(){ try{ localStorage.setItem(SKEY, JSON.stringify({deck,discard,wounds})); }catch(e){} }
   function load(){ try{ const raw = localStorage.getItem(SKEY); if(!raw) return false; const s=JSON.parse(raw); deck = Array.isArray(s.deck)?s.deck:deck; discard = Array.isArray(s.discard)?s.discard:discard; wounds = typeof s.wounds === 'number'?s.wounds:wounds; updateCounts(); updateDrawButtonState(); return true; }catch(e){ return false; } }
-  function displayGVCard(code){ if(!code) return ''; if(code.startsWith('Adv-')) return SYMBOL[code.split('-')[1]] || code; if(code.startsWith('Spell-')) return 'S' + (SYMBOL[code.split('-')[1]] || code); if(code === 'Wound') return SYMBOL.Wound; return code; }
-  function updateCounts(){ if(el(ids.deckCount)) el(ids.deckCount).textContent = deck.length; if(el(ids.gvWounds)) el(ids.gvWounds).textContent = wounds; if(el(ids.discardOutput)) el(ids.discardOutput).textContent = discard.length===0 ? 'Discard pile is empty.' : `Discard (${discard.length}): ${discard.map(displayGVCard).join(' ')}`; }
-  function changeWounds(delta){ const newW = Math.max(0, wounds + delta); const diff = newW - wounds; wounds = newW; if(diff > 0){ for(let i=0;i<diff;i++){ const pos = Math.floor(Math.random()*(deck.length+1)); deck.splice(pos,0,'Wound'); } } else if(diff < 0){ let toRemove = -diff; while(toRemove>0){ const idx = deck.indexOf('Wound'); if(idx !== -1){ deck.splice(idx,1); toRemove--; continue; } const dj = discard.indexOf('Wound'); if(dj !== -1){ discard.splice(dj,1); toRemove--; continue; } break; } } updateCounts(); save(); updateDrawButtonState(); }
-  function drawOnce(){ const out = el(ids.dummyOutput); if(deck.length === 0){ updateDrawButtonState(); if(out) out.textContent = 'Deck empty — Frenzy ready. Volkare will act as if a spell was drawn.'; return; } const card = deck.pop(); discard.push(card); if(out){ if(card.startsWith('Spell-')){ out.innerHTML = `<span class="symbol spell">${SYMBOL[card.split('-')[1]]}</span>`; } else if(card === 'Wound'){ out.innerHTML = `<span class="wound-symbol">${SYMBOL.Wound}</span>`; } else { out.textContent = SYMBOL[card.split('-')[1]] || card; } } updateCounts(); save(); updateDrawButtonState(); }
-  function reshuffle(){ const out = el(ids.dummyOutput); if(discard.length === 0){ if(out) out.textContent = 'Discard pile is empty. Nothing to reshuffle.'; return; } deck.push(...discard); discard = []; shuffle(deck); updateCounts(); if(out) out.textContent = 'Deck reshuffled from discard.'; save(); updateDrawButtonState(); }
-  function addCardToDiscard(cardCode){ discard.push(cardCode); updateCounts(); save(); updateDrawButtonState(); }
-  function updateDrawButtonState(){ const btn = el(ids.drawBtn); const desc = el(ids.gvFrenzyDesc); if(!btn) return; if(deck.length === 0){ btn.textContent = 'Frenzy'; if(desc) desc.style.display = 'block'; } else { btn.textContent = 'Draw'; if(desc) desc.style.display = 'none'; } }
-  function wire(){ const drawBtn = el(ids.drawBtn); if(drawBtn) drawBtn.addEventListener('click', ()=>{ if(deck.length === 0){ const out = el(ids.dummyOutput); if(out) out.textContent = 'Frenzy — Volkare will act as if a spell was drawn.'; return; } drawOnce(); }); const reshuffleBtn = el(ids.reshuffleBtn); if(reshuffleBtn) reshuffleBtn.addEventListener('click', reshuffle); document.querySelectorAll('.gv-wound-btn').forEach(b=> b.addEventListener('click', ()=>{ const act = b.dataset.act; changeWounds(act==='inc'?1:-1); })); }
+
+  function displayGVCard(code){
+    if(!code) return '';
+    if(code.startsWith('Adv-')) return SYMBOL[code.split('-')[1]] || code;
+    if(code.startsWith('Spell-')) return 'S' + (SYMBOL[code.split('-')[1]] || code);
+    if(code === 'Wound') return SYMBOL.Wound;
+    return code;
+  }
+
+  function updateCounts(){
+    if(el(ids.deckCount)) el(ids.deckCount).textContent = deck.length;
+    if(el(ids.gvWounds)) el(ids.gvWounds).textContent = wounds;
+    if(el(ids.discardOutput)) el(ids.discardOutput).textContent = discard.length===0 ? 'Discard pile is empty.' : `Discard (${discard.length}): ${discard.map(displayGVCard).join(' ')}`;
+  }
+
+  function changeWounds(delta){
+    const newW = Math.max(0, wounds + delta);
+    const diff = newW - wounds;
+    wounds = newW;
+    if(diff > 0){
+      for(let i=0;i<diff;i++){
+        const pos = Math.floor(Math.random()*(deck.length+1));
+        deck.splice(pos,0,'Wound');
+      }
+    } else if(diff < 0){
+      let toRemove = -diff;
+      while(toRemove>0){
+        const idx = deck.indexOf('Wound');
+        if(idx !== -1){ deck.splice(idx,1); toRemove--; continue; }
+        const dj = discard.indexOf('Wound');
+        if(dj !== -1){ discard.splice(dj,1); toRemove--; continue; }
+        break;
+      }
+    }
+    updateCounts(); save(); updateDrawButtonState();
+  }
+
+  function drawOnce(){
+    const out = el(ids.dummyOutput);
+    if(deck.length === 0){
+      updateDrawButtonState();
+      if(out) out.textContent = 'Deck empty — Frenzy ready. Volkare will act as if a spell was drawn.';
+      return;
+    }
+    const card = deck.pop();
+    discard.push(card);
+    if(out){
+      if(card.startsWith('Spell-')){
+        out.innerHTML = `<span class="symbol spell">${SYMBOL[card.split('-')[1]]}</span>`;
+      } else if(card === 'Wound'){
+        out.innerHTML = `<span class="wound-symbol">${SYMBOL.Wound}</span>`;
+      } else {
+        out.textContent = SYMBOL[card.split('-')[1]] || card;
+      }
+    }
+    updateCounts(); save(); updateDrawButtonState();
+  }
+
+  function reshuffle(){
+    const out = el(ids.dummyOutput);
+    if(discard.length === 0){
+      if(out) out.textContent = 'Discard pile is empty. Nothing to reshuffle.';
+      return;
+    }
+    deck.push(...discard); discard = []; shuffle(deck); updateCounts(); if(out) out.textContent = 'Deck reshuffled from discard.'; save();
+    updateDrawButtonState();
+  }
+
+  function addCardToDiscard(cardCode){
+    discard.push(cardCode);
+    updateCounts(); save(); updateDrawButtonState();
+  }
+
+  function updateDrawButtonState(){
+    const btn = el(ids.drawBtn);
+    const desc = el(ids.gvFrenzyDesc);
+    if(!btn) return;
+    if(deck.length === 0){
+      btn.textContent = 'Frenzy';
+      if(desc) desc.style.display = 'block';
+    } else {
+      btn.textContent = 'Draw';
+      if(desc) desc.style.display = 'none';
+    }
+  }
+
+  function wire(){
+    const drawBtn = el(ids.drawBtn);
+    if(drawBtn) drawBtn.addEventListener('click', ()=>{ if(deck.length === 0){ const out = el(ids.dummyOutput); if(out) out.textContent = 'Frenzy — Volkare will act as if a spell was drawn.'; return; } drawOnce(); });
+    const reshuffleBtn = el(ids.reshuffleBtn); if(reshuffleBtn) reshuffleBtn.addEventListener('click', reshuffle);
+    document.querySelectorAll('.gv-wound-btn').forEach(b=> b.addEventListener('click', ()=>{ const act = b.dataset.act; changeWounds(act==='inc'?1:-1); }));
+  }
+
   return { load, save, wire, buildDefaultDeck, updateCounts, drawOnce, reshuffle, addCardToDiscard, updateDrawButtonState, changeWounds };
 }
 
-/* App wiring */
+/* ------------------------ App wiring ------------------------ */
 const mainModule = DummyModule();
 const gvModule = GVModule();
 
-/* Levels & Rep UI wiring */
+const levelsContainer = document.getElementById('levels-container');
 const levelsToggleBtn = document.getElementById('levels-toggle');
 const levelsPanel = document.getElementById('levels-panel');
 const levelsList = document.getElementById('levels-list');
-const levelsContainer = document.getElementById('levels-container');
+
 let fame = 0;
 
+/* Helpers */
 function clampIntNonNeg(v){ return Math.max(0, Math.floor(Number(v) || 0)); }
-function getFameLevel(fameValue){ const v = Math.max(0, Number(fameValue) || 0); for (const b of FAME_LEVELS) if (v>=b.min && v<=b.max) return b.level; return 10; }
+function getFameLevel(fameValue){
+  const v = Math.max(0, Number(fameValue) || 0);
+  for (const b of FAME_LEVELS) if (v>=b.min && v<=b.max) return b.level;
+  return 10;
+}
 
-/* End-round modal wiring */
+/* Reputation UI */
+const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
+const REP_MID = ["0"];
+const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
+function buildRepRows(){
+  const repWrap = document.getElementById('rep-wrap');
+  repWrap.innerHTML = '';
+  const top=document.createElement('div'); top.className='rep-row top';
+  REP_TOP.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'top',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); selectRepCell({row:'top',index:i}); saveMeta(); }}); top.appendChild(c); });
+  const mid=document.createElement('div'); mid.className='rep-row mid';
+  REP_MID.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'mid',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); selectRepCell({row:'mid',index:i}); saveMeta(); }}); mid.appendChild(c); });
+  const bot=document.createElement('div'); bot.className='rep-row bot';
+  REP_BOT.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.tabIndex=0; c.addEventListener('click', ()=>{ selectRepCell({row:'bot',index:i}); saveMeta(); }); c.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); selectRepCell({row:'bot',index:i}); saveMeta(); }}); bot.appendChild(c); });
+  repWrap.appendChild(top); repWrap.appendChild(mid); repWrap.appendChild(bot);
+}
+function selectRepCell(sel){
+  document.querySelectorAll('.rep-cell').forEach(c=>c.classList.remove('selected'));
+  const rowEl = document.querySelector(`.rep-row.${sel.row}`);
+  if(!rowEl) return;
+  const cells = rowEl.querySelectorAll('.rep-cell');
+  if(cells[sel.index]){ cells[sel.index].classList.add('selected'); window._repSelection = {...sel}; saveMeta(); }
+}
+function applyRepSelection(sel){
+  if(!sel) return;
+  const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return;
+  const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected');
+}
+
+/* Levels rendering */
+function renderLevelsPanel(){
+  levelsList.innerHTML = '';
+  const lines = mainModule.getRenderLevels();
+  if(lines.length === 0){
+    const li = document.createElement('li'); li.className='level-line'; li.textContent='None yet'; levelsList.appendChild(li); return;
+  }
+  lines.forEach(l=>{ const li=document.createElement('li'); li.className='level-line'; li.textContent = l; levelsList.appendChild(li); });
+}
+
+/* End-round modal wiring (shared) */
 const endroundModal = document.getElementById('endround-modal');
 const cardChoices = document.getElementById('card-choices');
 const endroundConfirm = document.getElementById('endround-confirm');
 const endroundCancel = document.getElementById('endround-cancel');
 let endRoundContext = null;
 let selectedCard = null;
-function openEndRoundModalFor(playerKey){ endRoundContext = playerKey; selectedCard = null; if(endroundModal) endroundModal.style.display = 'flex'; if(endroundConfirm) endroundConfirm.disabled = true; cardChoices && cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected')); }
+function openEndRoundModalFor(playerKey){
+  endRoundContext = playerKey;
+  selectedCard = null;
+  if(endroundModal) endroundModal.style.display = 'flex';
+  if(endroundConfirm) endroundConfirm.disabled = true;
+  cardChoices && cardChoices.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));
+}
 if(cardChoices){
   cardChoices.addEventListener('click',(e)=>{
     const btn = e.target.closest('.choice-btn');
@@ -428,34 +602,6 @@ if(endroundConfirm) endroundConfirm.addEventListener('click', ()=>{
   endRoundContext = null; selectedCard = null;
 });
 
-/* Reputation UI */
-const REP_TOP = ["0","+1","+1","+2","+2","+3","+5"];
-const REP_MID = ["0"];
-const REP_BOT = ["0","-1","-1","-2","-3","-5","X"];
-function buildRepRows(){
-  const repWrap = document.getElementById('rep-wrap');
-  repWrap.innerHTML = '';
-  const top=document.createElement('div'); top.className='rep-row top';
-  REP_TOP.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.addEventListener('click', ()=>{ selectRepCell({row:'top',index:i}); saveMeta(); }); top.appendChild(c); });
-  const mid=document.createElement('div'); mid.className='rep-row mid';
-  REP_MID.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.addEventListener('click', ()=>{ selectRepCell({row:'mid',index:i}); saveMeta(); }); mid.appendChild(c); });
-  const bot=document.createElement('div'); bot.className='rep-row bot';
-  REP_BOT.forEach((label,i)=>{ const c=document.createElement('div'); c.className='rep-cell'; c.textContent=label; c.addEventListener('click', ()=>{ selectRepCell({row:'bot',index:i}); saveMeta(); }); bot.appendChild(c); });
-  repWrap.appendChild(top); repWrap.appendChild(mid); repWrap.appendChild(bot);
-}
-function selectRepCell(sel){ document.querySelectorAll('.rep-cell').forEach(c=>c.classList.remove('selected')); const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]){ cells[sel.index].classList.add('selected'); window._repSelection = {...sel}; saveMeta(); } }
-function applyRepSelection(sel){ if(!sel) return; const rowEl = document.querySelector(`.rep-row.${sel.row}`); if(!rowEl) return; const cells = rowEl.querySelectorAll('.rep-cell'); if(cells[sel.index]) cells[sel.index].classList.add('selected'); }
-
-/* Render achieved levels (no header) */
-function renderLevelsPanel(){
-  levelsList.innerHTML = '';
-  const lines = mainModule.getRenderLevels();
-  if(lines.length === 0){
-    const li = document.createElement('li'); li.className='level-line'; li.textContent='None yet'; levelsList.appendChild(li); return;
-  }
-  lines.forEach(l=>{ const li=document.createElement('li'); li.className='level-line'; li.textContent = l; levelsList.appendChild(li); });
-}
-
 /* Fame handling */
 function handleLevelPrompts(prevLevel, newLevel){
   const messages = [];
@@ -468,8 +614,10 @@ function handleLevelPrompts(prevLevel, newLevel){
 function updateFameUI(prevFame = null){
   const prevLevel = prevFame !== null ? getFameLevel(prevFame) : null;
   const level = getFameLevel(fame);
-  document.getElementById('player-level').textContent = level;
-  document.getElementById('fame-input').value = fame;
+  const lvlEl = document.getElementById('player-level');
+  if(lvlEl) lvlEl.textContent = level;
+  const fameInput = document.getElementById('fame-input');
+  if(fameInput) fameInput.value = fame;
   if(prevLevel !== null && level > prevLevel) handleLevelPrompts(prevLevel, level);
   renderLevelsPanel();
   saveMeta();
@@ -479,7 +627,7 @@ function updateFameUI(prevFame = null){
 function saveMeta(){ try{ const rep = window._repSelection || null; localStorage.setItem(STORAGE_KEY + '_meta', JSON.stringify({ fame, rep })); }catch(e){} }
 function loadMeta(){ try{ const raw = localStorage.getItem(STORAGE_KEY + '_meta'); if(!raw) return false; const m = JSON.parse(raw); fame = typeof m.fame==='number'?m.fame:fame; window._repSelection = m.rep || window._repSelection; return true;}catch(e){ return false; } }
 
-/* New game */
+/* New game resets */
 function newGame(){
   if(!confirm('Start a new game? This will reset saved progress and values to defaults.')) return;
   try{
@@ -505,6 +653,7 @@ window.addEventListener('load', ()=>{
   gvModule.load(); gvModule.wire();
 
   buildRepRows();
+  loadMeta();
   if(window._repSelection) applyRepSelection(window._repSelection);
   else { window._repSelection = { row:'mid', index:0 }; applyRepSelection(window._repSelection); saveMeta(); }
 
@@ -516,29 +665,32 @@ window.addEventListener('load', ()=>{
   gvModule.updateCounts && gvModule.updateCounts();
   gvModule.updateDrawButtonState && gvModule.updateDrawButtonState();
 
-  // fame input + increment buttons (centered visually by CSS)
-  document.getElementById('fame-input').addEventListener('change', ()=>{ const prev=fame; fame = clampIntNonNeg(document.getElementById('fame-input').value); updateFameUI(prev); });
+  // fame input + increments
+  const fameInput = document.getElementById('fame-input');
+  if(fameInput){
+    fameInput.addEventListener('change', ()=>{ const prev=fame; fame = clampIntNonNeg(document.getElementById('fame-input').value); updateFameUI(prev); });
+  }
   document.querySelectorAll('.fame-inc').forEach(btn=> btn.addEventListener('click', ()=>{ const prev=fame; fame = Math.max(0, Number(fame) + Number(btn.dataset.inc||0)); updateFameUI(prev); }));
 
-  // levels toggle click toggles aria-expanded (hover/focus also show panel)
+  // levels toggle click toggles aria-expanded (hover/focus also show)
   levelsToggleBtn.addEventListener('click', (e)=>{
     const expanded = levelsContainer.getAttribute('aria-expanded') === 'true';
     if(expanded){
       levelsContainer.setAttribute('aria-expanded','false');
       levelsPanel.setAttribute('aria-hidden','true');
-      levelsToggleBtn.setAttribute('aria-expanded','false');
       levelsPanel.style.display = 'none';
+      levelsToggleBtn.setAttribute('aria-expanded','false');
     } else {
       renderLevelsPanel();
       levelsContainer.setAttribute('aria-expanded','true');
       levelsPanel.setAttribute('aria-hidden','false');
-      levelsToggleBtn.setAttribute('aria-expanded','true');
       levelsPanel.style.display = 'block';
+      levelsToggleBtn.setAttribute('aria-expanded','true');
       levelsPanel.focus?.();
     }
   });
 
-  // close levels panel on escape or outside click
+  // close levels panel on outside click or ESC
   document.addEventListener('click', (ev)=>{
     if(!levelsContainer.contains(ev.target)){
       levelsContainer.setAttribute('aria-expanded','false');
@@ -556,7 +708,16 @@ window.addEventListener('load', ()=>{
     }
   });
 
-  // new game
+  // wire new game
   document.getElementById('new-game').addEventListener('click', newGame);
 
-  // expose end
+  // save periodically
+  setInterval(()=>{ mainModule.save && mainModule.save(); gvModule.save && gvModule.save(); saveMeta(); }, 2000);
+});
+
+/* Expose for debugging */
+window._main = mainModule;
+window._gv = gvModule;
+</script>
+</body>
+</html>
