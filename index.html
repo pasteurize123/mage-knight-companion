@@ -13,6 +13,8 @@
       --glass: rgba(255,255,255,0.03);
       --radius:14px;
       --phone-width:380px;
+      --track-bg: rgba(255,255,255,0.03);
+      --track-active: rgba(199,146,79,0.16);
     }
     * { box-sizing: border-box; }
     html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
@@ -70,6 +72,44 @@
     }
     .stat-controls { display:flex; align-items:center; }
     .small { color:var(--muted); font-size:12px; margin-top:8px; }
+
+    /* Reputation track */
+    .rep-track {
+      display:flex;
+      gap:6px;
+      align-items:center;
+      margin-top:10px;
+      overflow:auto;
+      padding-bottom:6px;
+    }
+    .rep-step {
+      min-width:40px;
+      padding:8px 6px;
+      border-radius:8px;
+      background:var(--track-bg);
+      text-align:center;
+      border:1px solid rgba(255,255,255,0.02);
+      color:var(--muted);
+      font-size:13px;
+      cursor:pointer;
+      flex-shrink:0;
+    }
+    .rep-step.active {
+      background:var(--track-active);
+      color:#ffdcb3;
+      border:1px solid rgba(199,146,79,0.25);
+      font-weight:700;
+    }
+    .rep-controls { display:flex; gap:8px; margin-top:8px; }
+    .rep-controls button {
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.04);
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+      color:#eaf2ff;
+      cursor:pointer;
+    }
+
     .dummy-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; color:#eaf2ff; }
     .controls-row { display:flex; gap:8px; justify-content:space-between; margin-top:8px; }
     .controls-row button {
@@ -130,16 +170,24 @@
         <div class="card-body">
           <div class="stat-row">
             <div class="row">
-              <div class="chip">Faction</div>
+              <div class="chip">Track pos</div>
               <div style="width:12px"></div>
-              <div class="stat-value" id="reputation-value">5</div>
+              <div class="stat-value" id="reputation-value">—</div>
             </div>
             <div class="stat-controls" aria-hidden="true">
-              <button id="rep-decrease">-</button>
-              <button id="rep-increase">+</button>
+              <button id="rep-left">◀</button>
+              <button id="rep-right">▶</button>
             </div>
           </div>
-          <div class="small">Use reputation for city interactions and level checks.</div>
+
+          <div class="rep-track" id="rep-track" role="list"></div>
+
+          <div class="rep-controls">
+            <button id="rep-to-start">Go to start</button>
+            <button id="rep-to-end">Go to end</button>
+          </div>
+
+          <div class="small">Move along the reputation track to reflect your current standing. The leftmost step shows X (unavailable).</div>
         </div>
       </section>
 
@@ -212,24 +260,23 @@
   </div>
 
   <script>
-    // Simple in-file state and interactions
     (function () {
+      // Reputation track values provided by the user
+      // Represented as strings to preserve the "X" and plus signs
+      const REP_TRACK = ["X", "-5", "-3", "-2", "-1", "-1", "0", "0", "0", "+1", "+1", "+2", "+2", "+3", "+5"];
+
       // state
       const state = {
-        reputation: 5,
+        repIndex: 6, // default: middle 0 (index 6 corresponds to first "0"); choose a reasonable default
         fame: 0,
-        dummy: {
-          name: 'Dummy Player',
-          hand: 5,
-          wounds: 0,
-          lastAction: 'Idle'
-        },
+        dummy: { name:'Dummy Player', hand:5, wounds:0, lastAction:'Idle' },
         volkareNotes: 'General Volkare: Track story events or reminders here.'
       };
 
       // elements
       const el = {
         reputationValue: document.getElementById('reputation-value'),
+        repTrackContainer: document.getElementById('rep-track'),
         fameValue: document.getElementById('fame-value'),
         dummyHand: document.getElementById('dummy-hand'),
         dummyWounds: document.getElementById('dummy-wounds'),
@@ -238,8 +285,42 @@
         volkareText: document.getElementById('volkare-text')
       };
 
-      // render helpers
-      function renderReputation() { el.reputationValue.textContent = state.reputation; }
+      // build track UI
+      function buildRepTrack() {
+        el.repTrackContainer.innerHTML = '';
+        REP_TRACK.forEach((label, idx) => {
+          const step = document.createElement('button');
+          step.type = 'button';
+          step.className = 'rep-step';
+          step.setAttribute('role','listitem');
+          step.setAttribute('aria-label', `Reputation step ${idx} value ${label}`);
+          step.textContent = label;
+          step.addEventListener('click', () => {
+            state.repIndex = idx;
+            renderReputation();
+            saveToStorage();
+          });
+          el.repTrackContainer.appendChild(step);
+        });
+      }
+
+      // render functions
+      function renderReputation() {
+        // update numeric display (show label)
+        const label = REP_TRACK[state.repIndex];
+        el.reputationValue.textContent = label === "X" ? "X" : label;
+        // update active class on steps
+        const steps = el.repTrackContainer.querySelectorAll('.rep-step');
+        steps.forEach((s, i) => {
+          if (i === state.repIndex) s.classList.add('active'); else s.classList.remove('active');
+        });
+        // ensure active step is visible
+        const active = steps[state.repIndex];
+        if (active && typeof active.scrollIntoView === 'function') {
+          active.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
+        }
+      }
+
       function renderFame() { el.fameValue.textContent = state.fame; }
       function renderDummy() {
         el.dummyHand.textContent = state.dummy.hand;
@@ -249,113 +330,110 @@
       }
       function renderVolkare() { el.volkareText.value = state.volkareNotes; }
 
-      // clamp helper
+      // helpers
       function clamp(n, min=0, max=999) { return Math.max(min, Math.min(max, n)); }
 
-      // controls
-      document.getElementById('rep-decrease').addEventListener('click', () => {
-        state.reputation = clamp(state.reputation - 1, 0);
+      // controls binding
+      document.getElementById('rep-left').addEventListener('click', () => {
+        state.repIndex = clamp(state.repIndex - 1, 0, REP_TRACK.length - 1);
         renderReputation();
+        saveToStorage();
       });
-      document.getElementById('rep-increase').addEventListener('click', () => {
-        state.reputation = clamp(state.reputation + 1, 0);
+      document.getElementById('rep-right').addEventListener('click', () => {
+        state.repIndex = clamp(state.repIndex + 1, 0, REP_TRACK.length - 1);
         renderReputation();
+        saveToStorage();
+      });
+      document.getElementById('rep-to-start').addEventListener('click', () => {
+        state.repIndex = 0; renderReputation(); saveToStorage();
+      });
+      document.getElementById('rep-to-end').addEventListener('click', () => {
+        state.repIndex = REP_TRACK.length - 1; renderReputation(); saveToStorage();
       });
 
-      document.getElementById('fame-decrease').addEventListener('click', () => {
-        state.fame = clamp(state.fame - 1, 0);
-        renderFame();
-      });
-      document.getElementById('fame-increase').addEventListener('click', () => {
-        state.fame = clamp(state.fame + 1, 0);
-        renderFame();
-      });
+      document.getElementById('fame-decrease').addEventListener('click', () => { state.fame = clamp(state.fame - 1, 0); renderFame(); saveToStorage(); });
+      document.getElementById('fame-increase').addEventListener('click', () => { state.fame = clamp(state.fame + 1, 0); renderFame(); saveToStorage(); });
 
       document.getElementById('play-1').addEventListener('click', () => {
         state.dummy.hand = clamp(state.dummy.hand - 1, 0);
         state.dummy.lastAction = 'Played 1 card';
-        renderDummy();
+        renderDummy(); saveToStorage();
       });
       document.getElementById('draw-1').addEventListener('click', () => {
         state.dummy.hand = clamp(state.dummy.hand + 1, 0);
         state.dummy.lastAction = 'Drew 1 card';
-        renderDummy();
+        renderDummy(); saveToStorage();
       });
       document.getElementById('heal-1').addEventListener('click', () => {
         state.dummy.wounds = clamp(state.dummy.wounds - 1, 0);
         state.dummy.lastAction = 'Healed 1 wound';
-        renderDummy();
+        renderDummy(); saveToStorage();
       });
       document.getElementById('reset-dummy').addEventListener('click', () => {
-        state.dummy = { name: 'Dummy Player', hand: 5, wounds: 0, lastAction: 'Idle' };
-        renderDummy();
+        state.dummy = { name:'Dummy Player', hand:5, wounds:0, lastAction:'Idle' };
+        renderDummy(); saveToStorage();
       });
-
-      // Auto action: deterministic rule
       document.getElementById('auto-action').addEventListener('click', () => {
-        // rule:
-        // if hand < 3 => draw 2
-        // else if wounds >= 4 => skip (defensive, simulate rest)
-        // else prefer to play one attack: play 1 card and take 1 wound
         if (state.dummy.hand < 3) {
           state.dummy.hand = clamp(state.dummy.hand + 2, 0);
           state.dummy.lastAction = 'Auto: Drew 2 cards';
         } else if (state.dummy.wounds >= 4) {
           state.dummy.lastAction = 'Auto: Rested (defensive)';
-          // simulate healing small amount when resting
           state.dummy.wounds = clamp(state.dummy.wounds - 1, 0);
         } else {
           state.dummy.hand = clamp(state.dummy.hand - 1, 0);
           state.dummy.wounds = clamp(state.dummy.wounds + 1, 0);
           state.dummy.lastAction = 'Auto: Attacked (took 1 wound)';
         }
-        renderDummy();
+        renderDummy(); saveToStorage();
       });
 
-      // notes persistence to localStorage
-      const STORAGE_KEY = 'mk_companion_v1';
+      // notes binding
+      el.volkareText.addEventListener('input', (e) => {
+        state.volkareNotes = e.target.value;
+      });
+
+      // persistence
+      const STORAGE_KEY = 'mk_companion_v1_reptrack';
       function saveToStorage() {
         try {
           const payload = {
-            reputation: state.reputation,
+            repIndex: state.repIndex,
             fame: state.fame,
             dummy: state.dummy,
             volkareNotes: state.volkareNotes
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        } catch (e) { /* ignore storage errors */ }
+        } catch (e) {}
       }
       function loadFromStorage() {
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
           if (!raw) return;
           const parsed = JSON.parse(raw);
-          if (typeof parsed.reputation === 'number') state.reputation = parsed.reputation;
+          if (typeof parsed.repIndex === 'number' && parsed.repIndex >=0 && parsed.repIndex < REP_TRACK.length) state.repIndex = parsed.repIndex;
           if (typeof parsed.fame === 'number') state.fame = parsed.fame;
           if (parsed.dummy) state.dummy = Object.assign(state.dummy, parsed.dummy);
           if (typeof parsed.volkareNotes === 'string') state.volkareNotes = parsed.volkareNotes;
-        } catch (e) { /* ignore parse errors */ }
+        } catch (e) {}
       }
 
-      // volkare textarea binding
-      el.volkareText.addEventListener('input', (e) => {
-        state.volkareNotes = e.target.value;
-      });
-
-      // autosave every 2s (lightweight)
-      setInterval(saveToStorage, 2000);
-
-      // load and initial render
+      // init
+      buildRepTrack();
       loadFromStorage();
       renderReputation();
       renderFame();
       renderDummy();
       renderVolkare();
 
-      // quick keyboard shortcuts for desktop testing (R/F/D)
+      // autosave every 2s
+      setInterval(saveToStorage, 2000);
+
+      // keyboard shortcuts for desktop testing (left/right arrows to move rep track)
       window.addEventListener('keydown', (ev) => {
-        if (ev.key === 'r') { state.reputation = clamp(state.reputation + 1); renderReputation(); }
-        if (ev.key === 'f') { state.fame = clamp(state.fame + 1); renderFame(); }
+        if (ev.key === 'ArrowLeft') { document.getElementById('rep-left').click(); }
+        if (ev.key === 'ArrowRight') { document.getElementById('rep-right').click(); }
+        if (ev.key === 'r') { state.fame = clamp(state.fame + 1); renderFame(); saveToStorage(); }
         if (ev.key === 'd') { document.getElementById('auto-action').click(); }
       });
     })();
