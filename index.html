@@ -16,7 +16,13 @@
       --track-bg: rgba(255,255,255,0.03);
       --gold:#c7924f;
       --red:#d9534f;
+      --blue:#4da3ff;
+      --green:#6fd08b;
+      --white:#f2f6fb;
       --yellow:#f6d365;
+      --backdrop: rgba(2,6,23,0.6);
+      --bronze: #b87333;
+      --black: #000000;
     }
     * { box-sizing: border-box; }
     html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
@@ -29,9 +35,10 @@
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
 
-    /* specifically center titles for Reputation and Fame */
+    /* center titles for Reputation, Fame and Dummy Player */
     #reputation-card .card-header,
-    #fame-card .card-header { justify-content:center; }
+    #fame-card .card-header,
+    #dummy-card .card-header { justify-content:center; }
 
     /* Reputation */
     .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; }
@@ -49,12 +56,13 @@
     .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
     .rep-step.active { box-shadow: 0 12px 36px rgba(0,0,0,0.6); transform:scale(1.14); z-index:2; font-weight:900; }
 
-    /* Fame & Level (stacked column) */
+    /* Fame & Level (version 25 style) */
     .fame-grid { display:flex; flex-direction:column; gap:6px; align-items:center; width:100%; }
     .fame-stack { display:flex; flex-direction:column; gap:10px; align-items:center; width:100%; }
     .fame-input { width:140px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); color:#eaf2ff; font-size:16px; text-align:center; -moz-appearance:textfield; }
     .fame-input[readonly] { background: rgba(255,255,255,0.02); cursor:default; color:#eaf2ff; }
     .fame-input.editing { outline: 2px solid rgba(199,146,79,0.18); }
+
     .level-badge { min-width:160px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
     .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
@@ -67,36 +75,78 @@
     .level-badge.level-9 { color:#ffd1f2; border-color: rgba(255,209,242,0.08); }
     .level-badge.level-10 { color:#ffd700; border-color: rgba(255,215,0,0.12); }
 
-    /* Centered popups (Fame Ranges and Level Ups) */
-    .fame-tooltip, .level-tooltip {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(1);
-      min-width:260px;
-      max-width:90vw;
-      background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98));
-      border-radius:12px;
-      padding:14px;
-      display:none;
-      z-index:1200;
-      border:1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 18px 50px rgba(0,0,0,0.6);
+    /* Dummy Player */
+    .dummy-sub { font-weight:700; color:var(--muted); margin:6px 0 4px 0; font-size:13px; text-transform:uppercase; letter-spacing:0.6px; display:flex; gap:8px; align-items:center; justify-content:center; }
+    .crystal-row, .cards-row { display:flex; gap:10px; align-items:center; justify-content:center; margin-bottom:8px; }
+    .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:72px; justify-content:center; }
+    .dp-count { font-weight:800; color:#eaf2ff; min-width:20px; text-align:center; }
+
+    /* Unified dp-dot: container for SVG icon */
+    .dp-dot {
+      width:22px;
+      height:22px;
+      display:inline-block;
+      vertical-align:middle;
+      flex:0 0 auto;
+      line-height:0;
     }
-    .fame-tooltip.visible, .level-tooltip.visible { display:block; animation: popin 160ms cubic-bezier(.2,.8,.2,1); }
+    .dp-dot svg { width:100%; height:100%; display:block; }
+
+    /* SVG fills by color class */
+    .dp-dot.red svg .fill { fill: var(--red); }
+    .dp-dot.blue svg .fill { fill: var(--blue); }
+    .dp-dot.green svg .fill { fill: var(--green); }
+    .dp-dot.white svg .fill { fill: var(--white); stroke: rgba(0,0,0,0.12); stroke-width:0.5; }
+
+    /* new bronze and na styles for automa icons */
+    .dp-dot.bronze svg .fill { fill: var(--bronze); }
+    .dp-dot.na svg line { stroke: var(--black); stroke-width:2; stroke-linecap:round; }
+
+    .dummy-controls { display:flex; gap:8px; justify-content:center; margin-top:8px; flex-direction:column; align-items:center; }
+    .small-btn { padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.01); color:#eaf2ff; cursor:pointer; }
+
+    .end-round-desc { font-size:12px; color:var(--muted); margin-top:6px; }
+
+    /* Discard pile */
+    .discard-pile { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; padding:8px; max-height:96px; overflow:auto; border-radius:8px; background: rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); margin-top:8px; }
+    .discard-sep { width:12px; height:1px; display:inline-block; }
+
+    /* Centered popups and modal */
+    .fame-tooltip, .level-tooltip, .modal, .backdrop { position: fixed; }
+    .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:12px; padding:14px; display:none; z-index:1200; border:1px solid rgba(255,255,255,0.06); box-shadow:0 18px 50px rgba(0,0,0,0.6); }
+    .fame-tooltip.visible, .level-tooltip.visible { display:block; animation:popin 160ms cubic-bezier(.2,.8,.2,1); }
     @keyframes popin { from { opacity:0; transform: translate(-50%, -50%) scale(0.96); } to { opacity:1; transform: translate(-50%, -50%) scale(1); } }
+
+    .backdrop { inset:0; background:var(--backdrop); z-index:1250; display:none; }
+    .backdrop.visible { display:block; }
+
+    .modal { top:50%; left:50%; transform:translate(-50%,-50%); background: linear-gradient(180deg, rgba(8,10,12,0.98), rgba(18,20,22,0.98)); padding:16px; border-radius:12px; z-index:1300; min-width:300px; max-width:92vw; display:none; color:var(--muted); border:1px solid rgba(255,255,255,0.04); box-shadow:0 24px 80px rgba(0,0,0,0.6); }
+    .modal.visible { display:block; }
+    .modal h3 { text-align:center; margin-top:0; } /* center modal titles */
+    .modal p { text-align:center; margin:6px 0 12px; } /* center descriptions */
+
+    .select-grid { display:flex; gap:8px; justify-content:center; margin-bottom:12px; flex-wrap:wrap; }
+    .select-item { display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px; border-radius:8px; cursor:pointer; border:1px solid transparent; }
+    .select-item.selected { outline:2px solid rgba(199,146,79,0.14); border-color: rgba(199,146,79,0.18); background: rgba(199,146,79,0.03); }
+    .select-item .dp-dot { width:20px; height:20px; }
+
+    .modal .actions { display:flex; gap:8px; justify-content:center; margin-top:6px; }
 
     .tooltip-list { display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; padding-right:6px; }
     .tooltip-item { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color: var(--muted); font-weight:600; justify-content:space-between; }
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    /* New Game button */
-    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); color:#eaf2ff; font-weight:700; cursor:pointer; margin:8px 0 4px 0; }
-    .new-game-btn.primary { background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.08)); border: 1px solid rgba(199,146,79,0.25); color: #ffdcb3; }
+    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.08)); color:#ffdcb3; font-weight:700; cursor:pointer; margin:8px 0 4px 0; }
 
-    .footer { margin-top:8px; text-align:center; color:var(--muted); font-size:12px; }
-    @media (max-width:400px) { :root { --phone-width:94vw; } .topbar { left:50%; transform:translateX(-50%); width:94vw; } .fame-input { width:120px; } .level-tooltip, .fame-tooltip { min-width:200px; } }
+    @media (max-width:480px) {
+      :root { --phone-width:94vw; }
+      .fame-input { width:120px; }
+      .dp-btn { min-width:60px; padding:6px 8px; }
+      .dp-dot { width:18px; height:18px; }
+      .discard-pile { max-height:72px; }
+      .modal { min-width:260px; }
+    }
   </style>
 </head>
 <body>
@@ -121,7 +171,7 @@
         </div>
       </section>
 
-      <!-- Fame (stacked) -->
+      <!-- Fame (version 25 layout & behaviour) -->
       <section class="card" id="fame-card" aria-labelledby="fame-title">
         <div class="card-header"><div><h2 id="fame-title" class="card-title">Fame</h2></div></div>
         <div class="card-body">
@@ -143,7 +193,7 @@
               <div class="tooltip-list" id="fame-tooltip-list"></div>
             </div>
 
-            <!-- Level ups tooltip stays centered -->
+            <!-- Level ups tooltip -->
             <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
               <div style="font-weight:800; margin-bottom:6px;">Level Ups</div>
               <div class="tooltip-list" id="tooltip-list"></div>
@@ -152,7 +202,69 @@
         </div>
       </section>
 
-      <!-- New Game button -->
+      <!-- Dummy Player (hidden until automa selection) -->
+      <section class="card" id="dummy-card" aria-labelledby="dummy-title" style="display:none;">
+        <div class="card-header"><div><h2 id="dummy-title" class="card-title">Dummy Player</h2></div></div>
+        <div class="card-body">
+          <div class="dummy-body">
+            <div class="dummy-sub">
+              <span>Crystals</span>
+              <span id="crystal-total" style="color:var(--muted);">()</span>
+            </div>
+            <div class="crystal-row" id="crystal-row" aria-hidden="false">
+              <div class="dp-btn" data-color="red" aria-label="red crystals">
+                <div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div>
+                <div class="dp-count" id="crystal-red">0</div>
+              </div>
+              <div class="dp-btn" data-color="blue" aria-label="blue crystals">
+                <div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div>
+                <div class="dp-count" id="crystal-blue">0</div>
+              </div>
+              <div class="dp-btn" data-color="green" aria-label="green crystals">
+                <div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div>
+                <div class="dp-count" id="crystal-green">0</div>
+              </div>
+              <div class="dp-btn" data-color="white" aria-label="white crystals">
+                <div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div>
+                <div class="dp-count" id="crystal-white">0</div>
+              </div>
+            </div>
+
+            <div class="dummy-sub">
+              <span>Cards</span>
+              <span id="card-total" style="color:var(--muted);">()</span>
+            </div>
+            <div class="cards-row" id="cards-row">
+              <div class="dp-btn" data-color="red" aria-label="red cards">
+                <div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+                <div class="dp-count" id="card-red">0</div>
+              </div>
+              <div class="dp-btn" data-color="blue" aria-label="blue cards">
+                <div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+                <div class="dp-count" id="card-blue">0</div>
+              </div>
+              <div class="dp-btn" data-color="green" aria-label="green cards">
+                <div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+                <div class="dp-count" id="card-green">0</div>
+              </div>
+              <div class="dp-btn" data-color="white" aria-label="white cards">
+                <div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+                <div class="dp-count" id="card-white">0</div>
+              </div>
+            </div>
+
+            <div class="dummy-controls" aria-hidden="false">
+              <button id="draw-cards" class="small-btn" title="Draw cards">Draw</button>
+              <div id="end-desc" class="end-round-desc" style="display:none;">End of Round Announced</div>
+            </div>
+
+            <div class="dummy-sub" style="margin-top:12px">Discard Pile</div>
+            <div id="discard-pile" class="discard-pile" aria-live="polite" aria-label="Discard pile (most recent draws)"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- New Game -->
       <div>
         <button id="new-game" class="new-game-btn primary" title="Reset the app to a new game">New Game</button>
       </div>
@@ -161,11 +273,74 @@
     </div>
   </div>
 
+  <!-- Automa modal -->
+  <div id="automa-backdrop" class="backdrop" aria-hidden="true"></div>
+  <div id="automa-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="automa-title">
+    <h3 id="automa-title">Automa</h3>
+    <p>Choose One</p>
+
+    <div class="select-grid" id="automa-options" style="margin-bottom:8px;">
+      <div class="select-item" data-choice="dummy" id="automa-dummy">
+        <!-- shield icon (bronze) -->
+        <div class="dp-dot bronze" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path class="fill" d="M12 2l7 3v5c0 5-4.5 9.5-7 12-2.5-2.5-7-7-7-12V5l7-3z"/>
+          </svg>
+        </div>
+        <div style="font-size:13px; color:var(--muted);">Dummy Player</div>
+      </div>
+      <div class="select-item" data-choice="none" id="automa-none">
+        <!-- black X icon -->
+        <div class="dp-dot na" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <line x1="5" y1="5" x2="19" y2="19" />
+            <line x1="19" y1="5" x2="5" y2="19" />
+          </svg>
+        </div>
+        <div style="font-size:13px; color:var(--muted);">N/A</div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:8px;">
+      <button id="automa-confirm" class="small-btn" disabled>Confirm</button>
+    </div>
+  </div>
+
+  <!-- Backdrop + End Round modal -->
+  <div id="backdrop" class="backdrop" aria-hidden="true"></div>
+  <div id="end-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="end-modal-title">
+    <h3 id="end-modal-title">End of Round</h3>
+    <p>Select one crystal and one card to add to the Dummy Player</p>
+
+    <div style="margin-bottom:8px;">
+      <div style="font-weight:700; color:var(--muted); margin-bottom:6px;">Choose a crystal</div>
+      <div class="select-grid" id="select-crystals">
+        <div class="select-item" data-color="red"><div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div></div>
+        <div class="select-item" data-color="blue"><div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div></div>
+        <div class="select-item" data-color="green"><div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div></div>
+        <div class="select-item" data-color="white"><div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-weight:700; color:var(--muted); margin-bottom:6px;">Choose a card</div>
+      <div class="select-grid" id="select-cards">
+        <div class="select-item" data-color="red"><div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
+        <div class="select-item" data-color="blue"><div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
+        <div class="select-item" data-color="green"><div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
+        <div class="select-item" data-color="white"><div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
+      </div>
+    </div>
+
+    <div class="actions" style="display:flex; justify-content:center; gap:8px; margin-top:8px;">
+      <button id="confirm-end" class="small-btn" disabled>Confirm</button>
+    </div>
+  </div>
+
   <script>
     (function () {
       const REP_TRACK = ["X","-5","-3","-2","-1","-1","0","0","0","+1","+1","+2","+2","+3","+5"];
       const DEFAULT_REP_INDEX = 7;
-
       const LEVEL_RANGES = [
         { level:1, min:0, max:2 },
         { level:2, min:3, max:7 },
@@ -178,25 +353,20 @@
         { level:9, min:80, max:98 },
         { level:10, min:99, max:119 }
       ];
-
       const LEVEL_REWARDS = {
-        1: 'Command Token',
-        2: 'Skill + Advanced Action',
-        3: 'Command Token',
-        4: 'Skill + Advanced Action',
-        5: 'Command Token',
-        6: 'Skill + Advanced Action',
-        7: 'Command Token',
-        8: 'Skill + Advanced Action',
-        9: 'Command Token',
-        10: 'Skill + Advanced Action'
+        1: 'Command Token',2: 'Skill + Advanced Action',3: 'Command Token',4: 'Skill + Advanced Action',
+        5: 'Command Token',6: 'Skill + Advanced Action',7: 'Command Token',8: 'Skill + Advanced Action',
+        9: 'Command Token',10: 'Skill + Advanced Action'
       };
 
-      // stored state (fame only updates when confirmed)
       const state = {
         repIndex: DEFAULT_REP_INDEX,
-        fame: 0,               // committed fame
-        previousLevel: 1      // committed level
+        fame: 0,
+        previousLevel: 1,
+        dummy: { crystals:{red:0,blue:0,green:0,white:0}, cards:{red:0,blue:0,green:0,white:0} },
+        discard: [],
+        awaitingEndRound: false,
+        showDummy: false
       };
 
       const el = {
@@ -211,82 +381,91 @@
         tooltipList: document.getElementById('tooltip-list'),
         fameTooltip: document.getElementById('fame-tooltip'),
         fameTooltipList: document.getElementById('fame-tooltip-list'),
-        newGameBtn: document.getElementById('new-game')
+        crystalRed: document.getElementById('crystal-red'),
+        crystalBlue: document.getElementById('crystal-blue'),
+        crystalGreen: document.getElementById('crystal-green'),
+        crystalWhite: document.getElementById('crystal-white'),
+        cardRed: document.getElementById('card-red'),
+        cardBlue: document.getElementById('card-blue'),
+        cardGreen: document.getElementById('card-green'),
+        cardWhite: document.getElementById('card-white'),
+        drawBtn: document.getElementById('draw-cards'),
+        endDesc: document.getElementById('end-desc'),
+        discardPile: document.getElementById('discard-pile'),
+        crystalTotal: document.getElementById('crystal-total'),
+        cardTotal: document.getElementById('card-total'),
+        newGameBtn: document.getElementById('new-game'),
+        backdrop: document.getElementById('backdrop'),
+        endModal: document.getElementById('end-modal'),
+        selectCrystals: document.getElementById('select-crystals'),
+        selectCards: document.getElementById('select-cards'),
+        confirmEnd: document.getElementById('confirm-end'),
+        automaBackdrop: document.getElementById('automa-backdrop'),
+        automaModal: document.getElementById('automa-modal'),
+        automaOptions: document.getElementById('automa-options'),
+        automaConfirm: document.getElementById('automa-confirm'),
+        automaDummy: document.getElementById('automa-dummy'),
+        automaNone: document.getElementById('automa-none'),
+        dummyCardSection: document.getElementById('dummy-card')
       };
 
-      function classifyLabel(label) {
-        if (label === "0") return 'zero';
-        if (label === "X" || label.startsWith('-')) return 'negative';
-        if (label.startsWith('+')) return 'positive';
-        return '';
-      }
-      function colorForLabel(label) {
+      function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
+      function sumObject(obj){ return Object.values(obj || {}).reduce((a,b)=>a+(Number(b)||0),0); }
+      function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+      function classifyLabel(label){ if (label === "0") return 'zero'; if (label === "X" || label.startsWith('-')) return 'negative'; if (label.startsWith('+')) return 'positive'; return ''; }
+      function colorForLabel(label){
         if (label === "0") return getComputedStyle(document.documentElement).getPropertyValue('--yellow').trim() || '#f6d365';
         if (label === "X" || label.startsWith('-')) return getComputedStyle(document.documentElement).getPropertyValue('--red').trim() || '#d9534f';
         if (label.startsWith('+')) return getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#c7924f';
         return getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#9aa4b2';
       }
 
-      function getLevelForFame(fame) {
-        const f = Math.max(0, Math.floor(Number(fame) || 0));
-        for (let r of LEVEL_RANGES) if (f >= r.min && f <= r.max) return r.level;
-        return LEVEL_RANGES[LEVEL_RANGES.length - 1].level;
-      }
-
-      function buildRepTrack() {
+      function buildRepTrack(){
         el.repTrackContainer.innerHTML = '';
         REP_TRACK.forEach((label, idx) => {
           const step = document.createElement('button');
-          step.type = 'button';
-          step.className = 'rep-step ' + classifyLabel(label);
+          step.type='button';
+          step.className='rep-step '+ classifyLabel(label);
           step.setAttribute('role','listitem');
           step.setAttribute('aria-label', `Reputation ${label}`);
           step.textContent = label;
-          step.addEventListener('click', () => { state.repIndex = idx; renderReputation(); saveToStorage(); });
+          step.addEventListener('click', ()=>{ state.repIndex = idx; renderReputation(); saveToStorage(); });
           el.repTrackContainer.appendChild(step);
         });
       }
-
-      function renderReputation() {
+      function renderReputation(){
         const label = REP_TRACK[state.repIndex];
         el.reputationValue.textContent = label;
         el.reputationValue.style.color = colorForLabel(label);
         const steps = el.repTrackContainer.querySelectorAll('.rep-step');
-        steps.forEach((s,i) => s.classList.toggle('active', i === state.repIndex));
+        steps.forEach((s,i)=>s.classList.toggle('active', i===state.repIndex));
         const active = steps[state.repIndex];
         if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
       }
 
-      // render fame input (committed fame is read-only) and committed level badge
-      function renderFameAndLevel() {
+      function getLevelForFame(fame){
+        const f = Math.max(0, Math.floor(Number(fame) || 0));
+        for (let r of LEVEL_RANGES) if (f >= r.min && f <= r.max) return r.level;
+        return LEVEL_RANGES[LEVEL_RANGES.length - 1].level;
+      }
+      function renderFameAndLevel(){
         el.fameInput.value = state.fame;
-        const level = state.previousLevel; // only committed level shown
+        const level = state.previousLevel;
         el.playerLevel.textContent = `Level ${level}`;
         el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
-        // make the fame number match the current level color
         try {
           const lvlColor = getComputedStyle(el.playerLevel).color;
           el.fameInput.style.color = lvlColor;
-        } catch (err) {
-          // fallback - leave default color
-        }
+        } catch (err) {}
       }
 
-      function createTooltipItem(lvl, text) {
-        const item = document.createElement('div');
-        item.className = 'tooltip-item';
-        const lvlDiv = document.createElement('div');
-        lvlDiv.className = 'lvl';
-        lvlDiv.textContent = `Level ${lvl}:`;
-        const rewardDiv = document.createElement('div');
-        rewardDiv.className = 'reward';
-        rewardDiv.textContent = text;
-        item.appendChild(lvlDiv);
-        item.appendChild(rewardDiv);
-        return item;
+      function createTooltipItem(lvl, text){
+        const item = document.createElement('div'); item.className='tooltip-item';
+        const lvlDiv = document.createElement('div'); lvlDiv.className='lvl'; lvlDiv.textContent = `Level ${lvl}:`;
+        const rewardDiv = document.createElement('div'); rewardDiv.className='reward'; rewardDiv.textContent = text;
+        item.appendChild(lvlDiv); item.appendChild(rewardDiv); return item;
       }
-
-      // show only newly reached levels (prevLevel+1 .. newLevel) and persist until tap-off
       function showGainedLevelsPersist(prevLevel, newLevel) {
         el.tooltipList.innerHTML = '';
         for (let l = prevLevel + 1; l <= newLevel; l++) {
@@ -299,18 +478,53 @@
         }
       }
 
-      // toggle full list for level badge (press)
+      function renderDummy(){
+        el.crystalRed.textContent = state.dummy.crystals.red || 0;
+        el.crystalBlue.textContent = state.dummy.crystals.blue || 0;
+        el.crystalGreen.textContent = state.dummy.crystals.green || 0;
+        el.crystalWhite.textContent = state.dummy.crystals.white || 0;
+        el.crystalTotal.textContent = `(${sumObject(state.dummy.crystals)})`;
+
+        el.cardRed.textContent = state.dummy.cards.red || 0;
+        el.cardBlue.textContent = state.dummy.cards.blue || 0;
+        el.cardGreen.textContent = state.dummy.cards.green || 0;
+        el.cardWhite.textContent = state.dummy.cards.white || 0;
+        el.cardTotal.textContent = `(${sumObject(state.dummy.cards)})`;
+
+        el.discardPile.innerHTML = '';
+        (state.discard || []).forEach(token=>{
+          if (token === '__SEP__') {
+            const sep = document.createElement('div');
+            sep.className = 'discard-sep';
+            el.discardPile.appendChild(sep);
+          } else {
+            const d = document.createElement('div');
+            d.className = 'dp-dot '+token;
+            d.title = token;
+            d.innerHTML = `<svg viewBox="0 0 24 32" aria-hidden="true" focusable="false"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
+            el.discardPile.appendChild(d);
+          }
+        });
+
+        if (state.awaitingEndRound) {
+          el.drawBtn.textContent = 'End Round';
+          el.endDesc.style.display = 'block';
+        } else {
+          el.drawBtn.textContent = 'Draw';
+          el.endDesc.style.display = 'none';
+        }
+
+        el.dummyCardSection.style.display = state.showDummy ? 'block' : 'none';
+      }
+
       function buildFullTooltip(level) {
         el.tooltipList.innerHTML = '';
-        for (let l = 1; l <= level; l++) {
-          el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
-        }
+        for (let l = 1; l <= level; l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
       }
       function toggleTooltip() {
         const isVisible = el.tooltip.classList.contains('visible');
-        if (isVisible) {
-          closeTooltip();
-        } else {
+        if (isVisible) closeTooltip();
+        else {
           buildFullTooltip(state.previousLevel);
           el.tooltip.classList.add('visible');
           el.tooltip.setAttribute('aria-hidden','false');
@@ -323,7 +537,6 @@
         el.playerLevel.setAttribute('aria-pressed','false');
       }
 
-      // Fame ranges tooltip: list all LEVEL_RANGES (centered)
       function buildFameRangesTooltip() {
         el.fameTooltipList.innerHTML = '';
         for (let r of LEVEL_RANGES) {
@@ -331,12 +544,10 @@
           el.fameTooltipList.appendChild(createTooltipItem(r.level, rangeText));
         }
       }
-
       function toggleFameTooltip() {
         const isVisible = el.fameTooltip.classList.contains('visible');
-        if (isVisible) {
-          closeFameTooltip();
-        } else {
+        if (isVisible) closeFameTooltip();
+        else {
           buildFameRangesTooltip();
           el.fameTooltip.classList.add('visible');
           el.fameTooltip.setAttribute('aria-hidden','false');
@@ -347,28 +558,174 @@
         el.fameTooltip.setAttribute('aria-hidden','true');
       }
 
-      function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
+      function buildDeckFromCounts(){
+        const deck = [];
+        for (const c of ['red','blue','green','white']) {
+          const cnt = Math.max(0, state.dummy.cards[c] || 0);
+          for (let i=0;i<cnt;i++) deck.push(c);
+        }
+        return deck;
+      }
+      function drawFromDeck(n){
+        const drawn = [];
+        for (let i=0;i<n;i++){
+          const deck = buildDeckFromCounts();
+          if (deck.length === 0) break;
+          const idx = Math.floor(Math.random()*deck.length);
+          const color = deck[idx];
+          state.dummy.cards[color] = Math.max(0, (state.dummy.cards[color]||0) - 1);
+          drawn.push(color);
+        }
+        return drawn;
+      }
 
-      // Reputation buttons
-      el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
-      el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+      function colorWithMaxCrystals(){
+        const crystals = state.dummy.crystals;
+        const entries = Object.keys(crystals).map(k=>({k, v:crystals[k]}));
+        const max = Math.max(...entries.map(e=>e.v));
+        if (max <= 0) return null;
+        const top = entries.filter(e=>e.v===max).map(e=>e.k);
+        return pickRandom(top);
+      }
 
-      // Add-fame input: commit on Enter or blur. Accept positive or negative numbers.
+      el.drawBtn.addEventListener('click', () => {
+        const cardsLeft = sumObject(state.dummy.cards);
+        if (cardsLeft <= 0) {
+          if (!state.awaitingEndRound) {
+            state.awaitingEndRound = true;
+            renderDummy();
+            saveToStorage();
+            return;
+          } else {
+            openEndRoundModal();
+            return;
+          }
+        }
+
+        const initial = drawFromDeck(3);
+        state.discard = state.discard.concat(initial);
+        const pool = colorWithMaxCrystals();
+        if (initial.length >= 3 && pool && initial[2] === pool) {
+          const extraCount = state.dummy.crystals[pool] || 0;
+          if (extraCount > 0) {
+            const extra = drawFromDeck(extraCount);
+            state.discard = state.discard.concat(extra);
+          }
+        }
+        state.discard.push('__SEP__');
+        renderDummy();
+        saveToStorage();
+      });
+
+      function openEndRoundModal(){
+        el.backdrop.classList.add('visible'); el.backdrop.setAttribute('aria-hidden','false');
+        el.endModal.classList.add('visible'); el.endModal.setAttribute('aria-hidden','false');
+        selected = { crystal: null, card: null };
+        el.confirmEnd.disabled = true;
+        Array.from(el.selectCrystals.querySelectorAll('.select-item')).forEach(node=>node.classList.remove('selected'));
+        Array.from(el.selectCards.querySelectorAll('.select-item')).forEach(node=>node.classList.remove('selected'));
+      }
+      function closeEndRoundModal(){
+        el.backdrop.classList.remove('visible'); el.backdrop.setAttribute('aria-hidden','true');
+        el.endModal.classList.remove('visible'); el.endModal.setAttribute('aria-hidden','true');
+      }
+      let selected = { crystal: null, card: null };
+      el.selectCrystals.addEventListener('click', (e)=>{
+        const item = e.target.closest('.select-item'); if(!item) return;
+        const color = item.getAttribute('data-color');
+        Array.from(el.selectCrystals.querySelectorAll('.select-item')).forEach(n=>n.classList.toggle('selected', n===item));
+        selected.crystal = color; el.confirmEnd.disabled = !(selected.crystal && selected.card);
+      });
+      el.selectCards.addEventListener('click', (e)=>{
+        const item = e.target.closest('.select-item'); if(!item) return;
+        const color = item.getAttribute('data-color');
+        Array.from(el.selectCards.querySelectorAll('.select-item')).forEach(n=>n.classList.toggle('selected', n===item));
+        selected.card = color; el.confirmEnd.disabled = !(selected.crystal && selected.card);
+      });
+
+      el.confirmEnd.addEventListener('click', ()=>{
+        if (!(selected.crystal && selected.card)) return;
+        state.dummy.crystals[selected.crystal] = (state.dummy.crystals[selected.crystal]||0) + 1;
+        for (const token of (state.discard || [])) {
+          if (token === '__SEP__') continue;
+          state.dummy.cards[token] = (state.dummy.cards[token] || 0) + 1;
+        }
+        state.dummy.cards[selected.card] = (state.dummy.cards[selected.card] || 0) + 1;
+        state.discard = [];
+        state.awaitingEndRound = false;
+        closeEndRoundModal();
+        renderDummy();
+        saveToStorage();
+      });
+
+      function openAutomaModal() {
+        state.showDummy = false;
+        renderDummy();
+        el.automaBackdrop.classList.add('visible'); el.automaBackdrop.setAttribute('aria-hidden','false');
+        el.automaModal.classList.add('visible'); el.automaModal.setAttribute('aria-hidden','false');
+        el.automaConfirm.disabled = true;
+        el.automaDummy.classList.remove('selected');
+        el.automaNone.classList.remove('selected');
+      }
+      function closeAutomaModal() {
+        el.automaBackdrop.classList.remove('visible'); el.automaBackdrop.setAttribute('aria-hidden','true');
+        el.automaModal.classList.remove('visible'); el.automaModal.setAttribute('aria-hidden','true');
+      }
+
+      let automaChoice = null;
+      el.automaOptions.addEventListener('click', (e) => {
+        const item = e.target.closest('.select-item');
+        if (!item) return;
+        automaChoice = item.getAttribute('data-choice');
+        el.automaDummy.classList.toggle('selected', automaChoice === 'dummy');
+        el.automaNone.classList.toggle('selected', automaChoice === 'none');
+        el.automaConfirm.disabled = !automaChoice;
+      });
+
+      el.automaConfirm.addEventListener('click', () => {
+        if (!automaChoice) return;
+        state.showDummy = (automaChoice === 'dummy');
+        closeAutomaModal();
+        renderDummy();
+        saveToStorage();
+      });
+
+      function randomizeDummyOnNewGame(){
+        const colors = ['red','blue','green','white'];
+        const firstIdx = Math.floor(Math.random()*colors.length);
+        let secondIdx = Math.floor(Math.random()*colors.length);
+        while (secondIdx === firstIdx) secondIdx = Math.floor(Math.random()*colors.length);
+        const c1 = colors[firstIdx], c2 = colors[secondIdx];
+        state.dummy.crystals = { red:0, blue:0, green:0, white:0 };
+        state.dummy.crystals[c1] = 2;
+        state.dummy.crystals[c2] = 1;
+        state.dummy.cards = { red:4, blue:4, green:4, white:4 };
+        state.discard = [];
+        state.awaitingEndRound = false;
+        state.showDummy = false;
+      }
+      function newGame(){
+        state.repIndex = DEFAULT_REP_INDEX;
+        state.fame = 0;
+        state.previousLevel = getLevelForFame(0);
+        randomizeDummyOnNewGame();
+        closeTooltip(); closeFameTooltip();
+        el.addFameInput.value = '';
+        renderReputation(); renderFameAndLevel(); renderDummy();
+        openAutomaModal();
+        saveToStorage();
+      }
+      el.newGameBtn.addEventListener('click', newGame);
+
       function commitAddFameEdit() {
         const raw = (el.addFameInput.value || '').trim();
-        if (raw === '') return; // no-op
-        // allow formats like "+3", "-2", "5"
+        if (raw === '') return;
         const parsed = Number(raw);
         const delta = Number.isFinite(parsed) ? Math.floor(parsed) : 0;
-        if (delta === 0) {
-          // if user explicitly entered 0, still clear input
-          el.addFameInput.value = '';
-          return;
-        }
+        if (delta === 0) { el.addFameInput.value = ''; return; }
         const prevLevel = state.previousLevel;
         state.fame = clamp(state.fame + delta, 0, 9999);
         state.previousLevel = getLevelForFame(state.fame);
-        // show gained levels if any
         if (state.previousLevel > prevLevel) {
           showGainedLevelsPersist(prevLevel, state.previousLevel);
         }
@@ -376,37 +733,21 @@
         renderFameAndLevel();
         saveToStorage();
       }
-
       el.addFameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          commitAddFameEdit();
-          el.addFameInput.blur();
-        } else if (e.key === 'Escape') {
-          e.preventDefault();
-          el.addFameInput.value = '';
-          el.addFameInput.blur();
-        }
+        if (e.key === 'Enter') { e.preventDefault(); commitAddFameEdit(); el.addFameInput.blur(); }
+        else if (e.key === 'Escape') { e.preventDefault(); el.addFameInput.value = ''; el.addFameInput.blur(); }
       });
-      el.addFameInput.addEventListener('blur', () => {
-        commitAddFameEdit();
-      });
+      el.addFameInput.addEventListener('blur', commitAddFameEdit);
 
-      // Clicking or pressing the committed fame box toggles the fame ranges popup
       el.fameInput.addEventListener('click', (e) => { e.stopPropagation(); toggleFameTooltip(); });
-      el.fameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFameTooltip(); }
-      });
+      el.fameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFameTooltip(); } });
 
-      // Player level badge toggles full list (press)
+      el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+      el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+
       el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
+      el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
 
-      // keyboard accessibility for badge
-      el.playerLevel.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); }
-      });
-
-      // close fame/level tooltips when tapping outside
       document.addEventListener('click', (e) => {
         const insideLevel = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.addFameInput || e.target === el.fameInput;
         if (!insideLevel) closeTooltip();
@@ -414,68 +755,62 @@
         if (!insideFame) closeFameTooltip();
       });
 
-      // also close tooltips with Escape for convenience
+      el.backdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
+      el.automaBackdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
+
       window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closeTooltip();
-          closeFameTooltip();
-        }
-        // reputation keyboard shortcuts
+        if (e.key === 'Escape') { closeTooltip(); closeFameTooltip(); }
         if (e.key === 'ArrowLeft') el.repDown.click();
         if (e.key === 'ArrowRight') el.repUp.click();
       });
 
-      // New Game handler: reset app state to defaults and persist
-      function newGame() {
-        // reset runtime state
-        state.repIndex = DEFAULT_REP_INDEX;
-        state.fame = 0;
-        state.previousLevel = getLevelForFame(0);
-        // close tooltips
-        closeTooltip();
-        closeFameTooltip();
-        // clear inputs
-        el.addFameInput.value = '';
-        // re-render UI
-        renderReputation();
-        renderFameAndLevel();
-        // persist defaults
-        saveToStorage();
-      }
-      el.newGameBtn.addEventListener('click', newGame);
-
-      // persistence
       const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_confirm';
       function saveToStorage(){
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify({
             repIndex: state.repIndex,
             fame: state.fame,
-            previousLevel: state.previousLevel
+            previousLevel: state.previousLevel,
+            dummy: state.dummy,
+            discard: state.discard,
+            awaitingEndRound: state.awaitingEndRound,
+            showDummy: state.showDummy
           }));
-        } catch (err) { /* ignore */ }
+        } catch (err) {}
       }
       function loadFromStorage(){
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return;
+          if (!raw) return false;
           const parsed = JSON.parse(raw);
-          if (typeof parsed.repIndex === 'number' && parsed.repIndex >= 0 && parsed.repIndex < REP_TRACK.length) state.repIndex = parsed.repIndex;
+          if (typeof parsed.repIndex === 'number') state.repIndex = parsed.repIndex;
           if (typeof parsed.fame === 'number') state.fame = parsed.fame;
           if (typeof parsed.previousLevel === 'number') state.previousLevel = parsed.previousLevel;
-        } catch (err) { /* ignore */ }
+          if (parsed.dummy && typeof parsed.dummy === 'object') {
+            state.dummy = {
+              crystals: Object.assign({ red:0, blue:0, green:0, white:0 }, parsed.dummy.crystals || {}),
+              cards: Object.assign({ red:0, blue:0, green:0, white:0 }, parsed.dummy.cards || {})
+            };
+          }
+          if (Array.isArray(parsed.discard)) state.discard = parsed.discard;
+          if (typeof parsed.awaitingEndRound === 'boolean') state.awaitingEndRound = parsed.awaitingEndRound;
+          if (typeof parsed.showDummy === 'boolean') state.showDummy = parsed.showDummy;
+          return true;
+        } catch (err) { return false; }
       }
 
-      // init
       buildRepTrack();
-      loadFromStorage();
+      const loaded = loadFromStorage();
+      const hasDummy = Object.values(state.dummy.crystals).some(v=>v>0) || Object.values(state.dummy.cards).some(v=>v>0);
+      if (!loaded || !hasDummy) randomizeDummyOnNewGame();
       if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
       if (typeof state.fame !== 'number') state.fame = 0;
       state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
-      renderReputation();
-      renderFameAndLevel();
+      renderReputation(); renderFameAndLevel(); renderDummy();
 
-      // autosave
+      // show automa modal on initial load
+      openAutomaModal();
+
       setInterval(saveToStorage, 2000);
     })();
   </script>
