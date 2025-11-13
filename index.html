@@ -23,6 +23,8 @@
       --backdrop: rgba(2,6,23,0.6);
       --bronze: #b87333;
       --black: #000000;
+      --wound: #6b6b6b;
+      --sword: #c0c8d6;
     }
     * { box-sizing: border-box; }
     html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; }
@@ -30,15 +32,16 @@
     .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
     .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
     .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); pointer-events:auto; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 8px rgba(0,0,0,0.4); }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 14px rgba(0,0,0,0.45); margin-bottom:12px; }
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
-    .card-body { font-size:14px; color:#e6eef6; }
+    .card-body { font-size:14px; color:#eaf2ff; }
 
     /* center titles for Reputation, Fame and Dummy Player */
     #reputation-card .card-header,
     #fame-card .card-header,
-    #dummy-card .card-header { justify-content:center; }
+    #dummy-card .card-header,
+    #commander-volakre .card-header { justify-content:center; }
 
     /* Reputation */
     .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; }
@@ -63,7 +66,7 @@
     .fame-input[readonly] { background: rgba(255,255,255,0.02); cursor:default; color:#eaf2ff; }
     .fame-input.editing { outline: 2px solid rgba(199,146,79,0.18); }
 
-    .level-badge { min-width:160px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); }
+    .level-badge { min-width:160px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.04); }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
     .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
     .level-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
@@ -78,8 +81,8 @@
     /* Dummy Player */
     .dummy-sub { font-weight:700; color:var(--muted); margin:6px 0 4px 0; font-size:13px; text-transform:uppercase; letter-spacing:0.6px; display:flex; gap:8px; align-items:center; justify-content:center; }
     .crystal-row, .cards-row { display:flex; gap:10px; align-items:center; justify-content:center; margin-bottom:8px; }
-    .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:64px; }
-    .dp-count { font-weight:800; color:#eaf2ff; min-width:20px; text-align:center; }
+    .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:70px; cursor:pointer; }
+    .dp-count { font-weight:800; color:#eaf2ff; min-width:20px; text-align:center; display:inline-block; }
 
     /* Unified dp-dot: container for SVG icon */
     .dp-dot {
@@ -97,6 +100,8 @@
     .dp-dot.blue svg .fill { fill: var(--blue); }
     .dp-dot.green svg .fill { fill: var(--green); }
     .dp-dot.white svg .fill { fill: var(--white); stroke: rgba(0,0,0,0.12); stroke-width:0.5; }
+    .dp-dot.wound svg .fill { fill: var(--wound); stroke: rgba(255,255,255,0.06); stroke-width:0.5; }
+    .dp-dot.sword svg .fill { fill: var(--sword); stroke: rgba(0,0,0,0.12); stroke-width:0.5; }
 
     /* new bronze and na styles for automa icons */
     .dp-dot.bronze svg .fill { fill: var(--bronze); }
@@ -111,16 +116,36 @@
     .discard-pile { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; padding:8px; max-height:96px; overflow:auto; border-radius:8px; background: rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); }
     .discard-sep { width:12px; height:1px; display:inline-block; }
 
+    /* Frenzy display */
+    .commander-frenzy {
+      text-align:center;
+      margin-top:10px;
+    }
+    .commander-frenzy .badge {
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:8px;
+      background: rgba(217,83,79,0.12);
+      color: var(--red);
+      font-weight:800;
+      border:1px solid rgba(217,83,79,0.18);
+    }
+    .commander-frenzy .desc {
+      margin-top:6px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
     /* Centered popups and modal */
     .fame-tooltip, .level-tooltip, .modal, .backdrop { position: fixed; }
-    .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:10px; padding:12px; box-shadow: 0 12px 36px rgba(0,0,0,0.6); z-index:1400; display:none; }
+    .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:12px; padding:12px; color:#eaf2ef; display:none; z-index:1300; }
     .fame-tooltip.visible, .level-tooltip.visible { display:block; animation:popin 160ms cubic-bezier(.2,.8,.2,1); }
     @keyframes popin { from { opacity:0; transform: translate(-50%, -50%) scale(0.96); } to { opacity:1; transform: translate(-50%, -50%) scale(1); } }
 
     .backdrop { inset:0; background:var(--backdrop); z-index:1250; display:none; }
     .backdrop.visible { display:block; }
 
-    .modal { top:50%; left:50%; transform:translate(-50%,-50%); background: linear-gradient(180deg, rgba(8,10,12,0.98), rgba(18,20,22,0.98)); padding:16px; border-radius:12px; z-index:1300; min-width:320px; display:none; }
+    .modal { top:50%; left:50%; transform:translate(-50%,-50%); background: linear-gradient(180deg, rgba(8,10,12,0.98), rgba(18,20,22,0.98)); padding:16px; border-radius:12px; z-index:1300; min-width:320px; color:#eaf2eef; display:none; }
     .modal.visible { display:block; }
     .modal h3 { text-align:center; margin-top:0; } /* center modal titles */
     .modal p { text-align:center; margin:6px 0 12px; } /* center descriptions */
@@ -134,10 +159,14 @@
 
     .tooltip-list { display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; padding-right:6px; }
     .tooltip-item { display:flex; gap:8px; align-items:center; padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color: var(--muted); font-weight:600; justify-content:space-between; }
-    .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
+    .tooltip-item .lvl { color:#eaf2ef; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.04)); color:#eaf2ff; font-weight:700; cursor:pointer; }
+    /* Make New Game visually and interactively accessible even if overlays exist */
+    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.06)); color:#fff; font-weight:700; cursor:pointer; position:relative; z-index:1405; }
+
+    /* Simple toast */
+    .mk-toast { position:fixed; left:50%; transform:translateX(-50%); bottom:28px; padding:10px 14px; border-radius:10px; background:rgba(0,0,0,0.7); color:#fff; z-index:2000; font-weight:700; display:none; }
 
     @media (max-width:480px) {
       :root { --phone-width:94vw; }
@@ -146,6 +175,7 @@
       .dp-dot { width:18px; height:18px; }
       .discard-pile { max-height:72px; }
       .modal { min-width:260px; }
+      .mk-toast { bottom:12px; }
     }
   </style>
 </head>
@@ -171,7 +201,7 @@
         </div>
       </section>
 
-      <!-- Fame (version 25 layout & behaviour) -->
+      <!-- Fame (fixed: input & popups) -->
       <section class="card" id="fame-card" aria-labelledby="fame-title">
         <div class="card-header"><div><h2 id="fame-title" class="card-title">Fame</h2></div></div>
         <div class="card-body">
@@ -264,17 +294,106 @@
         </div>
       </section>
 
+      <!-- Commander Volakre (hidden by default; selectable via Automa) -->
+      <section class="card" id="commander-volakre" aria-labelledby="commander-title" style="display:none;">
+        <div class="card-header"><div><h2 id="commander-title" class="card-title">Commander Volakre</h2></div></div>
+        <div class="card-body">
+          <div class="dummy-sub">Deck <span id="commander-deck-count" style="color:var(--muted);">()</span></div>
+
+          <div class="cards-row" aria-label="Commander Volakre deck">
+            <div class="dp-btn" aria-label="Commander red cards">
+              <div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+              <div class="dp-count">4</div>
+            </div>
+            <div class="dp-btn" aria-label="Commander blue cards">
+              <div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+              <div class="dp-count">4</div>
+            </div>
+            <div class="dp-btn" aria-label="Commander green cards">
+              <div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+              <div class="dp-count">4</div>
+            </div>
+            <div class="dp-btn" aria-label="Commander white cards">
+              <div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+              <div class="dp-count">4</div>
+            </div>
+          </div>
+
+          <div class="cards-row" aria-label="Commander Volakre special/star cards">
+            <div class="dp-btn" aria-label="Commander special red card (star)">
+              <div class="dp-dot red" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/>
+                </svg>
+              </div>
+              <div class="dp-count">1</div>
+            </div>
+
+            <div class="dp-btn" aria-label="Commander special blue card (star)">
+              <div class="dp-dot blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/>
+                </svg>
+              </div>
+              <div class="dp-count">1</div>
+            </div>
+
+            <div class="dp-btn" aria-label="Commander special green card (star)">
+              <div class="dp-dot green" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/>
+                </svg>
+              </div>
+              <div class="dp-count">1</div>
+            </div>
+
+            <div class="dp-btn" aria-label="Commander special white card (star)">
+              <div class="dp-dot white" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/>
+                </svg>
+              </div>
+              <div class="dp-count">1</div>
+            </div>
+          </div>
+
+          <!-- wounds row -->
+          <div class="cards-row" aria-label="Commander Volakre wounds">
+            <div class="dp-btn" aria-label="Commander wounds card">
+              <div class="dp-dot wound" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <path class="fill" d="M12 2c2.8 0 5 1.9 5 4.5V9c0 1.7-1 3.2-2.5 3.9L15 14v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2l.5-1.1C7 12.3 6 10.8 6 9V6.5C6 3.9 9.2 2 12 2z"/></svg>
+              </div>
+              <div class="dp-count">1</div>
+            </div>
+          </div>
+
+          <div class="dummy-controls" style="margin-top:8px;">
+            <button id="commander-draw" class="small-btn" title="Play a turn with Commander Volakre">Play Turn</button>
+          </div>
+
+          <div id="commander-mode" class="commander-frenzy" style="display:none;">
+            <div class="badge">Frenzy</div>
+            <div class="desc">Act as if a Spell was Drawn.</div>
+          </div>
+
+          <div class="dummy-sub" style="margin-top:12px">Discard Pile</div>
+          <div id="commander-discard" class="discard-pile" aria-live="polite" aria-label="Commander Volakre discard pile (most recent draws)"></div>
+        </div>
+      </section>
+
       <!-- New Game -->
       <div>
-        <!-- inline onclick as an additional robustness measure -->
-        <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game" onclick="if(window.__mk_new_game) window.__mk_new_game();">New Game</button>
+        <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game">New Game</button>
       </div>
 
       <footer class="footer"></footer>
     </div>
   </div>
 
-  <!-- Automa modal -->
+  <div id="mk-toast" class="mk-toast" aria-live="polite" role="status"></div>
+
+  <!-- Automa modal: added Commander (sword) option -->
   <div id="automa-backdrop" class="backdrop" aria-hidden="true"></div>
   <div id="automa-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="automa-title">
     <h3 id="automa-title">Automa</h3>
@@ -282,7 +401,6 @@
 
     <div class="select-grid" id="automa-options" style="margin-bottom:8px;">
       <div class="select-item" data-choice="dummy" id="automa-dummy">
-        <!-- shield icon (bronze) -->
         <div class="dp-dot bronze" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
             <path class="fill" d="M12 2l7 3v5c0 5-4.5 9.5-7 12-2.5-2.5-7-7-7-12V5l7-3z"/>
@@ -290,8 +408,18 @@
         </div>
         <div style="font-size:13px; color:var(--muted);">Dummy Player</div>
       </div>
+
+      <div class="select-item" data-choice="commander" id="automa-commander">
+        <div class="dp-dot sword" aria-hidden="true">
+          <!-- sword icon -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path class="fill" d="M21 3l-2 2-3-1-9 9-1 3 3 3 3-1 9-9-1-3 2-2zM8 18l-2 2 1 1 2-2-1-1z"/>
+          </svg>
+        </div>
+        <div style="font-size:13px; color:var(--muted);">Commander Volakre</div>
+      </div>
+
       <div class="select-item" data-choice="none" id="automa-none">
-        <!-- black X icon -->
         <div class="dp-dot na" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
             <line x1="5" y1="5" x2="19" y2="19" />
@@ -307,7 +435,7 @@
     </div>
   </div>
 
-  <!-- Backdrop + End Round modal -->
+  <!-- End Round modal -->
   <div id="backdrop" class="backdrop" aria-hidden="true"></div>
   <div id="end-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="end-modal-title">
     <h3 id="end-modal-title">End of Round</h3>
@@ -367,8 +495,18 @@
         dummy: { crystals:{red:0,blue:0,green:0,white:0}, cards:{red:0,blue:0,green:0,white:0} },
         discard: [],
         awaitingEndRound: false,
-        showDummy: false
+        showDummy: false,
+        showCommander: false,
+        commander: {
+          deckItems: [],
+          discard: [],
+          frenzy: false,
+          domCountNodes: {}
+        }
       };
+
+      // automaChoice must exist at top-level to avoid ReferenceErrors
+      let automaChoice = null;
 
       const el = {
         reputationValue: document.getElementById('reputation-value'),
@@ -406,8 +544,15 @@
         automaOptions: document.getElementById('automa-options'),
         automaConfirm: document.getElementById('automa-confirm'),
         automaDummy: document.getElementById('automa-dummy'),
+        automaCommander: document.getElementById('automa-commander'),
         automaNone: document.getElementById('automa-none'),
-        dummyCardSection: document.getElementById('dummy-card')
+        dummyCardSection: document.getElementById('dummy-card'),
+        commanderDrawBtn: document.getElementById('commander-draw'),
+        commanderDiscard: document.getElementById('commander-discard'),
+        commanderSection: document.getElementById('commander-volakre'),
+        commanderDeckCount: document.getElementById('commander-deck-count'),
+        commanderMode: document.getElementById('commander-mode'),
+        toast: document.getElementById('mk-toast')
       };
 
       function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
@@ -467,6 +612,7 @@
         const rewardDiv = document.createElement('div'); rewardDiv.className='reward'; rewardDiv.textContent = text;
         item.appendChild(lvlDiv); item.appendChild(rewardDiv); return item;
       }
+
       function showGainedLevelsPersist(prevLevel, newLevel) {
         el.tooltipList.innerHTML = '';
         for (let l = prevLevel + 1; l <= newLevel; l++) {
@@ -479,54 +625,20 @@
         }
       }
 
-      function renderDummy(){
-        el.crystalRed.textContent = state.dummy.crystals.red || 0;
-        el.crystalBlue.textContent = state.dummy.crystals.blue || 0;
-        el.crystalGreen.textContent = state.dummy.crystals.green || 0;
-        el.crystalWhite.textContent = state.dummy.crystals.white || 0;
-        el.crystalTotal.textContent = `(${sumObject(state.dummy.crystals)})`;
-
-        el.cardRed.textContent = state.dummy.cards.red || 0;
-        el.cardBlue.textContent = state.dummy.cards.blue || 0;
-        el.cardGreen.textContent = state.dummy.cards.green || 0;
-        el.cardWhite.textContent = state.dummy.cards.white || 0;
-        el.cardTotal.textContent = `(${sumObject(state.dummy.cards)})`;
-
-        el.discardPile.innerHTML = '';
-        (state.discard || []).forEach(token=>{
-          if (token === '__SEP__') {
-            const sep = document.createElement('div');
-            sep.className = 'discard-sep';
-            el.discardPile.appendChild(sep);
-          } else {
-            const d = document.createElement('div');
-            d.className = 'dp-dot '+token;
-            d.title = token;
-            d.innerHTML = `<svg viewBox="0 0 24 32" aria-hidden="true" focusable="false"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
-            el.discardPile.appendChild(d);
-          }
-        });
-
-        if (state.awaitingEndRound) {
-          el.drawBtn.textContent = 'End Round';
-          el.endDesc.style.display = 'block';
-        } else {
-          el.drawBtn.textContent = 'Play Turn';
-          el.endDesc.style.display = 'none';
+      function buildFameRangesTooltip() {
+        el.fameTooltipList.innerHTML = '';
+        for (let r of LEVEL_RANGES) {
+          const rangeText = (r.min === r.max) ? String(r.min) : `${r.min}-${r.max}`;
+          el.fameTooltipList.appendChild(createTooltipItem(r.level, rangeText));
         }
-
-        el.dummyCardSection.style.display = state.showDummy ? 'block' : 'none';
       }
 
-      function buildFullTooltip(level) {
-        el.tooltipList.innerHTML = '';
-        for (let l = 1; l <= level; l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
-      }
       function toggleTooltip() {
         const isVisible = el.tooltip.classList.contains('visible');
         if (isVisible) closeTooltip();
         else {
-          buildFullTooltip(state.previousLevel);
+          el.tooltipList.innerHTML = '';
+          for (let l = 1; l <= state.previousLevel; l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
           el.tooltip.classList.add('visible');
           el.tooltip.setAttribute('aria-hidden','false');
           el.playerLevel.setAttribute('aria-pressed','true');
@@ -538,13 +650,6 @@
         el.playerLevel.setAttribute('aria-pressed','false');
       }
 
-      function buildFameRangesTooltip() {
-        el.fameTooltipList.innerHTML = '';
-        for (let r of LEVEL_RANGES) {
-          const rangeText = (r.min === r.max) ? String(r.min) : `${r.min}-${r.max}`;
-          el.fameTooltipList.appendChild(createTooltipItem(r.level, rangeText));
-        }
-      }
       function toggleFameTooltip() {
         const isVisible = el.fameTooltip.classList.contains('visible');
         if (isVisible) closeFameTooltip();
@@ -580,6 +685,148 @@
         return drawn;
       }
 
+      // ---------- Commander helpers ----------
+      function initCommanderStateFromDOM(){
+        const sec = el.commanderSection;
+        if (!sec) return;
+        const btns = sec.querySelectorAll('.cards-row .dp-btn');
+        state.commander.deckItems = [];
+        state.commander.domCountNodes = {};
+        ['red','blue','green','white','wound'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
+
+        btns.forEach(btn=>{
+          const dot = btn.querySelector('.dp-dot');
+          const countNode = btn.querySelector('.dp-count');
+          const count = Number((countNode && countNode.textContent || '').trim()) || 0;
+          let color = null;
+          if (dot.classList.contains('red')) color = 'red';
+          else if (dot.classList.contains('blue')) color = 'blue';
+          else if (dot.classList.contains('green')) color = 'green';
+          else if (dot.classList.contains('white')) color = 'white';
+          else if (dot.classList.contains('wound')) color = 'wound';
+          const special = !!dot.querySelector('polygon');
+          if (color && countNode) {
+            if (special) state.commander.domCountNodes[color].special = countNode;
+            else state.commander.domCountNodes[color].normal = countNode;
+          }
+          for (let i=0;i<count;i++) state.commander.deckItems.push({ color, special });
+        });
+        state.commander.discard = [];
+        state.commander.frenzy = false;
+        updateCommanderDeckCount();
+        renderCommanderDiscard();
+        renderCommanderMode();
+      }
+
+      function buildCommanderDomNodeMapping(){
+        const sec = el.commanderSection;
+        if (!sec) return;
+        const btns = sec.querySelectorAll('.cards-row .dp-btn');
+        state.commander.domCountNodes = {};
+        ['red','blue','green','white','wound'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
+        btns.forEach(btn=>{
+          const dot = btn.querySelector('.dp-dot');
+          const countNode = btn.querySelector('.dp-count');
+          let color = null;
+          if (dot.classList.contains('red')) color = 'red';
+          else if (dot.classList.contains('blue')) color = 'blue';
+          else if (dot.classList.contains('green')) color = 'green';
+          else if (dot.classList.contains('white')) color = 'white';
+          else if (dot.classList.contains('wound')) color = 'wound';
+          const special = !!dot.querySelector('polygon');
+          if (color && countNode) {
+            if (special) state.commander.domCountNodes[color].special = countNode;
+            else state.commander.domCountNodes[color].normal = countNode;
+          }
+        });
+      }
+
+      function recalcCountsToDOM(){
+        const counts = { red:{normal:0,special:0}, blue:{normal:0,special:0}, green:{normal:0,special:0}, white:{normal:0,special:0}, wound:{normal:0,special:0} };
+        (state.commander.deckItems || []).forEach(item => {
+          if (!item || !item.color) return;
+          const type = item.special ? 'special' : 'normal';
+          if (!counts[item.color]) counts[item.color] = { normal:0, special:0 };
+          counts[item.color][type] = (counts[item.color][type] || 0) + 1;
+        });
+        Object.keys(counts).forEach(color => {
+          const nodes = state.commander.domCountNodes[color] || {};
+          if (nodes.normal) nodes.normal.textContent = String(counts[color].normal || 0);
+          if (nodes.special) nodes.special.textContent = String(counts[color].special || 0);
+        });
+        updateCommanderDeckCount();
+      }
+
+      function updateCommanderDeckCount(){
+        const total = Array.isArray(state.commander.deckItems) ? state.commander.deckItems.length : 0;
+        if (el.commanderDeckCount) el.commanderDeckCount.textContent = `(${total})`;
+      }
+
+      function findCountNodeForItem(item){
+        if (!item || !item.color) return null;
+        const nodes = state.commander.domCountNodes[item.color] || {};
+        return item.special ? (nodes.special || nodes.normal) : (nodes.normal || nodes.special);
+      }
+
+      function drawFromCommanderDeck(n){
+        const drawn = [];
+        for (let i=0;i<n;i++){
+          if (!state.commander.deckItems || state.commander.deckItems.length === 0) break;
+          const idx = Math.floor(Math.random()*state.commander.deckItems.length);
+          const item = state.commander.deckItems.splice(idx,1)[0];
+          state.commander.discard.push(item);
+          drawn.push(item);
+          const countNode = findCountNodeForItem(item);
+          if (countNode) {
+            const prior = Number((countNode.textContent || '').trim()) || 0;
+            const after = Math.max(0, prior - 1);
+            countNode.textContent = String(after);
+          }
+        }
+        updateCommanderDeckCount();
+        renderCommanderDiscard();
+        return drawn;
+      }
+
+      function renderCommanderDiscard(){
+        const container = el.commanderDiscard;
+        container.innerHTML = '';
+        (state.commander.discard || []).forEach(token=>{
+          if (token === '__SEP__') {
+            const sep = document.createElement('div');
+            sep.className = 'discard-sep';
+            container.appendChild(sep);
+          } else {
+            const d = document.createElement('div');
+            d.className = 'dp-dot ' + (token.color || '');
+            d.title = token.special ? `${token.color} (special)` : token.color;
+            if (token.special) {
+              d.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/></svg>`;
+            } else {
+              if (token.color === 'wound') {
+                d.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="fill" d="M12 2c2.8 0 5 1.9 5 4.5V9c0 1.7-1 3.2-2.5 3.9L15 14v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2l.5-1.1C7 12.3 6 10.8 6 9V6.5C6 3.9 9.2 2 12 2z"/></svg>`;
+              } else {
+                d.innerHTML = `<svg viewBox="0 0 24 32" aria-hidden="true" focusable="false"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
+              }
+            }
+            container.appendChild(d);
+          }
+        });
+      }
+
+      function renderCommanderMode(){
+        if (!el.commanderMode) return;
+        if (state.commander.frenzy) el.commanderMode.style.display = 'block';
+        else el.commanderMode.style.display = 'none';
+      }
+
+      function renderCommanderVisibility(){
+        if (!el.commanderSection) return;
+        el.commanderSection.style.display = state.showCommander ? 'block' : 'none';
+      }
+
+      // ---------- end commander helpers ----------
+
       function colorWithMaxCrystals(){
         const crystals = state.dummy.crystals;
         const entries = Object.keys(crystals).map(k=>({k, v:crystals[k]}));
@@ -589,161 +836,9 @@
         return pickRandom(top);
       }
 
-      el.drawBtn.addEventListener('click', () => {
-        const cardsLeft = sumObject(state.dummy.cards);
-        if (cardsLeft <= 0) {
-          if (!state.awaitingEndRound) {
-            state.awaitingEndRound = true;
-            renderDummy();
-            saveToStorage();
-            return;
-          } else {
-            openEndRoundModal();
-            return;
-          }
-        }
-
-        const initial = drawFromDeck(3);
-        state.discard = state.discard.concat(initial);
-        const pool = colorWithMaxCrystals();
-        if (initial.length >= 3 && pool && initial[2] === pool) {
-          const extraCount = state.dummy.crystals[pool] || 0;
-          if (extraCount > 0) {
-            const extra = drawFromDeck(extraCount);
-            state.discard = state.discard.concat(extra);
-          }
-        }
-        state.discard.push('__SEP__');
-        renderDummy();
-        saveToStorage();
-      });
-
-      function openEndRoundModal(){
-        el.backdrop.classList.add('visible'); el.backdrop.setAttribute('aria-hidden','false');
-        el.endModal.classList.add('visible'); el.endModal.setAttribute('aria-hidden','false');
-        selected = { crystal: null, card: null };
-        el.confirmEnd.disabled = true;
-        Array.from(el.selectCrystals.querySelectorAll('.select-item')).forEach(node=>node.classList.remove('selected'));
-        Array.from(el.selectCards.querySelectorAll('.select-item')).forEach(node=>node.classList.remove('selected'));
-      }
-      function closeEndRoundModal(){
-        el.backdrop.classList.remove('visible'); el.backdrop.setAttribute('aria-hidden','true');
-        el.endModal.classList.remove('visible'); el.endModal.setAttribute('aria-hidden','true');
-      }
-      let selected = { crystal: null, card: null };
-      el.selectCrystals.addEventListener('click', (e)=>{
-        const item = e.target.closest('.select-item'); if(!item) return;
-        const color = item.getAttribute('data-color');
-        Array.from(el.selectCrystals.querySelectorAll('.select-item')).forEach(n=>n.classList.toggle('selected', n===item));
-        selected.crystal = color; el.confirmEnd.disabled = !(selected.crystal && selected.card);
-      });
-      el.selectCards.addEventListener('click', (e)=>{
-        const item = e.target.closest('.select-item'); if(!item) return;
-        const color = item.getAttribute('data-color');
-        Array.from(el.selectCards.querySelectorAll('.select-item')).forEach(n=>n.classList.toggle('selected', n===item));
-        selected.card = color; el.confirmEnd.disabled = !(selected.crystal && selected.card);
-      });
-
-      el.confirmEnd.addEventListener('click', ()=>{
-        if (!(selected.crystal && selected.card)) return;
-        state.dummy.crystals[selected.crystal] = (state.dummy.crystals[selected.crystal]||0) + 1;
-        for (const token of (state.discard || [])) {
-          if (token === '__SEP__') continue;
-          state.dummy.cards[token] = (state.dummy.cards[token] || 0) + 1;
-        }
-        state.dummy.cards[selected.card] = (state.dummy.cards[selected.card] || 0) + 1;
-        state.discard = [];
-        state.awaitingEndRound = false;
-        closeEndRoundModal();
-        renderDummy();
-        saveToStorage();
-      });
-
-      function openAutomaModal() {
-        state.showDummy = false;
-        renderDummy();
-        el.automaBackdrop.classList.add('visible'); el.automaBackdrop.setAttribute('aria-hidden','false');
-        el.automaModal.classList.add('visible'); el.automaModal.setAttribute('aria-hidden','false');
-        el.automaConfirm.disabled = true;
-        el.automaDummy.classList.remove('selected');
-        el.automaNone.classList.remove('selected');
-      }
-      function closeAutomaModal() {
-        el.automaBackdrop.classList.remove('visible'); el.automaBackdrop.setAttribute('aria-hidden','true');
-        el.automaModal.classList.remove('visible'); el.automaModal.setAttribute('aria-hidden','true');
-      }
-
-      let automaChoice = null;
-      el.automaOptions.addEventListener('click', (e) => {
-        const item = e.target.closest('.select-item');
-        if (!item) return;
-        automaChoice = item.getAttribute('data-choice');
-        el.automaDummy.classList.toggle('selected', automaChoice === 'dummy');
-        el.automaNone.classList.toggle('selected', automaChoice === 'none');
-        el.automaConfirm.disabled = !automaChoice;
-      });
-
-      el.automaConfirm.addEventListener('click', () => {
-        if (!automaChoice) return;
-        state.showDummy = (automaChoice === 'dummy');
-        closeAutomaModal();
-        renderDummy();
-        saveToStorage();
-      });
-
-      function randomizeDummyOnNewGame(){
-        const colors = ['red','blue','green','white'];
-        const firstIdx = Math.floor(Math.random()*colors.length);
-        let secondIdx = Math.floor(Math.random()*colors.length);
-        while (secondIdx === firstIdx) secondIdx = Math.floor(Math.random()*colors.length);
-        const c1 = colors[firstIdx], c2 = colors[secondIdx];
-        state.dummy.crystals = { red:0, blue:0, green:0, white:0 };
-        state.dummy.crystals[c1] = 2;
-        state.dummy.crystals[c2] = 1;
-        state.dummy.cards = { red:4, blue:4, green:4, white:4 };
-        state.discard = [];
-        state.awaitingEndRound = false;
-        state.showDummy = false;
-      }
-      function newGame(){
-        // debugging hook - keeps non-destructive
-        try { console.debug && console.debug('newGame() called'); } catch(e){}
-        state.repIndex = DEFAULT_REP_INDEX;
-        state.fame = 0;
-        state.previousLevel = getLevelForFame(0);
-        randomizeDummyOnNewGame();
-        closeTooltip(); closeFameTooltip();
-        el.addFameInput.value = '';
-        // ensure automa selection is reset and dummy hidden until user picks
-        automaChoice = null;
-        state.showDummy = false;
-        renderReputation(); renderFameAndLevel(); renderDummy();
-        // persist reset state
-        saveToStorage();
-        // prompt the user to choose an Automa
-        openAutomaModal();
-      }
-
-      // expose the handler globally as a robust fallback for environments where addEventListener might be missed
-      window.__mk_new_game = newGame;
-
-      // attach new game handler robustly (guard for DOM timing)
-      if (el.newGameBtn) {
-        try {
-          el.newGameBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); newGame(); });
-        } catch (err) {
-          // fallback to setting onclick directly
-          el.newGameBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); newGame(); };
-        }
-      } else {
-        const fallbackBtn = document.getElementById('new-game');
-        if (fallbackBtn) {
-          fallbackBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); newGame(); });
-        }
-      }
-
+      // ----- Fame input handling (fixed/robust)
       function commitAddFameEdit() {
-        const raw = (el.addFameInput.value || '').trim();
+        const raw = (el.addFameInput && el.addFameInput.value ? String(el.addFameInput.value) : '').trim();
         if (raw === '') return;
         const parsed = Number(raw);
         const delta = Number.isFinite(parsed) ? Math.floor(parsed) : 0;
@@ -758,37 +853,49 @@
         renderFameAndLevel();
         saveToStorage();
       }
-      el.addFameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); commitAddFameEdit(); el.addFameInput.blur(); }
-        else if (e.key === 'Escape') { e.preventDefault(); el.addFameInput.value = ''; el.addFameInput.blur(); }
-      });
-      el.addFameInput.addEventListener('blur', commitAddFameEdit);
 
-      el.fameInput.addEventListener('click', (e) => { e.stopPropagation(); toggleFameTooltip(); });
-      el.fameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFameTooltip(); } });
+      // wire fame input events
+      if (el.addFameInput) {
+        el.addFameInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); commitAddFameEdit(); el.addFameInput.blur(); }
+          else if (e.key === 'Escape') { e.preventDefault(); el.addFameInput.value = ''; el.addFameInput.blur(); }
+        });
+        el.addFameInput.addEventListener('blur', commitAddFameEdit);
+      }
 
-      el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
-      el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+      // clicking the fame readout toggles fame ranges tooltip
+      if (el.fameInput) {
+        el.fameInput.addEventListener('click', (e) => { e.stopPropagation(); toggleFameTooltip(); });
+        el.fameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFameTooltip(); } });
+      }
 
-      el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
-      el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
+      // level badge toggles level rewards tooltip
+      if (el.playerLevel) {
+        el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
+        el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
+      }
+
+      // ----- remaining app wiring -----
+      if (el.repUp) el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+      if (el.repDown) el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
 
       document.addEventListener('click', (e) => {
-        const insideLevel = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.addFameInput || e.target === el.fameInput;
+        const insideLevel = e.target === el.playerLevel || (el.playerLevel && el.playerLevel.contains && el.playerLevel.contains(e.target)) || (el.tooltip && el.tooltip.contains && el.tooltip.contains(e.target)) || e.target === el.addFameInput || e.target === el.fameInput;
         if (!insideLevel) closeTooltip();
-        const insideFame = e.target === el.fameInput || el.fameInput.contains(e.target) || el.fameTooltip.contains(e.target) || e.target === el.addFameInput;
+        const insideFame = e.target === el.fameInput || (el.fameInput && el.fameInput.contains && el.fameInput.contains(e.target)) || (el.fameTooltip && el.fameTooltip.contains && el.fameTooltip.contains(e.target)) || e.target === el.addFameInput;
         if (!insideFame) closeFameTooltip();
       });
 
-      el.backdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
-      el.automaBackdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
+      el.backdrop && el.backdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
+      el.automaBackdrop && el.automaBackdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
 
       window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') { closeTooltip(); closeFameTooltip(); }
-        if (e.key === 'ArrowLeft') el.repDown.click();
-        if (e.key === 'ArrowRight') el.repUp.click();
+        if (e.key === 'ArrowLeft') el.repDown && el.repDown.click();
+        if (e.key === 'ArrowRight') el.repUp && el.repUp.click();
       });
 
+      // storage
       const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_confirm';
       function saveToStorage(){
         try {
@@ -799,7 +906,13 @@
             dummy: state.dummy,
             discard: state.discard,
             awaitingEndRound: state.awaitingEndRound,
-            showDummy: state.showDummy
+            showDummy: state.showDummy,
+            showCommander: state.showCommander,
+            commander: {
+              deckItems: state.commander.deckItems,
+              discard: state.commander.discard,
+              frenzy: state.commander.frenzy
+            }
           }));
         } catch (err) {}
       }
@@ -820,22 +933,173 @@
           if (Array.isArray(parsed.discard)) state.discard = parsed.discard;
           if (typeof parsed.awaitingEndRound === 'boolean') state.awaitingEndRound = parsed.awaitingEndRound;
           if (typeof parsed.showDummy === 'boolean') state.showDummy = parsed.showDummy;
+          if (typeof parsed.showCommander === 'boolean') state.showCommander = parsed.showCommander;
+          if (parsed.commander && typeof parsed.commander === 'object') {
+            state.commander.deckItems = Array.isArray(parsed.commander.deckItems) ? parsed.commander.deckItems : [];
+            state.commander.discard = Array.isArray(parsed.commander.discard) ? parsed.commander.discard : [];
+            state.commander.frenzy = !!parsed.commander.frenzy;
+          }
           return true;
         } catch (err) { return false; }
       }
 
+      // build UI & initialize
       buildRepTrack();
       const loaded = loadFromStorage();
       const hasDummy = Object.values(state.dummy.crystals).some(v=>v>0) || Object.values(state.dummy.cards).some(v=>v>0);
-      if (!loaded || !hasDummy) randomizeDummyOnNewGame();
+      if (!loaded || !hasDummy) {
+        state.repIndex = DEFAULT_REP_INDEX;
+        state.fame = 0;
+        state.previousLevel = getLevelForFame(0);
+        state.dummy.crystals = { red:0, blue:0, green:0, white:0 };
+        state.dummy.cards = { red:4, blue:4, green:4, white:4 };
+        state.discard = [];
+        state.awaitingEndRound = false;
+        state.showDummy = false;
+        state.showCommander = false;
+      }
       if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
       if (typeof state.fame !== 'number') state.fame = 0;
       state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
+
+      // commander init
+      if (state.commander.deckItems && state.commander.deckItems.length) {
+        buildCommanderDomNodeMapping();
+        recalcCountsToDOM();
+        renderCommanderDiscard();
+        renderCommanderMode();
+      } else {
+        initCommanderStateFromDOM();
+      }
+
       renderReputation(); renderFameAndLevel(); renderDummy();
+      renderCommanderVisibility();
 
       // show automa modal on initial load only when there's no saved state
-      if (!loaded) openAutomaModal();
+      if (!loaded && typeof openAutomaModal === 'function') openAutomaModal();
 
+      // -----------------------------
+      // New Game implementation and robust wiring
+      function showToast(message, ms = 1400) {
+        try {
+          if (!el.toast) return;
+          el.toast.textContent = message;
+          el.toast.style.display = 'block';
+          setTimeout(()=>{ el.toast.style.display = 'none'; }, ms);
+        } catch (err) {}
+      }
+
+      function openAutomaModal() {
+        // show automa selection UI
+        automaChoice = null;
+        el.automaBackdrop.classList.add('visible'); el.automaBackdrop.setAttribute('aria-hidden','false');
+        el.automaModal.classList.add('visible'); el.automaModal.setAttribute('aria-hidden','false');
+        el.automaConfirm.disabled = true;
+        el.automaDummy && el.automaDummy.classList.remove('selected');
+        el.automaCommander && el.automaCommander.classList.remove('selected');
+        el.automaNone && el.automaNone.classList.remove('selected');
+      }
+
+      function closeAutomaModal() {
+        el.automaBackdrop.classList.remove('visible'); el.automaBackdrop.setAttribute('aria-hidden','true');
+        el.automaModal.classList.remove('visible'); el.automaModal.setAttribute('aria-hidden','true');
+      }
+
+      function newGame(){
+        try { console.debug && console.debug('newGame() called'); } catch(e){}
+        state.repIndex = DEFAULT_REP_INDEX;
+        state.fame = 0;
+        state.previousLevel = getLevelForFame(0);
+
+        // reset dummy + commander to defaults
+        state.dummy.crystals = { red:0, blue:0, green:0, white:0 };
+        const colors = ['red','blue','green','white'];
+        const firstIdx = Math.floor(Math.random()*colors.length);
+        let secondIdx = Math.floor(Math.random()*colors.length);
+        while (secondIdx === firstIdx) secondIdx = Math.floor(Math.random()*colors.length);
+        const c1 = colors[firstIdx], c2 = colors[secondIdx];
+        state.dummy.crystals[c1] = 2;
+        state.dummy.crystals[c2] = 1;
+        state.dummy.cards = { red:4, blue:4, green:4, white:4 };
+        state.discard = [];
+        state.awaitingEndRound = false;
+        state.showDummy = false;
+
+        // Reset commander deck
+        state.commander.deckItems = [];
+        ['red','blue','green','white'].forEach(color => {
+          for (let i=0;i<4;i++) state.commander.deckItems.push({ color, special: false });
+          state.commander.deckItems.push({ color, special: true }); // special star card
+        });
+        state.commander.deckItems.push({ color: 'wound', special: false });
+        state.commander.discard = [];
+        state.commander.frenzy = false;
+        state.showCommander = false;
+
+        // ensure DOM nodes mapping updated
+        buildCommanderDomNodeMapping();
+        recalcCountsToDOM();
+        renderCommanderDiscard();
+        renderCommanderMode();
+
+        closeTooltip(); closeFameTooltip();
+        if (el.addFameInput) el.addFameInput.value = '';
+        automaChoice = null;
+        renderReputation(); renderFameAndLevel(); renderDummy();
+        renderCommanderVisibility();
+        updateCommanderDeckCount();
+        saveToStorage();
+
+        // visual feedback so user knows new game fired
+        showToast('New game started');
+
+        // open automa modal for configuration
+        openAutomaModal();
+      }
+
+      // expose globally for inline or external calls
+      window.__mk_new_game = newGame;
+
+      // Attach event handlers to automa modal options
+      if (el.automaOptions) {
+        el.automaOptions.addEventListener('click', (e) => {
+          const item = e.target.closest('.select-item');
+          if (!item) return;
+          automaChoice = item.getAttribute('data-choice');
+          el.automaDummy && el.automaDummy.classList.toggle('selected', automaChoice === 'dummy');
+          el.automaCommander && el.automaCommander.classList.toggle('selected', automaChoice === 'commander');
+          el.automaNone && el.automaNone.classList.toggle('selected', automaChoice === 'none');
+          el.automaConfirm.disabled = !automaChoice;
+        });
+      }
+      if (el.automaConfirm) {
+        el.automaConfirm.addEventListener('click', () => {
+          if (!automaChoice) return;
+          state.showDummy = (automaChoice === 'dummy');
+          state.showCommander = (automaChoice === 'commander');
+          closeAutomaModal();
+          renderDummy();
+          renderCommanderVisibility();
+          saveToStorage();
+        });
+      }
+
+      // Attach New Game handler robustly (idempotent)
+      (function attachNewGameHandlers(){
+        const btn = el.newGameBtn;
+        if (!btn) return;
+        if (!btn.__mk_bound) {
+          btn.addEventListener('click', function (e) {
+            try { e && e.preventDefault && e.preventDefault(); } catch (err) {}
+            newGame();
+          });
+          // set pointer cursor and aria attribute to make clickable
+          btn.setAttribute('role','button');
+          btn.__mk_bound = true;
+        }
+      })();
+
+      // save periodically
       setInterval(saveToStorage, 2000);
     })();
   </script>
