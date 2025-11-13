@@ -23,7 +23,6 @@
       --backdrop: rgba(2,6,23,0.6);
       --bronze: #b87333;
       --black: #000000;
-      --wound: #6b6b6b;
     }
     * { box-sizing: border-box; }
     html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; }
@@ -83,7 +82,6 @@
     .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:70px; cursor:pointer; }
     .dp-count { font-weight:800; color:#eaf2ff; min-width:20px; text-align:center; display:inline-block; }
 
-    /* Unified dp-dot: container for SVG icon */
     .dp-dot {
       width:22px;
       height:22px;
@@ -94,14 +92,11 @@
     }
     .dp-dot svg { width:100%; height:100%; display:block; }
 
-    /* SVG fills by color class */
     .dp-dot.red svg .fill { fill: var(--red); }
     .dp-dot.blue svg .fill { fill: var(--blue); }
     .dp-dot.green svg .fill { fill: var(--green); }
     .dp-dot.white svg .fill { fill: var(--white); stroke: rgba(0,0,0,0.12); stroke-width:0.5; }
-    .dp-dot.wound svg .fill { fill: var(--wound); stroke: rgba(255,255,255,0.06); stroke-width:0.5; }
 
-    /* new bronze and na styles for automa icons */
     .dp-dot.bronze svg .fill { fill: var(--bronze); }
     .dp-dot.na svg line { stroke: var(--black); stroke-width:2; stroke-linecap:round; }
 
@@ -110,11 +105,9 @@
 
     .end-round-desc { font-size:12px; color:var(--muted); margin-top:6px; }
 
-    /* Discard pile */
     .discard-pile { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; padding:8px; max-height:96px; overflow:auto; border-radius:8px; background: rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); }
     .discard-sep { width:12px; height:1px; display:inline-block; }
 
-    /* Frenzy display */
     .commander-frenzy {
       text-align:center;
       margin-top:10px;
@@ -134,7 +127,6 @@
       font-size:13px;
     }
 
-    /* Centered popups and modal */
     .fame-tooltip, .level-tooltip, .modal, .backdrop { position: fixed; }
     .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:12px; padding:12px; color:#eaf2ff; display:none; z-index:1300; }
     .fame-tooltip.visible, .level-tooltip.visible { display:block; animation:popin 160ms cubic-bezier(.2,.8,.2,1); }
@@ -145,8 +137,8 @@
 
     .modal { top:50%; left:50%; transform:translate(-50%,-50%); background: linear-gradient(180deg, rgba(8,10,12,0.98), rgba(18,20,22,0.98)); padding:16px; border-radius:12px; z-index:1300; min-width:320px; color:#eaf2ff; display:none; }
     .modal.visible { display:block; }
-    .modal h3 { text-align:center; margin-top:0; } /* center modal titles */
-    .modal p { text-align:center; margin:6px 0 12px; } /* center descriptions */
+    .modal h3 { text-align:center; margin-top:0; }
+    .modal p { text-align:center; margin:6px 0 12px; }
 
     .select-grid { display:flex; gap:8px; justify-content:center; margin-bottom:12px; flex-wrap:wrap; }
     .select-item { display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px; border-radius:8px; cursor:pointer; border:1px solid transparent; }
@@ -194,29 +186,22 @@
         </div>
       </section>
 
-      <!-- Fame (version 25 layout & behaviour) -->
+      <!-- Fame -->
       <section class="card" id="fame-card" aria-labelledby="fame-title">
         <div class="card-header"><div><h2 id="fame-title" class="card-title">Fame</h2></div></div>
         <div class="card-body">
           <div class="fame-grid">
             <div class="fame-stack" role="group" aria-label="Fame controls (top to bottom)">
-              <!-- top: add-fame delta input -->
               <input id="add-fame-input" class="fame-input" type="number" inputmode="numeric" placeholder="+0" aria-label="Add or remove fame (use negative values to reduce fame)" />
-
-              <!-- middle: committed fame value (read-only) - clicking this toggles Fame Ranges -->
               <input id="fame-input" class="fame-input" type="number" value="0" aria-label="Committed fame value (click to view ranges)" readonly tabindex="0" />
-
-              <!-- bottom: level badge -->
               <div id="player-level" class="level-badge level-1" role="button" aria-pressed="false" tabindex="0">Level 1</div>
             </div>
 
-            <!-- Fame ranges tooltip (centered) -->
             <div id="fame-tooltip" class="fame-tooltip" role="dialog" aria-hidden="true">
               <div style="font-weight:800; margin-bottom:6px;">Fame Ranges</div>
               <div class="tooltip-list" id="fame-tooltip-list"></div>
             </div>
 
-            <!-- Level ups tooltip -->
             <div id="level-tooltip" class="level-tooltip" role="dialog" aria-hidden="true">
               <div style="font-weight:800; margin-bottom:6px;">Level Ups</div>
               <div class="tooltip-list" id="tooltip-list"></div>
@@ -225,7 +210,7 @@
         </div>
       </section>
 
-      <!-- Dummy Player (hidden until automa selection) -->
+      <!-- Dummy Player -->
       <section class="card" id="dummy-card" aria-labelledby="dummy-title" style="display:none;">
         <div class="card-header"><div><h2 id="dummy-title" class="card-title">Dummy Player</h2></div></div>
         <div class="card-body">
@@ -287,11 +272,10 @@
         </div>
       </section>
 
-      <!-- Commander Volakre (wounds moved to own row beneath specials and above Play Turn) -->
+      <!-- Commander Volakre -->
       <section class="card" id="commander-volakre" aria-labelledby="commander-title">
         <div class="card-header"><div><h2 id="commander-title" class="card-title">Commander Volakre</h2></div></div>
         <div class="card-body">
-          <!-- Deck subtitle now includes a bracketed current deck counter -->
           <div class="dummy-sub">Deck <span id="commander-deck-count" style="color:var(--muted);">()</span></div>
 
           <div class="cards-row" aria-label="Commander Volakre deck">
@@ -313,7 +297,6 @@
             </div>
           </div>
 
-          <!-- special/star cards are shown inline as part of the same deck -->
           <div class="cards-row" aria-label="Commander Volakre special/star cards">
             <div class="dp-btn" aria-label="Commander special red card (star)">
               <div class="dp-dot red" aria-hidden="true">
@@ -352,31 +335,15 @@
             </div>
           </div>
 
-          <!-- wounds row placed under special cards but above the Play Turn button -->
-          <div class="cards-row" aria-label="Commander Volakre wounds">
-            <div class="dp-btn" aria-label="Commander wounds card">
-              <div class="dp-dot wound" aria-hidden="true">
-                <!-- skull icon for wound -->
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                  <path class="fill" d="M12 2c2.8 0 5 1.9 5 4.5V9c0 1.7-1 3.2-2.5 3.9L15 14v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2l.5-1.1C7 12.3 6 10.8 6 9V6.5C6 3.9 9.2 2 12 2zm-2.2 8.5c.5 0 .9-.4.9-.9s-.4-.9-.9-.9-.9.4-.9.9.4.9.9.9zm4.4 0c.5 0 .9-.4.9-.9s-.4-.9-.9-.9-.9.4-.9.9.4.9.9.9z"/>
-                </svg>
-              </div>
-              <div class="dp-count">1</div>
-            </div>
-          </div>
-
-          <!-- Play Turn button for Commander Volakre -->
           <div class="dummy-controls" style="margin-top:8px;">
             <button id="commander-draw" class="small-btn" title="Play a turn with Commander Volakre">Play Turn</button>
           </div>
 
-          <!-- Frenzy display (hidden unless frenzy active) -->
           <div id="commander-mode" class="commander-frenzy" style="display:none;">
             <div class="badge">Frenzy</div>
             <div class="desc">Act as if a Spell was Drawn.</div>
           </div>
 
-          <!-- Commander discard pile -->
           <div class="dummy-sub" style="margin-top:12px">Discard Pile</div>
           <div id="commander-discard" class="discard-pile" aria-live="polite" aria-label="Commander Volakre discard pile (most recent draws)"></div>
         </div>
@@ -384,7 +351,6 @@
 
       <!-- New Game -->
       <div>
-        <!-- inline onclick as an additional robustness measure -->
         <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game" onclick="if(window.__mk_new_game) window.__mk_new_game();">New Game</button>
       </div>
 
@@ -392,7 +358,6 @@
     </div>
   </div>
 
-  <!-- Automa modal -->
   <div id="automa-backdrop" class="backdrop" aria-hidden="true"></div>
   <div id="automa-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="automa-title">
     <h3 id="automa-title">Automa</h3>
@@ -400,7 +365,6 @@
 
     <div class="select-grid" id="automa-options" style="margin-bottom:8px;">
       <div class="select-item" data-choice="dummy" id="automa-dummy">
-        <!-- shield icon (bronze) -->
         <div class="dp-dot bronze" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
             <path class="fill" d="M12 2l7 3v5c0 5-4.5 9.5-7 12-2.5-2.5-7-7-7-12V5l7-3z"/>
@@ -409,7 +373,6 @@
         <div style="font-size:13px; color:var(--muted);">Dummy Player</div>
       </div>
       <div class="select-item" data-choice="none" id="automa-none">
-        <!-- black X icon -->
         <div class="dp-dot na" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
             <line x1="5" y1="5" x2="19" y2="19" />
@@ -425,7 +388,6 @@
     </div>
   </div>
 
-  <!-- Backdrop + End Round modal -->
   <div id="backdrop" class="backdrop" aria-hidden="true"></div>
   <div id="end-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="end-modal-title">
     <h3 id="end-modal-title">End of Round</h3>
@@ -486,9 +448,8 @@
         discard: [],
         awaitingEndRound: false,
         showDummy: false,
-        // commander state
         commander: {
-          deckItems: [], // array of { color: 'red'|'blue'|'green'|'white'|'wound', special: boolean }
+          deckItems: [],
           discard: [],
           frenzy: false,
           domCountNodes: {}
@@ -649,11 +610,8 @@
       }
 
       function buildFullTooltip(level) {
-        el.fameTooltipList.innerHTML = '';
-        for (let r of LEVEL_RANGES) {
-          const rangeText = (r.min === r.max) ? String(r.min) : `${r.min}-${r.max}`;
-          el.fameTooltipList.appendChild(createTooltipItem(r.level, rangeText));
-        }
+        el.tooltipList.innerHTML = '';
+        for (let l = 1; l <= level; l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
       }
       function toggleTooltip() {
         const isVisible = el.tooltip.classList.contains('visible');
@@ -720,28 +678,22 @@
         const btns = sec.querySelectorAll('.cards-row .dp-btn');
         state.commander.deckItems = [];
         state.commander.domCountNodes = {};
-        // include 'wound' key so wounds card is supported in mapping
-        ['red','blue','green','white','wound'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
+        ['red','blue','green','white'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
 
         btns.forEach(btn=>{
           const dot = btn.querySelector('.dp-dot');
           const countNode = btn.querySelector('.dp-count');
           const count = Number((countNode && countNode.textContent || '').trim()) || 0;
-          // determine color by class on dp-dot (now supports 'wound')
           let color = null;
           if (dot.classList.contains('red')) color = 'red';
           else if (dot.classList.contains('blue')) color = 'blue';
           else if (dot.classList.contains('green')) color = 'green';
           else if (dot.classList.contains('white')) color = 'white';
-          else if (dot.classList.contains('wound')) color = 'wound';
-          // detect special by presence of polygon (star)
           const special = !!dot.querySelector('polygon');
-          // store the dom count node reference for this color/special
           if (color && countNode) {
             if (special) state.commander.domCountNodes[color].special = countNode;
             else state.commander.domCountNodes[color].normal = countNode;
           }
-          // create items according to the number
           for (let i=0;i<count;i++) state.commander.deckItems.push({ color, special });
         });
         state.commander.discard = [];
@@ -757,7 +709,7 @@
         if (!sec) return;
         const btns = sec.querySelectorAll('.cards-row .dp-btn');
         state.commander.domCountNodes = {};
-        ['red','blue','green','white','wound'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
+        ['red','blue','green','white'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
         btns.forEach(btn=>{
           const dot = btn.querySelector('.dp-dot');
           const countNode = btn.querySelector('.dp-count');
@@ -766,7 +718,6 @@
           else if (dot.classList.contains('blue')) color = 'blue';
           else if (dot.classList.contains('green')) color = 'green';
           else if (dot.classList.contains('white')) color = 'white';
-          else if (dot.classList.contains('wound')) color = 'wound';
           const special = !!dot.querySelector('polygon');
           if (color && countNode) {
             if (special) state.commander.domCountNodes[color].special = countNode;
@@ -776,12 +727,10 @@
       }
 
       function recalcCountsToDOM(){
-        // compute counts from state.commander.deckItems and write them into the DOM nodes recorded in domCountNodes
-        const counts = { red:{normal:0,special:0}, blue:{normal:0,special:0}, green:{normal:0,special:0}, white:{normal:0,special:0}, wound:{normal:0,special:0} };
+        const counts = { red:{normal:0,special:0}, blue:{normal:0,special:0}, green:{normal:0,special:0}, white:{normal:0,special:0} };
         (state.commander.deckItems || []).forEach(item => {
           if (!item || !item.color) return;
           const type = item.special ? 'special' : 'normal';
-          if (!counts[item.color]) counts[item.color] = { normal:0, special:0 };
           counts[item.color][type] = (counts[item.color][type] || 0) + 1;
         });
         Object.keys(counts).forEach(color => {
@@ -809,11 +758,8 @@
           if (!state.commander.deckItems || state.commander.deckItems.length === 0) break;
           const idx = Math.floor(Math.random()*state.commander.deckItems.length);
           const item = state.commander.deckItems.splice(idx,1)[0];
-          // add to commander discard
           state.commander.discard.push(item);
           drawn.push(item);
-
-          // update DOM count for the matching node (prefer the specific type)
           const countNode = findCountNodeForItem(item);
           if (countNode) {
             const prior = Number((countNode.textContent || '').trim()) || 0;
@@ -841,12 +787,7 @@
             if (token.special) {
               d.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/></svg>`;
             } else {
-              // handle wound icon in discard too
-              if (token.color === 'wound') {
-                d.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="fill" d="M12 2c2.8 0 5 1.9 5 4.5V9c0 1.7-1 3.2-2.5 3.9L15 14v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2l.5-1.1C7 12.3 6 10.8 6 9V6.5C6 3.9 9.2 2 12 2z"/></svg>`;
-              } else {
-                d.innerHTML = `<svg viewBox="0 0 24 32" aria-hidden="true" focusable="false"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
-              }
+              d.innerHTML = `<svg viewBox="0 0 24 32" aria-hidden="true" focusable="false"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
             }
             container.appendChild(d);
           }
@@ -855,11 +796,8 @@
 
       function renderCommanderMode(){
         if (!el.commanderMode) return;
-        if (state.commander.frenzy) {
-          el.commanderMode.style.display = 'block';
-        } else {
-          el.commanderMode.style.display = 'none';
-        }
+        if (state.commander.frenzy) el.commanderMode.style.display = 'block';
+        else el.commanderMode.style.display = 'none';
       }
 
       // ---------- end commander helpers ----------
@@ -902,20 +840,21 @@
         saveToStorage();
       });
 
-      // commander draw button handler - now draws exactly 1 card per click, or enters Frenzy if deck empty
       if (el.commanderDrawBtn) {
         el.commanderDrawBtn.addEventListener('click', () => {
           if (!state.commander.deckItems || state.commander.deckItems.length === 0) {
-            // Enter Frenzy mode when play turn pressed with no cards
+            // enter Frenzy when Play Turn pressed with no commander deck cards
             state.commander.frenzy = true;
             renderCommanderMode();
             saveToStorage();
             return;
           }
           const drawn = drawFromCommanderDeck(1);
-          // separator like dummy player
           state.commander.discard.push('__SEP__');
           renderCommanderDiscard();
+          if (!state.commander.deckItems || state.commander.deckItems.length === 0) {
+            // next press will enter frenzy
+          }
           saveToStorage();
         });
       }
@@ -1014,9 +953,6 @@
           for (let i=0;i<4;i++) state.commander.deckItems.push({ color, special: false });
           state.commander.deckItems.push({ color, special: true }); // special star card
         });
-        // add one wounds card
-        state.commander.deckItems.push({ color: 'wound', special: false });
-
         state.commander.discard = [];
         state.commander.frenzy = false;
 
@@ -1158,9 +1094,8 @@
       if (typeof state.fame !== 'number') state.fame = 0;
       state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
 
-      // commander initialization logic:
       if (state.commander.deckItems && state.commander.deckItems.length) {
-        // Build domCountNodes mapping for counts and sync DOM
+        // Build DOM node mapping for counts and sync DOM
         buildCommanderDomNodeMapping();
         recalcCountsToDOM();
         renderCommanderDiscard();
@@ -1172,7 +1107,6 @@
 
       renderReputation(); renderFameAndLevel(); renderDummy();
 
-      // show automa modal on initial load only when there's no saved state
       if (!loaded) openAutomaModal();
 
       setInterval(saveToStorage, 2000);
