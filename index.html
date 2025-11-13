@@ -23,14 +23,15 @@
       --backdrop: rgba(2,6,23,0.6);
       --bronze: #b87333;
       --black: #000000;
+      --silver: #c0c0c0;
     }
     * { box-sizing: border-box; }
-    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; }
+    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
     .phone-shell { width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 12px; }
     .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
     .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
     .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); pointer-events:auto; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 8px rgba(0,0,0,0.4); }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 10px rgba(0,0,0,0.45); margin-bottom:12px; }
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
@@ -38,7 +39,8 @@
     /* center titles for Reputation, Fame and Dummy Player */
     #reputation-card .card-header,
     #fame-card .card-header,
-    #dummy-card .card-header { justify-content:center; }
+    #dummy-card .card-header,
+    #volkare-card .card-header { justify-content:center; }
 
     /* Reputation */
     .stat-row { display:flex; align-items:center; justify-content:center; gap:8px; }
@@ -78,7 +80,7 @@
     /* Dummy Player */
     .dummy-sub { font-weight:700; color:var(--muted); margin:6px 0 4px 0; font-size:13px; text-transform:uppercase; letter-spacing:0.6px; display:flex; gap:8px; align-items:center; justify-content:center; }
     .crystal-row, .cards-row { display:flex; gap:10px; align-items:center; justify-content:center; margin-bottom:8px; }
-    .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:64px; }
+    .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:80px; cursor:pointer; }
     .dp-count { font-weight:800; color:#eaf2ff; min-width:20px; text-align:center; }
 
     /* Unified dp-dot: container for SVG icon */
@@ -91,29 +93,24 @@
       line-height:0;
     }
     .dp-dot svg { width:100%; height:100%; display:block; }
+    /* reuse fill classes for card rects */
+    .fill.red { fill: var(--red); }
+    .fill.blue { fill: var(--blue); }
+    .fill.green { fill: var(--green); }
+    .fill.white { fill: var(--white); stroke: rgba(0,0,0,0.08); stroke-width:0.6; }
 
-    /* SVG fills by color class */
-    .dp-dot.red svg .fill { fill: var(--red); }
-    .dp-dot.blue svg .fill { fill: var(--blue); }
-    .dp-dot.green svg .fill { fill: var(--green); }
-    .dp-dot.white svg .fill { fill: var(--white); stroke: rgba(0,0,0,0.12); stroke-width:0.5; }
+    /* Volkare deck UI specifics (compact icon + numeric count layout) */
+    .volkare-grid { display:flex; gap:12px; align-items:flex-start; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+    .volkare-column { display:flex; flex-direction:column; align-items:center; gap:8px; min-width:84px; }
+    /* labels removed per request; column now only shows box and count */
+    .volkare-column .box { display:flex; align-items:center; gap:8px; justify-content:center; }
 
-    /* new bronze and na styles for automa icons */
-    .dp-dot.bronze svg .fill { fill: var(--bronze); }
-    .dp-dot.na svg line { stroke: var(--black); stroke-width:2; stroke-linecap:round; }
-
-    .dummy-controls { display:flex; gap:8px; justify-content:center; margin-top:8px; flex-direction:column; align-items:center; }
-    .small-btn { padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.01); color:#eaf2ff; cursor:pointer; }
-
-    .end-round-desc { font-size:12px; color:var(--muted); margin-top:6px; }
-
-    /* Discard pile */
-    .discard-pile { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; padding:8px; max-height:96px; overflow:auto; border-radius:8px; background: rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); }
-    .discard-sep { width:12px; height:1px; display:inline-block; }
+    .volkare-discard { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+    .volkare-discard-item { padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); color:var(--muted); font-weight:700; font-size:12px; border:1px solid rgba(255,255,255,0.03); }
 
     /* Centered popups and modal */
     .fame-tooltip, .level-tooltip, .modal, .backdrop { position: fixed; }
-    .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:10px; padding:12px; box-shadow: 0 12px 36px rgba(0,0,0,0.6); z-index:1400; display:none; }
+    .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:12px; padding:12px; color:#eaf2eff; display:none; z-index:1400; box-shadow: 0 8px 32px rgba(0,0,0,0.6); }
     .fame-tooltip.visible, .level-tooltip.visible { display:block; animation:popin 160ms cubic-bezier(.2,.8,.2,1); }
     @keyframes popin { from { opacity:0; transform: translate(-50%, -50%) scale(0.96); } to { opacity:1; transform: translate(-50%, -50%) scale(1); } }
 
@@ -126,9 +123,20 @@
     .modal p { text-align:center; margin:6px 0 12px; } /* center descriptions */
 
     .select-grid { display:flex; gap:8px; justify-content:center; margin-bottom:12px; flex-wrap:wrap; }
-    .select-item { display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px; border-radius:8px; cursor:pointer; border:1px solid transparent; }
+    .select-item { display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px; border-radius:8px; cursor:pointer; border:1px solid transparent; min-width:84px; }
     .select-item.selected { outline:2px solid rgba(199,146,79,0.14); border-color: rgba(199,146,79,0.18); background: rgba(199,146,79,0.03); }
     .select-item .dp-dot { width:20px; height:20px; }
+
+    /* Force crystals and cards in end-of-round modal to display in a single horizontal row and scroll if necessary */
+    #select-crystals, #select-cards {
+      display:flex;
+      gap:8px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:nowrap;
+      overflow:auto; /* horizontal scroll on small screens */
+      padding:6px 4px;
+    }
 
     .modal .actions { display:flex; gap:8px; justify-content:center; margin-top:6px; }
 
@@ -137,7 +145,44 @@
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.04)); color:#eaf2ff; font-weight:700; cursor:pointer; }
+    /* BUTTON STYLES: unified primary action button */
+    .action-btn,
+    .small-btn.action-btn,
+    .new-game-btn.action-btn {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:10px;
+      background: linear-gradient(180deg, var(--gold), rgba(199,146,79,0.95));
+      color:#ffffff;
+      font-weight:700;
+      border:none;
+      min-width:96px;
+      cursor:pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+      transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+    }
+    .action-btn:hover:not(:disabled):not(.disabled) { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(0,0,0,0.5); }
+    .action-btn:active:not(:disabled):not(.disabled) { transform: translateY(0); box-shadow: 0 6px 18px rgba(0,0,0,0.4); }
+    .action-btn:focus { outline: 3px solid rgba(199,146,79,0.18); outline-offset:2px; }
+    .action-btn:disabled,
+    .action-btn.disabled,
+    .small-btn.disabled,
+    .new-game-btn.disabled {
+      background: rgba(255,255,255,0.02);
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.04);
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.9;
+      transform: none;
+    }
+    .action-btn.small { padding:8px 12px; min-width:84px; }
+    .action-btn.confirm-enabled { background: linear-gradient(180deg, #4da3ff, #2d88ff); } /* optional visual for enabled confirm */
+
+    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.04)); color:#fff; font-weight:700; cursor:pointer; }
 
     @media (max-width:480px) {
       :root { --phone-width:94vw; }
@@ -146,6 +191,12 @@
       .dp-dot { width:18px; height:18px; }
       .discard-pile { max-height:72px; }
       .modal { min-width:260px; }
+      .dp-dot.silver { width:30px; height:30px; }
+      .volkare-count { min-width:72px; padding:6px; }
+      /* allow compact labels on small screens but maintain single-row behavior */
+      #select-crystals, #select-cards { gap:6px; padding:4px 2px; }
+      .volkare-icon { width:24px; height:32px; }
+      .action-btn { min-width:72px; padding:8px 10px; font-size:14px; }
     }
   </style>
 </head>
@@ -198,6 +249,7 @@
               <div style="font-weight:800; margin-bottom:6px;">Level Ups</div>
               <div class="tooltip-list" id="tooltip-list"></div>
             </div>
+
           </div>
         </div>
       </section>
@@ -213,19 +265,19 @@
             </div>
             <div class="crystal-row" id="crystal-row" aria-hidden="false">
               <div class="dp-btn" data-color="red" aria-label="red crystals">
-                <div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div>
+                <div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill red" points="12,2 18,8 12,22 6,8"/></svg></div>
                 <div class="dp-count" id="crystal-red">0</div>
               </div>
               <div class="dp-btn" data-color="blue" aria-label="blue crystals">
-                <div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div>
+                <div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill blue" points="12,2 18,8 12,22 6,8"/></svg></div>
                 <div class="dp-count" id="crystal-blue">0</div>
               </div>
               <div class="dp-btn" data-color="green" aria-label="green crystals">
-                <div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div>
+                <div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill green" points="12,2 18,8 12,22 6,8"/></svg></div>
                 <div class="dp-count" id="crystal-green">0</div>
               </div>
               <div class="dp-btn" data-color="white" aria-label="white crystals">
-                <div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div>
+                <div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill white" points="12,2 18,8 12,22 6,8"/></svg></div>
                 <div class="dp-count" id="crystal-white">0</div>
               </div>
             </div>
@@ -236,25 +288,26 @@
             </div>
             <div class="cards-row" id="cards-row">
               <div class="dp-btn" data-color="red" aria-label="red cards">
-                <div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+                <div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill red" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
                 <div class="dp-count" id="card-red">0</div>
               </div>
               <div class="dp-btn" data-color="blue" aria-label="blue cards">
-                <div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+                <div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill blue" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
                 <div class="dp-count" id="card-blue">0</div>
               </div>
               <div class="dp-btn" data-color="green" aria-label="green cards">
-                <div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+                <div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill green" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
                 <div class="dp-count" id="card-green">0</div>
               </div>
               <div class="dp-btn" data-color="white" aria-label="white cards">
-                <div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
+                <div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill white" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
                 <div class="dp-count" id="card-white">0</div>
               </div>
             </div>
 
             <div class="dummy-controls" aria-hidden="false">
-              <button id="draw-cards" class="small-btn" title="Play a turn">Play Turn</button>
+              <!-- Play Turn button: unified action style -->
+              <button id="draw-cards" class="small-btn action-btn" title="Play a turn">Play Turn</button>
               <div id="end-desc" class="end-round-desc" style="display:none;">End of Round Announced</div>
             </div>
 
@@ -264,10 +317,57 @@
         </div>
       </section>
 
+      <!-- General Volkare (Volkare deck only) -->
+      <section class="card" id="volkare-card" aria-labelledby="volkare-title" style="display:none;">
+        <div class="card-header"><div><h2 id="volkare-title" class="card-title">General Volkare</h2></div></div>
+        <div class="card-body">
+          <!-- Sub-head showing Cards and current total in deck -->
+          <div style="text-align:center; color:var(--muted); font-weight:700; margin-bottom:8px;">Cards (<span id="volkare-card-count">0</span>)</div>
+
+          <div class="volkare-grid" id="volkare-grid" style="margin-top:4px;">
+            <!-- Labels removed: cards now show just the box + count (same visual as dummy player) -->
+            <div class="volkare-column">
+              <div class="box" id="volkare-red-count" aria-label="Red cards"></div>
+            </div>
+            <div class="volkare-column">
+              <div class="box" id="volkare-blue-count" aria-label="Blue cards"></div>
+            </div>
+            <div class="volkare-column">
+              <div class="box" id="volkare-green-count" aria-label="Green cards"></div>
+            </div>
+            <div class="volkare-column">
+              <div class="box" id="volkare-white-count" aria-label="White cards"></div>
+            </div>
+
+            <div class="volkare-column">
+              <div class="box" id="volkare-spred-count" aria-label="Special Red cards"></div>
+            </div>
+            <div class="volkare-column">
+              <div class="box" id="volkare-spblu-count" aria-label="Special Blue cards"></div>
+            </div>
+            <div class="volkare-column">
+              <div class="box" id="volkare-spgrn-count" aria-label="Special Green cards"></div>
+            </div>
+            <div class="volkare-column">
+              <div class="box" id="volkare-spwht-count" aria-label="Special White cards"></div>
+            </div>
+          </div>
+
+          <!-- single control button labelled Play Turn -->
+          <div style="display:flex; justify-content:center; gap:8px; margin-top:10px;">
+            <button id="volkare-draw" class="small-btn action-btn" title="Volkare plays a turn">Play Turn</button>
+          </div>
+
+          <!-- discard -->
+          <div style="margin-top:12px; text-align:center; color:var(--muted); font-weight:700;">Volkare Discard</div>
+          <div id="volkare-discard" class="volkare-discard" aria-live="polite"></div>
+        </div>
+      </section>
+
       <!-- New Game -->
       <div>
         <!-- inline onclick as an additional robustness measure -->
-        <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game" onclick="if(window.__mk_new_game) window.__mk_new_game();">New Game</button>
+        <button type="button" id="new-game" class="new-game-btn action-btn" title="Reset the app to a new game" onclick="if(window.__mk_new_game) window.__mk_new_game();">New Game</button>
       </div>
 
       <footer class="footer"></footer>
@@ -281,8 +381,18 @@
     <p>Choose One</p>
 
     <div class="select-grid" id="automa-options" style="margin-bottom:8px;">
-      <div class="select-item" data-choice="dummy" id="automa-dummy">
-        <!-- shield icon (bronze) -->
+      <div class="select-item" data-choice="volkare" id="automa-volkare" aria-label="General Volkare">
+        <div class="dp-dot silver" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <g transform="translate(1,0) scale(1)">
+              <path class="fill" d="M12 1 L15 5 L13.5 6.2 L13.5 15.5 L16.8 18.8 L15.6 20 L12.2 16.6 L8.8 20 L7.6 18.8 L10.9 15.5 L10.9 6.2 L9.4 5 L12 1 Z" stroke="rgba(40,40,40,0.14)" stroke-width="0.9"/>
+            </g>
+          </svg>
+        </div>
+        <div style="font-size:13px; color:var(--muted);">General Volkare</div>
+      </div>
+
+      <div class="select-item" data-choice="dummy" id="automa-dummy" aria-label="Dummy Player">
         <div class="dp-dot bronze" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
             <path class="fill" d="M12 2l7 3v5c0 5-4.5 9.5-7 12-2.5-2.5-7-7-7-12V5l7-3z"/>
@@ -290,12 +400,14 @@
         </div>
         <div style="font-size:13px; color:var(--muted);">Dummy Player</div>
       </div>
+
       <div class="select-item" data-choice="none" id="automa-none">
-        <!-- black X icon -->
         <div class="dp-dot na" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <line x1="5" y1="5" x2="19" y2="19" />
-            <line x1="19" y1="5" x2="5" y2="19" />
+            <line class="back" x1="5" y1="5" x2="19" y2="19" />
+            <line class="back" x1="19" y1="5" x2="5" y2="19" />
+            <line class="front" x1="5" y1="5" x2="19" y2="19" />
+            <line class="front" x1="19" y1="5" x2="5" y2="19" />
           </svg>
         </div>
         <div style="font-size:13px; color:var(--muted);">N/A</div>
@@ -303,7 +415,7 @@
     </div>
 
     <div style="display:flex; justify-content:center; gap:8px;">
-      <button id="automa-confirm" class="small-btn" disabled>Confirm</button>
+      <button id="automa-confirm" class="small-btn action-btn" disabled aria-disabled="true">Confirm</button>
     </div>
   </div>
 
@@ -316,25 +428,25 @@
     <div style="margin-bottom:8px;">
       <div style="font-weight:700; color:var(--muted); margin-bottom:6px;">Choose a crystal</div>
       <div class="select-grid" id="select-crystals">
-        <div class="select-item" data-color="red"><div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div></div>
-        <div class="select-item" data-color="blue"><div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div></div>
-        <div class="select-item" data-color="green"><div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div></div>
-        <div class="select-item" data-color="white"><div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill" points="12,2 18,8 12,22 6,8"/></svg></div></div>
+        <div class="select-item" data-color="red"><div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill red" points="12,2 18,8 12,22 6,8"/></svg></div></div>
+        <div class="select-item" data-color="blue"><div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill blue" points="12,2 18,8 12,22 6,8"/></svg></div></div>
+        <div class="select-item" data-color="green"><div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill green" points="12,2 18,8 12,22 6,8"/></svg></div></div>
+        <div class="select-item" data-color="white"><div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon class="fill white" points="12,2 18,8 12,22 6,8"/></svg></div></div>
       </div>
     </div>
 
     <div>
       <div style="font-weight:700; color:var(--muted); margin-bottom:6px;">Choose a card</div>
       <div class="select-grid" id="select-cards">
-        <div class="select-item" data-color="red"><div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
-        <div class="select-item" data-color="blue"><div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
-        <div class="select-item" data-color="green"><div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
-        <div class="select-item" data-color="white"><div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
+        <div class="select-item" data-color="red"><div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill red" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
+        <div class="select-item" data-color="blue"><div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill blue" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
+        <div class="select-item" data-color="green"><div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill green" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
+        <div class="select-item" data-color="white"><div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill white" x="2" y="2" width="20" height="28" rx="3"/></svg></div></div>
       </div>
     </div>
 
     <div class="actions" style="display:flex; justify-content:center; gap:8px; margin-top:8px;">
-      <button id="confirm-end" class="small-btn" disabled>Confirm</button>
+      <button id="confirm-end" class="small-btn action-btn" disabled aria-disabled="true">Confirm</button>
     </div>
   </div>
 
@@ -367,7 +479,16 @@
         dummy: { crystals:{red:0,blue:0,green:0,white:0}, cards:{red:0,blue:0,green:0,white:0} },
         discard: [],
         awaitingEndRound: false,
-        showDummy: false
+        showDummy: false,
+        showVolkare: false,
+        volkare: {
+          // counts for the deck (4 of each color + 1 special of each color)
+          deck: {
+            red: 4, blue: 4, green: 4, white: 4,
+            special_red: 1, special_blue: 1, special_green: 1, special_white: 1
+          },
+          discard: []
+        }
       };
 
       const el = {
@@ -378,6 +499,7 @@
         addFameInput: document.getElementById('add-fame-input'),
         fameInput: document.getElementById('fame-input'),
         playerLevel: document.getElementById('player-level'),
+        // tooltips (may be null if DOM changed; guarded in code)
         tooltip: document.getElementById('level-tooltip'),
         tooltipList: document.getElementById('tooltip-list'),
         fameTooltip: document.getElementById('fame-tooltip'),
@@ -406,10 +528,25 @@
         automaOptions: document.getElementById('automa-options'),
         automaConfirm: document.getElementById('automa-confirm'),
         automaDummy: document.getElementById('automa-dummy'),
+        automaVolkare: document.getElementById('automa-volkare'),
         automaNone: document.getElementById('automa-none'),
-        dummyCardSection: document.getElementById('dummy-card')
+        dummyCardSection: document.getElementById('dummy-card'),
+        volkareCard: document.getElementById('volkare-card'),
+        // Volkare UI elements (containers for icon + number)
+        volkareRedCount: document.getElementById('volkare-red-count'),
+        volkareBlueCount: document.getElementById('volkare-blue-count'),
+        volkareGreenCount: document.getElementById('volkare-green-count'),
+        volkareWhiteCount: document.getElementById('volkare-white-count'),
+        volkareSpRedCount: document.getElementById('volkare-spred-count'),
+        volkareSpBlueCount: document.getElementById('volkare-spblu-count'),
+        volkareSpGreenCount: document.getElementById('volkare-spgrn-count'),
+        volkareSpWhiteCount: document.getElementById('volkare-spwht-count'),
+        volkareDiscard: document.getElementById('volkare-discard'),
+        volkareDrawBtn: document.getElementById('volkare-draw'),
+        volkareCardCount: document.getElementById('volkare-card-count')
       };
 
+      // helper utils
       function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
       function sumObject(obj){ return Object.values(obj || {}).reduce((a,b)=>a+(Number(b)||0),0); }
       function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
@@ -422,7 +559,26 @@
         return getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#9aa4b2';
       }
 
+      // Button enable/disable helpers (use these to keep appearance + accessibility consistent)
+      function enableButton(btnEl) {
+        if (!btnEl) return;
+        btnEl.disabled = false;
+        btnEl.classList.remove('disabled');
+        btnEl.setAttribute('aria-disabled', 'false');
+        // visual emphasis for confirm buttons when enabled
+        if (btnEl.id === 'confirm-end' || btnEl.id === 'automa-confirm') btnEl.classList.add('confirm-enabled');
+      }
+      function disableButton(btnEl) {
+        if (!btnEl) return;
+        btnEl.disabled = true;
+        btnEl.classList.add('disabled');
+        btnEl.setAttribute('aria-disabled', 'true');
+        if (btnEl.id === 'confirm-end' || btnEl.id === 'automa-confirm') btnEl.classList.remove('confirm-enabled');
+      }
+
+      // build rep track
       function buildRepTrack(){
+        if (!el.repTrackContainer) return;
         el.repTrackContainer.innerHTML = '';
         REP_TRACK.forEach((label, idx) => {
           const step = document.createElement('button');
@@ -437,27 +593,34 @@
       }
       function renderReputation(){
         const label = REP_TRACK[state.repIndex];
-        el.reputationValue.textContent = label;
-        el.reputationValue.style.color = colorForLabel(label);
-        const steps = el.repTrackContainer.querySelectorAll('.rep-step');
+        if (el.reputationValue) {
+          el.reputationValue.textContent = label;
+          el.reputationValue.style.color = colorForLabel(label);
+        }
+        const steps = el.repTrackContainer ? el.repTrackContainer.querySelectorAll('.rep-step') : [];
         steps.forEach((s,i)=>s.classList.toggle('active', i===state.repIndex));
         const active = steps[state.repIndex];
-        if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
+        try { if (active && typeof active.scrollIntoView === 'function') active.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' }); } catch(e){}
       }
 
+      // Fame / Level helpers
       function getLevelForFame(fame){
         const f = Math.max(0, Math.floor(Number(fame) || 0));
         for (let r of LEVEL_RANGES) if (f >= r.min && f <= r.max) return r.level;
         return LEVEL_RANGES[LEVEL_RANGES.length - 1].level;
       }
       function renderFameAndLevel(){
-        el.fameInput.value = state.fame;
+        if (el.fameInput) el.fameInput.value = state.fame;
         const level = state.previousLevel;
-        el.playerLevel.textContent = `Level ${level}`;
-        el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
+        if (el.playerLevel) {
+          el.playerLevel.textContent = `Level ${level}`;
+          el.playerLevel.className = 'level-badge level-' + Math.max(1, Math.min(10, level));
+        }
         try {
-          const lvlColor = getComputedStyle(el.playerLevel).color;
-          el.fameInput.style.color = lvlColor;
+          if (el.playerLevel) {
+            const lvlColor = getComputedStyle(el.playerLevel).color;
+            if (el.fameInput) el.fameInput.style.color = lvlColor;
+          }
         } catch (err) {}
       }
 
@@ -467,7 +630,9 @@
         const rewardDiv = document.createElement('div'); rewardDiv.className='reward'; rewardDiv.textContent = text;
         item.appendChild(lvlDiv); item.appendChild(rewardDiv); return item;
       }
+
       function showGainedLevelsPersist(prevLevel, newLevel) {
+        if (!el.tooltipList || !el.tooltip) return;
         el.tooltipList.innerHTML = '';
         for (let l = prevLevel + 1; l <= newLevel; l++) {
           el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
@@ -475,70 +640,37 @@
         if (prevLevel < newLevel) {
           el.tooltip.classList.add('visible');
           el.tooltip.setAttribute('aria-hidden','false');
-          el.playerLevel.setAttribute('aria-pressed','true');
+          if (el.playerLevel) el.playerLevel.setAttribute('aria-pressed','true');
         }
       }
 
-      function renderDummy(){
-        el.crystalRed.textContent = state.dummy.crystals.red || 0;
-        el.crystalBlue.textContent = state.dummy.crystals.blue || 0;
-        el.crystalGreen.textContent = state.dummy.crystals.green || 0;
-        el.crystalWhite.textContent = state.dummy.crystals.white || 0;
-        el.crystalTotal.textContent = `(${sumObject(state.dummy.crystals)})`;
-
-        el.cardRed.textContent = state.dummy.cards.red || 0;
-        el.cardBlue.textContent = state.dummy.cards.blue || 0;
-        el.cardGreen.textContent = state.dummy.cards.green || 0;
-        el.cardWhite.textContent = state.dummy.cards.white || 0;
-        el.cardTotal.textContent = `(${sumObject(state.dummy.cards)})`;
-
-        el.discardPile.innerHTML = '';
-        (state.discard || []).forEach(token=>{
-          if (token === '__SEP__') {
-            const sep = document.createElement('div');
-            sep.className = 'discard-sep';
-            el.discardPile.appendChild(sep);
-          } else {
-            const d = document.createElement('div');
-            d.className = 'dp-dot '+token;
-            d.title = token;
-            d.innerHTML = `<svg viewBox="0 0 24 32" aria-hidden="true" focusable="false"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
-            el.discardPile.appendChild(d);
-          }
-        });
-
-        if (state.awaitingEndRound) {
-          el.drawBtn.textContent = 'End Round';
-          el.endDesc.style.display = 'block';
-        } else {
-          el.drawBtn.textContent = 'Play Turn';
-          el.endDesc.style.display = 'none';
-        }
-
-        el.dummyCardSection.style.display = state.showDummy ? 'block' : 'none';
-      }
-
+      // Fame tooltip toggle/close functions (guarded)
       function buildFullTooltip(level) {
+        if (!el.tooltipList) return;
         el.tooltipList.innerHTML = '';
         for (let l = 1; l <= level; l++) el.tooltipList.appendChild(createTooltipItem(l, LEVEL_REWARDS[l] || '—'));
       }
       function toggleTooltip() {
+        if (!el.tooltip) return;
         const isVisible = el.tooltip.classList.contains('visible');
         if (isVisible) closeTooltip();
         else {
           buildFullTooltip(state.previousLevel);
           el.tooltip.classList.add('visible');
           el.tooltip.setAttribute('aria-hidden','false');
-          el.playerLevel.setAttribute('aria-pressed','true');
+          if (el.playerLevel) el.playerLevel.setAttribute('aria-pressed','true');
         }
       }
       function closeTooltip() {
+        if (!el.tooltip) return;
         el.tooltip.classList.remove('visible');
         el.tooltip.setAttribute('aria-hidden','true');
-        el.playerLevel.setAttribute('aria-pressed','false');
+        if (el.playerLevel) el.playerLevel.setAttribute('aria-pressed','false');
       }
 
+      // Fame ranges tooltip (guarded)
       function buildFameRangesTooltip() {
+        if (!el.fameTooltipList) return;
         el.fameTooltipList.innerHTML = '';
         for (let r of LEVEL_RANGES) {
           const rangeText = (r.min === r.max) ? String(r.min) : `${r.min}-${r.max}`;
@@ -546,6 +678,7 @@
         }
       }
       function toggleFameTooltip() {
+        if (!el.fameTooltip) return;
         const isVisible = el.fameTooltip.classList.contains('visible');
         if (isVisible) closeFameTooltip();
         else {
@@ -555,8 +688,121 @@
         }
       }
       function closeFameTooltip() {
+        if (!el.fameTooltip) return;
         el.fameTooltip.classList.remove('visible');
         el.fameTooltip.setAttribute('aria-hidden','true');
+      }
+
+      // Dummy rendering
+      function renderDummy(){
+        if (el.crystalRed) el.crystalRed.textContent = state.dummy.crystals.red || 0;
+        if (el.crystalBlue) el.crystalBlue.textContent = state.dummy.crystals.blue || 0;
+        if (el.crystalGreen) el.crystalGreen.textContent = state.dummy.crystals.green || 0;
+        if (el.crystalWhite) el.crystalWhite.textContent = state.dummy.crystals.white || 0;
+        if (el.crystalTotal) el.crystalTotal.textContent = `(${sumObject(state.dummy.crystals)})`;
+
+        if (el.cardRed) el.cardRed.textContent = state.dummy.cards.red || 0;
+        if (el.cardBlue) el.cardBlue.textContent = state.dummy.cards.blue || 0;
+        if (el.cardGreen) el.cardGreen.textContent = state.dummy.cards.green || 0;
+        if (el.cardWhite) el.cardWhite.textContent = state.dummy.cards.white || 0;
+        if (el.cardTotal) el.cardTotal.textContent = `(${sumObject(state.dummy.cards)})`;
+
+        if (el.discardPile) {
+          el.discardPile.innerHTML = '';
+          (state.discard || []).forEach(token=>{
+            if (token === '__SEP__') {
+              const sep = document.createElement('div');
+              sep.className = 'discard-sep';
+              el.discardPile.appendChild(sep);
+            } else {
+              const d = document.createElement('div');
+              d.className = 'dp-dot '+token;
+              d.title = token;
+              d.innerHTML = `<svg viewBox="0 0 24 32" aria-hidden="true" focusable="false"><rect class="fill ${token}" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
+              el.discardPile.appendChild(d);
+            }
+          });
+        }
+
+        if (el.drawBtn) {
+          if (state.awaitingEndRound) {
+            el.drawBtn.textContent = 'End Round';
+            if (el.endDesc) el.endDesc.style.display = 'block';
+          } else {
+            el.drawBtn.textContent = 'Play Turn';
+            if (el.endDesc) el.endDesc.style.display = 'none';
+          }
+        }
+
+        if (el.dummyCardSection) el.dummyCardSection.style.display = state.showDummy ? 'block' : 'none';
+      }
+
+      // VOLKARE helpers (use same dummy card box style; labels removed)
+      function createVolkareBox(color, count, special) {
+        const rect = `<svg viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect class="fill ${color}" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
+        const marker = special ? `<span class="special-marker" aria-hidden="true"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path class="fill ${color}" d="M8 1.5 L9.2 5.5 L13 6.2 L9.8 8.5 L10.6 12.2 L8 10.2 L5.4 12.2 L6.2 8.5 L3 6.2 L6.8 5.5 Z"/></svg></span>` : '';
+        return `<div class="dp-btn volkare-card" data-color="${color}" role="group" aria-label="${special ? 'Special ' : ''}${color} cards">
+                  <span class="dp-dot" aria-hidden="true">${rect}${marker}</span>
+                  <span class="dp-count">${count}</span>
+                </div>`;
+      }
+
+      function buildVolkareDeckArray() {
+        const d = state.volkare.deck;
+        const arr = [];
+        ['red','blue','green','white'].forEach(c=>{
+          for (let i=0;i<(d[c]||0);i++) arr.push(c);
+        });
+        ['special_red','special_blue','special_green','special_white'].forEach(s=>{
+          for (let i=0;i<(d[s]||0);i++) arr.push(s);
+        });
+        return arr;
+      }
+
+      function renderVolkare(){
+        if (!el.volkareCard) return;
+        el.volkareCard.style.display = state.showVolkare ? 'block' : 'none';
+        const d = state.volkare.deck;
+
+        if (el.volkareRedCount) el.volkareRedCount.innerHTML = createVolkareBox('red', d.red || 0, false);
+        if (el.volkareBlueCount) el.volkareBlueCount.innerHTML = createVolkareBox('blue', d.blue || 0, false);
+        if (el.volkareGreenCount) el.volkareGreenCount.innerHTML = createVolkareBox('green', d.green || 0, false);
+        if (el.volkareWhiteCount) el.volkareWhiteCount.innerHTML = createVolkareBox('white', d.white || 0, false);
+
+        if (el.volkareSpRedCount) el.volkareSpRedCount.innerHTML = createVolkareBox('red', d.special_red || 0, true);
+        if (el.volkareSpBlueCount) el.volkareSpBlueCount.innerHTML = createVolkareBox('blue', d.special_blue || 0, true);
+        if (el.volkareSpGreenCount) el.volkareSpGreenCount.innerHTML = createVolkareBox('green', d.special_green || 0, true);
+        if (el.volkareSpWhiteCount) el.volkareSpWhiteCount.innerHTML = createVolkareBox('white', d.special_white || 0, true);
+
+        const total = (d.red||0) + (d.blue||0) + (d.green||0) + (d.white||0)
+                    + (d.special_red||0) + (d.special_blue||0) + (d.special_green||0) + (d.special_white||0);
+        if (el.volkareCardCount) el.volkareCardCount.textContent = total;
+
+        if (el.volkareDiscard) {
+          el.volkareDiscard.innerHTML = '';
+          (state.volkare.discard || []).slice().reverse().forEach(tok=>{
+            const node = document.createElement('div');
+            node.className = 'volkare-discard-item';
+            if (tok.startsWith('special_')) node.textContent = tok.replace('special_','Sp ').replace('red','Red').replace('blue','Blue').replace('green','Green').replace('white','White');
+            else node.textContent = tok[0].toUpperCase() + tok.slice(1);
+            el.volkareDiscard.appendChild(node);
+          });
+        }
+      }
+
+      function volkareDrawCard() {
+        const deckArr = buildVolkareDeckArray();
+        if (deckArr.length === 0) return;
+        const idx = Math.floor(Math.random() * deckArr.length);
+        const card = deckArr[idx];
+        state.volkare.deck[card] = Math.max(0, (state.volkare.deck[card]||0) - 1);
+        state.volkare.discard.push(card);
+        renderVolkare();
+        saveToStorage();
+      }
+
+      if (el.volkareDrawBtn) {
+        el.volkareDrawBtn.addEventListener('click', () => { volkareDrawCard(); });
       }
 
       function buildDeckFromCounts(){
@@ -589,108 +835,129 @@
         return pickRandom(top);
       }
 
-      el.drawBtn.addEventListener('click', () => {
-        const cardsLeft = sumObject(state.dummy.cards);
-        if (cardsLeft <= 0) {
-          if (!state.awaitingEndRound) {
-            state.awaitingEndRound = true;
-            renderDummy();
-            saveToStorage();
-            return;
-          } else {
-            openEndRoundModal();
-            return;
+      if (el.drawBtn) {
+        el.drawBtn.addEventListener('click', () => {
+          const cardsLeft = sumObject(state.dummy.cards);
+          if (cardsLeft <= 0) {
+            if (!state.awaitingEndRound) {
+              state.awaitingEndRound = true;
+              renderDummy();
+              saveToStorage();
+              return;
+            } else {
+              openEndRoundModal();
+              return;
+            }
           }
-        }
 
-        const initial = drawFromDeck(3);
-        state.discard = state.discard.concat(initial);
-        const pool = colorWithMaxCrystals();
-        if (initial.length >= 3 && pool && initial[2] === pool) {
-          const extraCount = state.dummy.crystals[pool] || 0;
-          if (extraCount > 0) {
-            const extra = drawFromDeck(extraCount);
-            state.discard = state.discard.concat(extra);
+          const initial = drawFromDeck(3);
+          state.discard = state.discard.concat(initial);
+          const pool = colorWithMaxCrystals();
+          if (initial.length >= 3 && pool && initial[2] === pool) {
+            const extraCount = state.dummy.crystals[pool] || 0;
+            if (extraCount > 0) {
+              const extra = drawFromDeck(extraCount);
+              state.discard = state.discard.concat(extra);
+            }
           }
-        }
-        state.discard.push('__SEP__');
-        renderDummy();
-        saveToStorage();
-      });
+          state.discard.push('__SEP__');
+          renderDummy();
+          saveToStorage();
+        });
+      }
 
       function openEndRoundModal(){
-        el.backdrop.classList.add('visible'); el.backdrop.setAttribute('aria-hidden','false');
-        el.endModal.classList.add('visible'); el.endModal.setAttribute('aria-hidden','false');
+        if (el.backdrop) { el.backdrop.classList.add('visible'); el.backdrop.setAttribute('aria-hidden','false'); }
+        if (el.endModal) { el.endModal.classList.add('visible'); el.endModal.setAttribute('aria-hidden','false'); }
         selected = { crystal: null, card: null };
-        el.confirmEnd.disabled = true;
-        Array.from(el.selectCrystals.querySelectorAll('.select-item')).forEach(node=>node.classList.remove('selected'));
-        Array.from(el.selectCards.querySelectorAll('.select-item')).forEach(node=>node.classList.remove('selected'));
+        if (el.confirmEnd) disableButton(el.confirmEnd);
+        if (el.selectCrystals) Array.from(el.selectCrystals.querySelectorAll('.select-item')).forEach(node=>node.classList.remove('selected'));
+        if (el.selectCards) Array.from(el.selectCards.querySelectorAll('.select-item')).forEach(node=>node.classList.remove('selected'));
       }
       function closeEndRoundModal(){
-        el.backdrop.classList.remove('visible'); el.backdrop.setAttribute('aria-hidden','true');
-        el.endModal.classList.remove('visible'); el.endModal.setAttribute('aria-hidden','true');
+        if (el.backdrop) { el.backdrop.classList.remove('visible'); el.backdrop.setAttribute('aria-hidden','true'); }
+        if (el.endModal) { el.endModal.classList.remove('visible'); el.endModal.setAttribute('aria-hidden','true'); }
       }
       let selected = { crystal: null, card: null };
-      el.selectCrystals.addEventListener('click', (e)=>{
-        const item = e.target.closest('.select-item'); if(!item) return;
-        const color = item.getAttribute('data-color');
-        Array.from(el.selectCrystals.querySelectorAll('.select-item')).forEach(n=>n.classList.toggle('selected', n===item));
-        selected.crystal = color; el.confirmEnd.disabled = !(selected.crystal && selected.card);
-      });
-      el.selectCards.addEventListener('click', (e)=>{
-        const item = e.target.closest('.select-item'); if(!item) return;
-        const color = item.getAttribute('data-color');
-        Array.from(el.selectCards.querySelectorAll('.select-item')).forEach(n=>n.classList.toggle('selected', n===item));
-        selected.card = color; el.confirmEnd.disabled = !(selected.crystal && selected.card);
-      });
+      if (el.selectCrystals) {
+        el.selectCrystals.addEventListener('click', (e)=>{
+          const item = e.target.closest('.select-item'); if(!item) return;
+          const color = item.getAttribute('data-color');
+          Array.from(el.selectCrystals.querySelectorAll('.select-item')).forEach(n=>n.classList.toggle('selected', n===item));
+          selected.crystal = color; if (el.confirmEnd) { if (selected.crystal && selected.card) enableButton(el.confirmEnd); else disableButton(el.confirmEnd); }
+        });
+      }
+      if (el.selectCards) {
+        el.selectCards.addEventListener('click', (e)=>{
+          const item = e.target.closest('.select-item'); if(!item) return;
+          const color = item.getAttribute('data-color');
+          Array.from(el.selectCards.querySelectorAll('.select-item')).forEach(n=>n.classList.toggle('selected', n===item));
+          selected.card = color; if (el.confirmEnd) { if (selected.crystal && selected.card) enableButton(el.confirmEnd); else disableButton(el.confirmEnd); }
+        });
+      }
 
-      el.confirmEnd.addEventListener('click', ()=>{
-        if (!(selected.crystal && selected.card)) return;
-        state.dummy.crystals[selected.crystal] = (state.dummy.crystals[selected.crystal]||0) + 1;
-        for (const token of (state.discard || [])) {
-          if (token === '__SEP__') continue;
-          state.dummy.cards[token] = (state.dummy.cards[token] || 0) + 1;
-        }
-        state.dummy.cards[selected.card] = (state.dummy.cards[selected.card] || 0) + 1;
-        state.discard = [];
-        state.awaitingEndRound = false;
-        closeEndRoundModal();
-        renderDummy();
-        saveToStorage();
-      });
+      if (el.confirmEnd) {
+        el.confirmEnd.addEventListener('click', ()=>{
+          if (!(selected.crystal && selected.card)) return;
+          state.dummy.crystals[selected.crystal] = (state.dummy.crystals[selected.crystal]||0) + 1;
+          for (const token of (state.discard || [])) {
+            if (token === '__SEP__') continue;
+            state.dummy.cards[token] = (state.dummy.cards[token] || 0) + 1;
+          }
+          state.dummy.cards[selected.card] = (state.dummy.cards[selected.card] || 0) + 1;
+          state.discard = [];
+          state.awaitingEndRound = false;
+          closeEndRoundModal();
+          renderDummy();
+          saveToStorage();
+        });
+      }
 
+      // AUTOMA modal open/close
       function openAutomaModal() {
         state.showDummy = false;
+        state.showVolkare = false;
         renderDummy();
-        el.automaBackdrop.classList.add('visible'); el.automaBackdrop.setAttribute('aria-hidden','false');
-        el.automaModal.classList.add('visible'); el.automaModal.setAttribute('aria-hidden','false');
-        el.automaConfirm.disabled = true;
-        el.automaDummy.classList.remove('selected');
-        el.automaNone.classList.remove('selected');
+        renderVolkare();
+        if (el.automaBackdrop) { el.automaBackdrop.classList.add('visible'); el.automaBackdrop.setAttribute('aria-hidden','false'); }
+        if (el.automaModal) { el.automaModal.classList.add('visible'); el.automaModal.setAttribute('aria-hidden','false'); }
+        if (el.automaConfirm) disableButton(el.automaConfirm);
+        if (el.automaDummy) el.automaDummy.classList.remove('selected');
+        if (el.automaVolkare) el.automaVolkare.classList.remove('selected');
+        if (el.automaNone) el.automaNone.classList.remove('selected');
       }
       function closeAutomaModal() {
-        el.automaBackdrop.classList.remove('visible'); el.automaBackdrop.setAttribute('aria-hidden','true');
-        el.automaModal.classList.remove('visible'); el.automaModal.setAttribute('aria-hidden','true');
+        if (el.automaBackdrop) { el.automaBackdrop.classList.remove('visible'); el.automaBackdrop.setAttribute('aria-hidden','true'); }
+        if (el.automaModal) { el.automaModal.classList.remove('visible'); el.automaModal.setAttribute('aria-hidden','true'); }
       }
 
       let automaChoice = null;
-      el.automaOptions.addEventListener('click', (e) => {
-        const item = e.target.closest('.select-item');
-        if (!item) return;
-        automaChoice = item.getAttribute('data-choice');
-        el.automaDummy.classList.toggle('selected', automaChoice === 'dummy');
-        el.automaNone.classList.toggle('selected', automaChoice === 'none');
-        el.automaConfirm.disabled = !automaChoice;
-      });
+      if (el.automaOptions) {
+        el.automaOptions.addEventListener('click', (e) => {
+          const item = e.target.closest('.select-item');
+          if (!item) return;
+          automaChoice = item.getAttribute('data-choice');
+          if (el.automaDummy) el.automaDummy.classList.toggle('selected', automaChoice === 'dummy');
+          if (el.automaVolkare) el.automaVolkare.classList.toggle('selected', automaChoice === 'volkare');
+          if (el.automaNone) el.automaNone.classList.toggle('selected', automaChoice === 'none');
+          if (!el.automaConfirm) return;
+          if (!automaChoice) disableButton(el.automaConfirm); else enableButton(el.automaConfirm);
+        });
+      }
 
-      el.automaConfirm.addEventListener('click', () => {
-        if (!automaChoice) return;
-        state.showDummy = (automaChoice === 'dummy');
-        closeAutomaModal();
-        renderDummy();
-        saveToStorage();
-      });
+      if (el.automaConfirm) {
+        el.automaConfirm.addEventListener('click', () => {
+          if (!automaChoice) return;
+          state.showDummy = (automaChoice === 'dummy');
+          state.showVolkare = (automaChoice === 'volkare');
+          closeAutomaModal();
+          renderDummy();
+          renderVolkare();
+          saveToStorage();
+        });
+      }
 
+      // New game + randomize dummy
       function randomizeDummyOnNewGame(){
         const colors = ['red','blue','green','white'];
         const firstIdx = Math.floor(Math.random()*colors.length);
@@ -704,27 +971,27 @@
         state.discard = [];
         state.awaitingEndRound = false;
         state.showDummy = false;
+        // reset volkare deck on new game as well
+        state.volkare.deck = { red:4, blue:4, green:4, white:4, special_red:1, special_blue:1, special_green:1, special_white:1 };
+        state.volkare.discard = [];
       }
       function newGame(){
-        // debugging hook - keeps non-destructive
         try { console.debug && console.debug('newGame() called'); } catch(e){}
         state.repIndex = DEFAULT_REP_INDEX;
         state.fame = 0;
         state.previousLevel = getLevelForFame(0);
         randomizeDummyOnNewGame();
         closeTooltip(); closeFameTooltip();
-        el.addFameInput.value = '';
-        // ensure automa selection is reset and dummy hidden until user picks
+        if (el.addFameInput) el.addFameInput.value = '';
         automaChoice = null;
         state.showDummy = false;
-        renderReputation(); renderFameAndLevel(); renderDummy();
-        // persist reset state
+        state.showVolkare = false;
+        renderReputation(); renderFameAndLevel(); renderDummy(); renderVolkare();
         saveToStorage();
-        // prompt the user to choose an Automa
         openAutomaModal();
       }
 
-      // expose the handler globally as a robust fallback for environments where addEventListener might be missed
+      // expose the handler globally so inline onclick works after script runs
       window.__mk_new_game = newGame;
 
       // attach new game handler robustly (guard for DOM timing)
@@ -732,17 +999,13 @@
         try {
           el.newGameBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); newGame(); });
         } catch (err) {
-          // fallback to setting onclick directly
           el.newGameBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); newGame(); };
-        }
-      } else {
-        const fallbackBtn = document.getElementById('new-game');
-        if (fallbackBtn) {
-          fallbackBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); newGame(); });
         }
       }
 
+      // Fame editing & commit
       function commitAddFameEdit() {
+        if (!el.addFameInput) return;
         const raw = (el.addFameInput.value || '').trim();
         if (raw === '') return;
         const parsed = Number(raw);
@@ -758,35 +1021,41 @@
         renderFameAndLevel();
         saveToStorage();
       }
-      el.addFameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); commitAddFameEdit(); el.addFameInput.blur(); }
-        else if (e.key === 'Escape') { e.preventDefault(); el.addFameInput.value = ''; el.addFameInput.blur(); }
-      });
-      el.addFameInput.addEventListener('blur', commitAddFameEdit);
+      if (el.addFameInput) {
+        el.addFameInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); commitAddFameEdit(); el.addFameInput.blur(); }
+          else if (e.key === 'Escape') { e.preventDefault(); el.addFameInput.value = ''; el.addFameInput.blur(); }
+        });
+        el.addFameInput.addEventListener('blur', commitAddFameEdit);
+      }
 
-      el.fameInput.addEventListener('click', (e) => { e.stopPropagation(); toggleFameTooltip(); });
-      el.fameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFameTooltip(); } });
+      if (el.fameInput) {
+        el.fameInput.addEventListener('click', (e) => { e.stopPropagation(); toggleFameTooltip(); });
+        el.fameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFameTooltip(); } });
+      }
 
-      el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
-      el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+      if (el.repUp) el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+      if (el.repDown) el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
 
-      el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
-      el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
+      if (el.playerLevel) {
+        el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
+        el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
+      }
 
       document.addEventListener('click', (e) => {
-        const insideLevel = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.addFameInput || e.target === el.fameInput;
+        const insideLevel = el.playerLevel && (e.target === el.playerLevel || el.playerLevel.contains(e.target) || (el.tooltip && el.tooltip.contains(e.target)) || e.target === el.addFameInput || e.target === el.fameInput);
         if (!insideLevel) closeTooltip();
-        const insideFame = e.target === el.fameInput || el.fameInput.contains(e.target) || el.fameTooltip.contains(e.target) || e.target === el.addFameInput;
+        const insideFame = el.fameInput && (e.target === el.fameInput || el.fameInput.contains(e.target) || (el.fameTooltip && el.fameTooltip.contains(e.target)) || e.target === el.addFameInput);
         if (!insideFame) closeFameTooltip();
       });
 
-      el.backdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
-      el.automaBackdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
+      if (el.backdrop) el.backdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
+      if (el.automaBackdrop) el.automaBackdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
 
       window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') { closeTooltip(); closeFameTooltip(); }
-        if (e.key === 'ArrowLeft') el.repDown.click();
-        if (e.key === 'ArrowRight') el.repUp.click();
+        if (e.key === 'ArrowLeft') el.repDown && el.repDown.click();
+        if (e.key === 'ArrowRight') el.repUp && el.repUp.click();
       });
 
       const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_confirm';
@@ -799,7 +1068,9 @@
             dummy: state.dummy,
             discard: state.discard,
             awaitingEndRound: state.awaitingEndRound,
-            showDummy: state.showDummy
+            showDummy: state.showDummy,
+            showVolkare: state.showVolkare,
+            volkare: state.volkare
           }));
         } catch (err) {}
       }
@@ -820,6 +1091,13 @@
           if (Array.isArray(parsed.discard)) state.discard = parsed.discard;
           if (typeof parsed.awaitingEndRound === 'boolean') state.awaitingEndRound = parsed.awaitingEndRound;
           if (typeof parsed.showDummy === 'boolean') state.showDummy = parsed.showDummy;
+          if (typeof parsed.showVolkare === 'boolean') state.showVolkare = parsed.showVolkare;
+          if (parsed.volkare && typeof parsed.volkare === 'object') {
+            state.volkare = {
+              deck: Object.assign({ red:4, blue:4, green:4, white:4, special_red:1, special_blue:1, special_green:1, special_white:1 }, parsed.volkare.deck || {}),
+              discard: Array.isArray(parsed.volkare.discard) ? parsed.volkare.discard.slice() : []
+            };
+          }
           return true;
         } catch (err) { return false; }
       }
@@ -831,7 +1109,7 @@
       if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
       if (typeof state.fame !== 'number') state.fame = 0;
       state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
-      renderReputation(); renderFameAndLevel(); renderDummy();
+      renderReputation(); renderFameAndLevel(); renderDummy(); renderVolkare();
 
       // show automa modal on initial load only when there's no saved state
       if (!loaded) openAutomaModal();
