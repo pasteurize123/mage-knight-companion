@@ -23,14 +23,15 @@
       --backdrop: rgba(2,6,23,0.6);
       --bronze: #b87333;
       --black: #000000;
+      --wound:#8f8f8f;
     }
     * { box-sizing: border-box; }
-    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; }
+    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
     .phone-shell { width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 12px; }
-    .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+    .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.45); }
     .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
     .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); pointer-events:auto; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 14px rgba(0,0,0,0.45); margin-bottom:12px; }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 18px rgba(0,0,0,0.35); }
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
@@ -47,7 +48,7 @@
 
     .rep-area { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
     .rep-controls-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 6px; }
-    .thumb-btn { width:44px; height:44px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:#eaf2ff; cursor:pointer; }
+    .thumb-btn { width:44px; height:44px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:#fff; cursor:pointer; }
     .thumb-up { background: linear-gradient(180deg, rgba(199,146,79,0.14), rgba(199,146,79,0.06)); color: #fff; border: 1px solid rgba(199,146,79,0.25); }
     .thumb-down { background: linear-gradient(180deg, rgba(217,83,79,0.12), rgba(217,83,79,0.06)); color: #fff; border: 1px solid rgba(217,83,79,0.22); }
     .rep-track { display:flex; gap:8px; align-items:center; overflow:auto; padding:10px 6px; border-radius:10px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
@@ -79,7 +80,7 @@
     /* Dummy Player */
     .dummy-sub { font-weight:700; color:var(--muted); margin:6px 0 4px 0; font-size:13px; text-transform:uppercase; letter-spacing:0.6px; display:flex; gap:8px; align-items:center; justify-content:center; }
     .crystal-row, .cards-row { display:flex; gap:10px; align-items:center; justify-content:center; margin-bottom:8px; }
-    .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:70px; cursor:pointer; }
+    .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:48px; justify-content:center; }
     .dp-count { font-weight:800; color:#eaf2ff; min-width:20px; text-align:center; display:inline-block; }
 
     .dp-dot {
@@ -99,6 +100,10 @@
 
     .dp-dot.bronze svg .fill { fill: var(--bronze); }
     .dp-dot.na svg line { stroke: var(--black); stroke-width:2; stroke-linecap:round; }
+
+    /* wound drop should be red */
+    .dp-dot.wound svg .fill { fill: var(--red); }
+    .dp-dot.wound svg .highlight { opacity: 0.9; fill: rgba(255,255,255,0.18); }
 
     .dummy-controls { display:flex; gap:8px; justify-content:center; margin-top:8px; flex-direction:column; align-items:center; }
     .small-btn { padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.01); color:#eaf2ff; cursor:pointer; }
@@ -128,14 +133,14 @@
     }
 
     .fame-tooltip, .level-tooltip, .modal, .backdrop { position: fixed; }
-    .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:12px; padding:12px; color:#eaf2ff; display:none; z-index:1300; }
+    .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:10px; padding:12px; box-shadow: 0 12px 48px rgba(0,0,0,0.6); display:none; z-index:1400; }
     .fame-tooltip.visible, .level-tooltip.visible { display:block; animation:popin 160ms cubic-bezier(.2,.8,.2,1); }
     @keyframes popin { from { opacity:0; transform: translate(-50%, -50%) scale(0.96); } to { opacity:1; transform: translate(-50%, -50%) scale(1); } }
 
     .backdrop { inset:0; background:var(--backdrop); z-index:1250; display:none; }
     .backdrop.visible { display:block; }
 
-    .modal { top:50%; left:50%; transform:translate(-50%,-50%); background: linear-gradient(180deg, rgba(8,10,12,0.98), rgba(18,20,22,0.98)); padding:16px; border-radius:12px; z-index:1300; min-width:320px; color:#eaf2ff; display:none; }
+    .modal { top:50%; left:50%; transform:translate(-50%,-50%); background: linear-gradient(180deg, rgba(8,10,12,0.98), rgba(18,20,22,0.98)); padding:16px; border-radius:12px; z-index:1300; min-width:320px; display:none; }
     .modal.visible { display:block; }
     .modal h3 { text-align:center; margin-top:0; }
     .modal p { text-align:center; margin:6px 0 12px; }
@@ -152,7 +157,7 @@
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.06)); color:#fff; font-weight:700; cursor:pointer; }
+    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.04)); color:#fff; font-weight:700; cursor:pointer; }
 
     @media (max-width:480px) {
       :root { --phone-width:94vw; }
@@ -272,33 +277,33 @@
         </div>
       </section>
 
-      <!-- Commander Volakre -->
-      <section class="card" id="commander-volakre" aria-labelledby="commander-title">
-        <div class="card-header"><div><h2 id="commander-title" class="card-title">Commander Volakre</h2></div></div>
+      <!-- General Volkare (hidden by default; surfaced as an Automa choice on New Game / start) -->
+      <section class="card" id="commander-volakre" aria-labelledby="commander-title" style="display:none;">
+        <div class="card-header"><div><h2 id="commander-title" class="card-title">General Volkare</h2></div></div>
         <div class="card-body">
           <div class="dummy-sub">Deck <span id="commander-deck-count" style="color:var(--muted);">()</span></div>
 
-          <div class="cards-row" aria-label="Commander Volakre deck">
-            <div class="dp-btn" aria-label="Commander red cards">
+          <div class="cards-row" aria-label="General Volkare deck">
+            <div class="dp-btn" aria-label="General Volkare red cards">
               <div class="dp-dot red" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
               <div class="dp-count">4</div>
             </div>
-            <div class="dp-btn" aria-label="Commander blue cards">
+            <div class="dp-btn" aria-label="General Volkare blue cards">
               <div class="dp-dot blue" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
               <div class="dp-count">4</div>
             </div>
-            <div class="dp-btn" aria-label="Commander green cards">
+            <div class="dp-btn" aria-label="General Volkare green cards">
               <div class="dp-dot green" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
               <div class="dp-count">4</div>
             </div>
-            <div class="dp-btn" aria-label="Commander white cards">
+            <div class="dp-btn" aria-label="General Volkare white cards">
               <div class="dp-dot white" aria-hidden="true"><svg viewBox="0 0 24 32"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg></div>
               <div class="dp-count">4</div>
             </div>
           </div>
 
-          <div class="cards-row" aria-label="Commander Volakre special/star cards">
-            <div class="dp-btn" aria-label="Commander special red card (star)">
+          <div class="cards-row" aria-label="General Volkare special/star cards">
+            <div class="dp-btn" aria-label="General Volkare special red card (star)">
               <div class="dp-dot red" aria-hidden="true">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                   <polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/>
@@ -307,7 +312,7 @@
               <div class="dp-count">1</div>
             </div>
 
-            <div class="dp-btn" aria-label="Commander special blue card (star)">
+            <div class="dp-btn" aria-label="General Volkare special blue card (star)">
               <div class="dp-dot blue" aria-hidden="true">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                   <polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/>
@@ -316,7 +321,7 @@
               <div class="dp-count">1</div>
             </div>
 
-            <div class="dp-btn" aria-label="Commander special green card (star)">
+            <div class="dp-btn" aria-label="General Volkare special green card (star)">
               <div class="dp-dot green" aria-hidden="true">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                   <polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/>
@@ -325,7 +330,7 @@
               <div class="dp-count">1</div>
             </div>
 
-            <div class="dp-btn" aria-label="Commander special white card (star)">
+            <div class="dp-btn" aria-label="General Volkare special white card (star)">
               <div class="dp-dot white" aria-hidden="true">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                   <polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/>
@@ -335,8 +340,23 @@
             </div>
           </div>
 
+          <!-- Wound card (always displayed, default 0) -->
+          <div class="cards-row" aria-label="General Volkare wound cards">
+            <div class="dp-btn" aria-label="General Volkare wound card">
+              <div class="dp-dot wound" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <!-- red blood drop -->
+                  <path class="fill" d="M12 2C12 2 20 7.35 20 13.25A7.25 7.25 0 1 1 4 13.25C4 7.35 12 2 12 2z"/>
+                  <!-- glossy highlight -->
+                  <path class="highlight" d="M10.6 6.2c-.4.6-.6 1.3-.6 2 .1.1.4.1.7 0 .6-.3 1.1-.7 1.5-1.3.3-.5.4-1.1.2-1.5-.4-.2-1 .1-1.8.8z" fill="rgba(255,255,255,0.18)"/>
+                </svg>
+              </div>
+              <div class="dp-count" id="commander-wound-count">0</div>
+            </div>
+          </div>
+
           <div class="dummy-controls" style="margin-top:8px;">
-            <button id="commander-draw" class="small-btn" title="Play a turn with Commander Volakre">Play Turn</button>
+            <button id="commander-draw" class="small-btn" title="Play a turn with General Volkare">Play Turn</button>
           </div>
 
           <div id="commander-mode" class="commander-frenzy" style="display:none;">
@@ -345,7 +365,7 @@
           </div>
 
           <div class="dummy-sub" style="margin-top:12px">Discard Pile</div>
-          <div id="commander-discard" class="discard-pile" aria-live="polite" aria-label="Commander Volakre discard pile (most recent draws)"></div>
+          <div id="commander-discard" class="discard-pile" aria-live="polite" aria-label="General Volkare discard pile (most recent draws)"></div>
         </div>
       </section>
 
@@ -372,6 +392,16 @@
         </div>
         <div style="font-size:13px; color:var(--muted);">Dummy Player</div>
       </div>
+
+      <div class="select-item" data-choice="volkare" id="automa-volkare">
+        <div class="dp-dot red" aria-hidden="true">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path class="fill" d="M12 2C12 2 20 7.35 20 13.25A7.25 7.25 0 1 1 4 13.25C4 7.35 12 2 12 2z"/>
+          </svg>
+        </div>
+        <div style="font-size:13px; color:var(--muted);">General Volkare</div>
+      </div>
+
       <div class="select-item" data-choice="none" id="automa-none">
         <div class="dp-dot na" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -385,6 +415,20 @@
 
     <div style="display:flex; justify-content:center; gap:8px;">
       <button id="automa-confirm" class="small-btn" disabled>Confirm</button>
+    </div>
+  </div>
+
+  <!-- Volkare wound prompt modal (free number input) -->
+  <div id="volkare-wound-modal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="volkare-wound-title">
+    <h3 id="volkare-wound-title">Add Wound Cards</h3>
+
+    <div style="display:flex; gap:8px; justify-content:center; align-items:center; margin-bottom:8px;">
+      <input id="volkare-wound-input" class="fame-input" type="number" inputmode="numeric" min="0" aria-label="Number of wound cards to add" style="width:120px;" />
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:8px;">
+      <button id="volkare-wound-confirm" class="small-btn" disabled>Confirm</button>
+      <button id="volkare-wound-cancel" class="small-btn">Cancel</button>
     </div>
   </div>
 
@@ -452,7 +496,8 @@
           deckItems: [],
           discard: [],
           frenzy: false,
-          domCountNodes: {}
+          domCountNodes: {},
+          visible: false // persist whether commander (General Volkare) is shown
         }
       };
 
@@ -492,13 +537,19 @@
         automaOptions: document.getElementById('automa-options'),
         automaConfirm: document.getElementById('automa-confirm'),
         automaDummy: document.getElementById('automa-dummy'),
+        automaVolkare: document.getElementById('automa-volkare'),
         automaNone: document.getElementById('automa-none'),
         dummyCardSection: document.getElementById('dummy-card'),
         commanderDrawBtn: document.getElementById('commander-draw'),
         commanderDiscard: document.getElementById('commander-discard'),
         commanderSection: document.getElementById('commander-volakre'),
         commanderDeckCount: document.getElementById('commander-deck-count'),
-        commanderMode: document.getElementById('commander-mode')
+        commanderMode: document.getElementById('commander-mode'),
+        commanderWoundCount: document.getElementById('commander-wound-count'),
+        volkareWoundModal: document.getElementById('volkare-wound-modal'),
+        volkareWoundInput: document.getElementById('volkare-wound-input'),
+        volkareWoundConfirm: document.getElementById('volkare-wound-confirm'),
+        volkareWoundCancel: document.getElementById('volkare-wound-cancel')
       };
 
       function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
@@ -624,9 +675,10 @@
         }
       }
       function closeTooltip() {
+        if (!el.tooltip) return;
         el.tooltip.classList.remove('visible');
         el.tooltip.setAttribute('aria-hidden','true');
-        el.playerLevel.setAttribute('aria-pressed','false');
+        if (el.playerLevel) el.playerLevel.setAttribute('aria-pressed','false');
       }
 
       function buildFameRangesTooltip() {
@@ -646,8 +698,15 @@
         }
       }
       function closeFameTooltip() {
+        if (!el.fameTooltip) return;
         el.fameTooltip.classList.remove('visible');
         el.fameTooltip.setAttribute('aria-hidden','true');
+      }
+
+      // Close both tooltips helper (used by document-level click and Escape key)
+      function closeAllTooltips() {
+        closeTooltip();
+        closeFameTooltip();
       }
 
       function buildDeckFromCounts(){
@@ -678,7 +737,8 @@
         const btns = sec.querySelectorAll('.cards-row .dp-btn');
         state.commander.deckItems = [];
         state.commander.domCountNodes = {};
-        ['red','blue','green','white'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
+        // include wound mapping to allow writing count node
+        ['red','blue','green','white','wound'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
 
         btns.forEach(btn=>{
           const dot = btn.querySelector('.dp-dot');
@@ -689,6 +749,7 @@
           else if (dot.classList.contains('blue')) color = 'blue';
           else if (dot.classList.contains('green')) color = 'green';
           else if (dot.classList.contains('white')) color = 'white';
+          else if (dot.classList.contains('wound')) color = 'wound';
           const special = !!dot.querySelector('polygon');
           if (color && countNode) {
             if (special) state.commander.domCountNodes[color].special = countNode;
@@ -704,12 +765,11 @@
       }
 
       function buildCommanderDomNodeMapping(){
-        // build domCountNodes mapping (without reading counts) so we can write counts after resetting deck
         const sec = el.commanderSection;
         if (!sec) return;
         const btns = sec.querySelectorAll('.cards-row .dp-btn');
         state.commander.domCountNodes = {};
-        ['red','blue','green','white'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
+        ['red','blue','green','white','wound'].forEach(c => state.commander.domCountNodes[c] = { normal: null, special: null });
         btns.forEach(btn=>{
           const dot = btn.querySelector('.dp-dot');
           const countNode = btn.querySelector('.dp-count');
@@ -718,6 +778,7 @@
           else if (dot.classList.contains('blue')) color = 'blue';
           else if (dot.classList.contains('green')) color = 'green';
           else if (dot.classList.contains('white')) color = 'white';
+          else if (dot.classList.contains('wound')) color = 'wound';
           const special = !!dot.querySelector('polygon');
           if (color && countNode) {
             if (special) state.commander.domCountNodes[color].special = countNode;
@@ -727,7 +788,7 @@
       }
 
       function recalcCountsToDOM(){
-        const counts = { red:{normal:0,special:0}, blue:{normal:0,special:0}, green:{normal:0,special:0}, white:{normal:0,special:0} };
+        const counts = { red:{normal:0,special:0}, blue:{normal:0,special:0}, green:{normal:0,special:0}, white:{normal:0,special:0}, wound:{normal:0,special:0} };
         (state.commander.deckItems || []).forEach(item => {
           if (!item || !item.color) return;
           const type = item.special ? 'special' : 'normal';
@@ -787,7 +848,16 @@
             if (token.special) {
               d.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon class="fill" points="12,2 14.6,8.8 21.8,9.3 16.5,13.8 18.2,20.8 12,17.2 5.8,20.8 7.5,13.8 2.2,9.3 9.4,8.8"/></svg>`;
             } else {
-              d.innerHTML = `<svg viewBox="0 0 24 32" aria-hidden="true" focusable="false"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
+              if (token.color === 'wound') {
+                // render as red blood drop (matches static HTML)
+                d.innerHTML = ''
+                  + '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">'
+                  + '<path class="fill" d="M12 2C12 2 20 7.35 20 13.25A7.25 7.25 0 1 1 4 13.25C4 7.35 12 2 12 2z"/>'
+                  + '<path class="highlight" d="M10.6 6.2c-.4.6-.6 1.3-.6 2 .1.1.4.1.7 0 .6-.3 1.1-.7 1.5-1.3.3-.5.4-1.1.2-1.5-.4-.2-1 .1-1.8.8z" fill="rgba(255,255,255,0.18)"/>'
+                  + '</svg>';
+              } else {
+                d.innerHTML = `<svg viewBox="0 0 24 32" aria-hidden="true" focusable="false"><rect class="fill" x="2" y="2" width="20" height="28" rx="3"/></svg>`;
+              }
             }
             container.appendChild(d);
           }
@@ -901,13 +971,20 @@
       });
 
       function openAutomaModal() {
+        // hide commander by default at start/new-game; user will choose it explicitly
         state.showDummy = false;
         renderDummy();
+
+        // ensure UI selections reset
         el.automaBackdrop.classList.add('visible'); el.automaBackdrop.setAttribute('aria-hidden','false');
         el.automaModal.classList.add('visible'); el.automaModal.setAttribute('aria-hidden','false');
         el.automaConfirm.disabled = true;
-        el.automaDummy.classList.remove('selected');
-        el.automaNone.classList.remove('selected');
+
+        // clear prior selection markers
+        [el.automaDummy, el.automaVolkare, el.automaNone].forEach(n => { if (n) n.classList.remove('selected'); });
+
+        // make sure commander section hidden until user explicitly chooses Volkare
+        if (el.commanderSection) el.commanderSection.style.display = 'none';
       }
       function closeAutomaModal() {
         el.automaBackdrop.classList.remove('visible'); el.automaBackdrop.setAttribute('aria-hidden','true');
@@ -919,14 +996,108 @@
         const item = e.target.closest('.select-item');
         if (!item) return;
         automaChoice = item.getAttribute('data-choice');
-        el.automaDummy.classList.toggle('selected', automaChoice === 'dummy');
-        el.automaNone.classList.toggle('selected', automaChoice === 'none');
+        // toggle visual selected state across all three options
+        if (el.automaDummy) el.automaDummy.classList.toggle('selected', automaChoice === 'dummy');
+        if (el.automaVolkare) el.automaVolkare.classList.toggle('selected', automaChoice === 'volkare');
+        if (el.automaNone) el.automaNone.classList.toggle('selected', automaChoice === 'none');
         el.automaConfirm.disabled = !automaChoice;
+      });
+
+      // open the wound prompt modal (reusing the automa backdrop)
+      function openVolkareWoundModal() {
+        // show the wound modal
+        el.automaBackdrop.classList.add('visible');
+        el.automaBackdrop.setAttribute('aria-hidden','false');
+        el.volkareWoundModal.classList.add('visible');
+        el.volkareWoundModal.setAttribute('aria-hidden','false');
+        // reset input to have no value and keep confirm disabled until valid input
+        if (el.volkareWoundInput) {
+          el.volkareWoundInput.value = '';
+          el.volkareWoundInput.focus();
+        }
+        if (el.volkareWoundConfirm) el.volkareWoundConfirm.disabled = true;
+      }
+      function closeVolkareWoundModal() {
+        el.volkareWoundModal.classList.remove('visible');
+        el.volkareWoundModal.setAttribute('aria-hidden','true');
+        el.automaBackdrop.classList.remove('visible');
+        el.automaBackdrop.setAttribute('aria-hidden','true');
+      }
+
+      // handle free number input for wounds
+      if (el.volkareWoundInput) {
+        el.volkareWoundInput.addEventListener('input', (e) => {
+          const raw = (e.target.value || '').trim();
+          // require a non-empty numeric value >= 0
+          const parsed = Number(raw);
+          const valid = raw !== '' && Number.isFinite(parsed) && !Number.isNaN(parsed) && parsed >= 0;
+          if (el.volkareWoundConfirm) el.volkareWoundConfirm.disabled = !valid;
+        });
+      }
+
+      el.volkareWoundCancel.addEventListener('click', () => {
+        // Default to 0 wounds if cancelled, still show commander
+        state.commander.visible = true;
+        if (el.commanderSection) el.commanderSection.style.display = 'block';
+        // ensure DOM mapping and counts are correct (no added wound cards)
+        buildCommanderDomNodeMapping();
+        recalcCountsToDOM();
+        renderCommanderDiscard();
+        renderCommanderMode();
+        closeVolkareWoundModal();
+        saveToStorage();
+      });
+
+      el.volkareWoundConfirm.addEventListener('click', () => {
+        // read numeric wounds from free input (allow large numbers)
+        let wounds = 0;
+        if (el.volkareWoundInput) {
+          const parsed = parseInt(el.volkareWoundInput.value, 10);
+          wounds = Number.isFinite(parsed) && !Number.isNaN(parsed) && parsed >= 0 ? parsed : 0;
+        }
+        // clamp to a safe upper bound to avoid accidental huge numbers
+        wounds = clamp(wounds, 0, 9999);
+
+        // add wound cards into commander deckItems
+        for (let i=0;i<wounds;i++) state.commander.deckItems.push({ color: 'wound', special: false });
+        // mark commander visible and update UI and DOM mappings
+        state.commander.visible = true;
+        if (el.commanderSection) el.commanderSection.style.display = 'block';
+        buildCommanderDomNodeMapping();
+        recalcCountsToDOM();
+        renderCommanderDiscard();
+        renderCommanderMode();
+        closeVolkareWoundModal();
+        saveToStorage();
       });
 
       el.automaConfirm.addEventListener('click', () => {
         if (!automaChoice) return;
+        // Show Dummy player if dummy chosen
         state.showDummy = (automaChoice === 'dummy');
+
+        // If Volkare chosen, we want to prompt for wound cards and then show him
+        if (automaChoice === 'volkare') {
+          // close the automa modal and open the wound prompt to ask how many wound cards to add
+          closeAutomaModal();
+          // ensure commander DOM mapping exists so recalc can write counts after adding wounds
+          buildCommanderDomNodeMapping();
+          openVolkareWoundModal();
+          return;
+        }
+
+        // Show or hide General Volkare depending on selection
+        state.commander.visible = (automaChoice === 'volkare');
+        if (el.commanderSection) {
+          el.commanderSection.style.display = state.commander.visible ? 'block' : 'none';
+        }
+
+        // If we show commander, ensure DOM mapping / counts are set up
+        buildCommanderDomNodeMapping();
+        recalcCountsToDOM();
+        renderCommanderDiscard();
+        renderCommanderMode();
+
         closeAutomaModal();
         renderDummy();
         saveToStorage();
@@ -948,15 +1119,17 @@
 
         // Reset commander to DEFAULT VALUES on New Game:
         // default = 4 normal cards of each color, plus 1 special/star of each color
+        // wound card DOM is present and will be shown with count (default 0)
         state.commander.deckItems = [];
         ['red','blue','green','white'].forEach(color => {
           for (let i=0;i<4;i++) state.commander.deckItems.push({ color, special: false });
           state.commander.deckItems.push({ color, special: true }); // special star card
         });
+        // do not add wound cards by default
         state.commander.discard = [];
         state.commander.frenzy = false;
 
-        // ensure we have DOM nodes mapped to write counts
+        // ensure we have DOM nodes mapped to write counts (even if hidden)
         buildCommanderDomNodeMapping();
         recalcCountsToDOM();
         renderCommanderDiscard();
@@ -968,6 +1141,10 @@
         state.repIndex = DEFAULT_REP_INDEX;
         state.fame = 0;
         state.previousLevel = getLevelForFame(0);
+        // hide commander until user selects it in automa modal
+        state.commander.visible = false;
+        if (el.commanderSection) el.commanderSection.style.display = 'none';
+
         randomizeDummyOnNewGame();
         closeTooltip(); closeFameTooltip();
         el.addFameInput.value = '';
@@ -998,53 +1175,68 @@
         const raw = (el.addFameInput.value || '').trim();
         if (raw === '') return;
         const parsed = Number(raw);
-        const delta = Number.isFinite(parsed) ? Math.floor(parsed) : 0;
-        if (delta === 0) { el.addFameInput.value = ''; return; }
-        const prevLevel = state.previousLevel;
-        state.fame = clamp(state.fame + delta, 0, 9999);
-        state.previousLevel = getLevelForFame(state.fame);
-        if (state.previousLevel > prevLevel) {
-          showGainedLevelsPersist(prevLevel, state.previousLevel);
+        if (Number.isNaN(parsed)) {
+          el.addFameInput.value = '';
+          return;
         }
+        const prevLevel = getLevelForFame(state.fame);
+        state.fame = clamp((Number(state.fame)||0) + parsed, 0, 9999);
         el.addFameInput.value = '';
+        const newLevel = getLevelForFame(state.fame);
+        state.previousLevel = newLevel;
         renderFameAndLevel();
+        if (newLevel > prevLevel) showGainedLevelsPersist(prevLevel, newLevel);
         saveToStorage();
       }
-      el.addFameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); commitAddFameEdit(); el.addFameInput.blur(); }
-        else if (e.key === 'Escape') { e.preventDefault(); el.addFameInput.value = ''; el.addFameInput.blur(); }
-      });
+
+      // wire up some UI interactions
+      buildRepTrack();
+      renderReputation();
+      renderFameAndLevel();
+      buildFameRangesTooltip();
+      buildCommanderDomNodeMapping();
+      // try to initialize commander state from DOM counts if any
+      initCommanderStateFromDOM();
+
+      // accessibility / interactions
+      el.playerLevel.addEventListener('click', toggleTooltip);
+      el.playerLevel.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') toggleTooltip(); });
+      el.fameInput.addEventListener('click', toggleFameTooltip);
+      el.fameInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') toggleFameTooltip(); });
+
+      // Close tooltips when clicking elsewhere on the page (or pressing Escape)
+      document.addEventListener('click', (e) => {
+        try {
+          const target = e.target;
+          const clickedInsideTooltip = (el.tooltip && el.tooltip.contains(target)) || (el.fameTooltip && el.fameTooltip.contains(target));
+          const clickedInsideControl = (el.playerLevel && el.playerLevel.contains(target)) || (el.fameInput && el.fameInput.contains(target));
+          // if click is outside both tooltips and outside the controls that toggle them, close both
+          if (!clickedInsideTooltip && !clickedInsideControl) {
+            closeAllTooltips();
+          }
+        } catch (err) {
+          // silent
+        }
+      }, false);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          // also close wound prompt if open
+          try { closeVolkareWoundModal(); } catch (_) {}
+          closeAllTooltips();
+        }
+      }, false);
+
+      el.repUp.addEventListener('click', ()=>{ state.repIndex = clamp(state.repIndex+1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+      el.repDown.addEventListener('click', ()=>{ state.repIndex = clamp(state.repIndex-1,0,REP_TRACK.length-1); renderReputation(); saveToStorage(); });
+
+      el.addFameInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') commitAddFameEdit(); });
       el.addFameInput.addEventListener('blur', commitAddFameEdit);
 
-      el.fameInput.addEventListener('click', (e) => { e.stopPropagation(); toggleFameTooltip(); });
-      el.fameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFameTooltip(); } });
-
-      el.repUp.addEventListener('click', () => { state.repIndex = clamp(state.repIndex+1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
-      el.repDown.addEventListener('click', () => { state.repIndex = clamp(state.repIndex-1, 0, REP_TRACK.length-1); renderReputation(); saveToStorage(); });
-
-      el.playerLevel.addEventListener('click', (e) => { e.stopPropagation(); toggleTooltip(); });
-      el.playerLevel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTooltip(); } });
-
-      document.addEventListener('click', (e) => {
-        const insideLevel = e.target === el.playerLevel || el.playerLevel.contains(e.target) || el.tooltip.contains(e.target) || e.target === el.addFameInput || e.target === el.fameInput;
-        if (!insideLevel) closeTooltip();
-        const insideFame = e.target === el.fameInput || el.fameInput.contains(e.target) || el.fameTooltip.contains(e.target) || e.target === el.addFameInput;
-        if (!insideFame) closeFameTooltip();
-      });
-
-      el.backdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
-      el.automaBackdrop.addEventListener('click', (e)=>{ e.stopPropagation(); });
-
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { closeTooltip(); closeFameTooltip(); }
-        if (e.key === 'ArrowLeft') el.repDown.click();
-        if (e.key === 'ArrowRight') el.repUp.click();
-      });
-
-      const STORAGE_KEY = 'mk_companion_v1_reptrack_fame_confirm';
+      // storage helpers
       function saveToStorage(){
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          const toStore = {
             repIndex: state.repIndex,
             fame: state.fame,
             previousLevel: state.previousLevel,
@@ -1055,61 +1247,56 @@
             commander: {
               deckItems: state.commander.deckItems,
               discard: state.commander.discard,
-              frenzy: state.commander.frenzy
+              frenzy: state.commander.frenzy,
+              visible: state.commander.visible
             }
-          }));
+          };
+          localStorage.setItem('mk_state_v1', JSON.stringify(toStore));
         } catch (err) {}
       }
       function loadFromStorage(){
         try {
-          const raw = localStorage.getItem(STORAGE_KEY);
+          const raw = localStorage.getItem('mk_state_v1');
           if (!raw) return false;
           const parsed = JSON.parse(raw);
-          if (typeof parsed.repIndex === 'number') state.repIndex = parsed.repIndex;
-          if (typeof parsed.fame === 'number') state.fame = parsed.fame;
-          if (typeof parsed.previousLevel === 'number') state.previousLevel = parsed.previousLevel;
-          if (parsed.dummy && typeof parsed.dummy === 'object') {
-            state.dummy = {
-              crystals: Object.assign({ red:0, blue:0, green:0, white:0 }, parsed.dummy.crystals || {}),
-              cards: Object.assign({ red:0, blue:0, green:0, white:0 }, parsed.dummy.cards || {})
-            };
-          }
-          if (Array.isArray(parsed.discard)) state.discard = parsed.discard;
-          if (typeof parsed.awaitingEndRound === 'boolean') state.awaitingEndRound = parsed.awaitingEndRound;
-          if (typeof parsed.showDummy === 'boolean') state.showDummy = parsed.showDummy;
-          if (parsed.commander && typeof parsed.commander === 'object') {
-            state.commander.deckItems = Array.isArray(parsed.commander.deckItems) ? parsed.commander.deckItems : [];
-            state.commander.discard = Array.isArray(parsed.commander.discard) ? parsed.commander.discard : [];
-            state.commander.frenzy = !!parsed.commander.frenzy;
+          state.repIndex = parsed.repIndex || state.repIndex;
+          state.fame = parsed.fame || state.fame;
+          state.previousLevel = parsed.previousLevel || state.previousLevel;
+          state.dummy = parsed.dummy || state.dummy;
+          state.discard = parsed.discard || state.discard;
+          state.awaitingEndRound = parsed.awaitingEndRound || false;
+          state.showDummy = parsed.showDummy || false;
+          if (parsed.commander) {
+            state.commander.deckItems = parsed.commander.deckItems || state.commander.deckItems;
+            state.commander.discard = parsed.commander.discard || state.commander.discard;
+            state.commander.frenzy = parsed.commander.frenzy || false;
+            state.commander.visible = !!parsed.commander.visible;
           }
           return true;
         } catch (err) { return false; }
       }
 
-      buildRepTrack();
-      const loaded = loadFromStorage();
-      const hasDummy = Object.values(state.dummy.crystals).some(v=>v>0) || Object.values(state.dummy.cards).some(v=>v>0);
-      if (!loaded || !hasDummy) randomizeDummyOnNewGame();
-      if (typeof state.repIndex !== 'number') state.repIndex = DEFAULT_REP_INDEX;
-      if (typeof state.fame !== 'number') state.fame = 0;
-      state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
-
-      if (state.commander.deckItems && state.commander.deckItems.length) {
-        // Build DOM node mapping for counts and sync DOM
+      // try load
+      if (loadFromStorage()) {
         buildCommanderDomNodeMapping();
         recalcCountsToDOM();
+        renderReputation();
+        renderFameAndLevel();
+        renderDummy();
         renderCommanderDiscard();
         renderCommanderMode();
+        // show/hide commander according to stored preference
+        if (el.commanderSection) el.commanderSection.style.display = state.commander.visible ? 'block' : 'none';
       } else {
-        // No stored commander state - initialize from DOM defaults
-        initCommanderStateFromDOM();
+        // start fresh
+        newGame();
       }
 
-      renderReputation(); renderFameAndLevel(); renderDummy();
+      // Expose some helpers for debugging in console
+      window.__mk_state = state;
+      window.__mk_save = saveToStorage;
+      window.__mk_load = loadFromStorage;
 
-      if (!loaded) openAutomaModal();
-
-      setInterval(saveToStorage, 2000);
     })();
   </script>
 </body>
