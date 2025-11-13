@@ -25,15 +25,18 @@
       --black: #000000;
     }
     * { box-sizing: border-box; }
-    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; }
     .phone-shell { width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 12px; }
     .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
     .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
     .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); pointer-events:auto; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 14px rgba(0,0,0,0.45); margin-bottom:12px; }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 8px rgba(0,0,0,0.4); margin-bottom:10px; }
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
+
+    /* ensure controls card body uses same internal spacing */
+    .controls-card .card-body { display:flex; flex-direction:column; gap:8px; align-items:stretch; }
 
     /* center titles for Reputation, Fame and Dummy Player */
     #reputation-card .card-header,
@@ -46,11 +49,11 @@
 
     .rep-area { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
     .rep-controls-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 6px; }
-    .thumb-btn { width:44px; height:44px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:#eaf2ff; cursor:pointer; font-size:18px; }
+    .thumb-btn { width:44px; height:44px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:#eaf2ff; cursor:pointer; }
     .thumb-up { background: linear-gradient(180deg, rgba(199,146,79,0.14), rgba(199,146,79,0.06)); color: #fff; border: 1px solid rgba(199,146,79,0.25); }
     .thumb-down { background: linear-gradient(180deg, rgba(217,83,79,0.12), rgba(217,83,79,0.06)); color: #fff; border: 1px solid rgba(217,83,79,0.22); }
     .rep-track { display:flex; gap:8px; align-items:center; overflow:auto; padding:10px 6px; border-radius:10px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
-    .rep-step { min-width:48px; padding:10px 6px; border-radius:10px; background:var(--track-bg); text-align:center; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; cursor:pointer; transition: transform 160ms cubic-bezier(.2,.8,.2,1), box-shadow 160ms ease, border-color 160ms ease; will-change: transform; }
+    .rep-step { min-width:48px; padding:10px 6px; border-radius:10px; background:var(--track-bg); text-align:center; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; cursor:pointer; }
     .rep-step.zero { background: rgba(246,211,101,0.08); color:var(--yellow); border:1px solid rgba(246,211,101,0.18); }
     .rep-step.positive { background: rgba(199,146,79,0.08); color:var(--gold); border:1px solid rgba(199,146,79,0.18); }
     .rep-step.negative { background: rgba(217,83,79,0.08); color:var(--red); border:1px solid rgba(217,83,79,0.18); }
@@ -63,7 +66,7 @@
     .fame-input[readonly] { background: rgba(255,255,255,0.02); cursor:default; color:#eaf2ff; }
     .fame-input.editing { outline: 2px solid rgba(199,146,79,0.18); }
 
-    .level-badge { min-width:160px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); cursor:pointer; }
+    .level-badge { min-width:160px; padding:8px 10px; border-radius:10px; background: rgba(255,255,255,0.02); color:var(--muted); text-align:center; font-weight:700; border:1px solid rgba(255,255,255,0.03); }
     .level-badge.level-1 { color:#e6eef6; background: rgba(0,0,0,0.12); }
     .level-badge.level-2 { color:var(--yellow); border-color: rgba(246,211,101,0.12); }
     .level-badge.level-3 { color:var(--gold); border-color: rgba(199,146,79,0.12); }
@@ -78,7 +81,7 @@
     /* Dummy Player */
     .dummy-sub { font-weight:700; color:var(--muted); margin:6px 0 4px 0; font-size:13px; text-transform:uppercase; letter-spacing:0.6px; display:flex; gap:8px; align-items:center; justify-content:center; }
     .crystal-row, .cards-row { display:flex; gap:10px; align-items:center; justify-content:center; margin-bottom:8px; }
-    .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:72px; justify-content:center; }
+    .dp-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:var(--muted); min-width:64px; }
     .dp-count { font-weight:800; color:#eaf2ff; min-width:20px; text-align:center; }
 
     /* Unified dp-dot: container for SVG icon */
@@ -108,19 +111,19 @@
     .end-round-desc { font-size:12px; color:var(--muted); margin-top:6px; }
 
     /* Discard pile */
-    .discard-pile { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; padding:8px; max-height:96px; overflow:auto; border-radius:8px; background: rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); margin-top:8px; }
+    .discard-pile { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; padding:8px; max-height:96px; overflow:auto; border-radius:8px; background: rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); }
     .discard-sep { width:12px; height:1px; display:inline-block; }
 
     /* Centered popups and modal */
     .fame-tooltip, .level-tooltip, .modal, .backdrop { position: fixed; }
-    .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:12px; padding:14px; display:none; z-index:1200; border:1px solid rgba(255,255,255,0.06); box-shadow:0 18px 50px rgba(0,0,0,0.6); }
+    .fame-tooltip, .level-tooltip { top:50%; left:50%; transform:translate(-50%,-50%); min-width:260px; max-width:90vw; background: linear-gradient(180deg, rgba(10,10,10,0.98), rgba(20,20,20,0.98)); border-radius:10px; padding:12px; box-shadow: 0 12px 36px rgba(0,0,0,0.6); z-index:1400; display:none; }
     .fame-tooltip.visible, .level-tooltip.visible { display:block; animation:popin 160ms cubic-bezier(.2,.8,.2,1); }
     @keyframes popin { from { opacity:0; transform: translate(-50%, -50%) scale(0.96); } to { opacity:1; transform: translate(-50%, -50%) scale(1); } }
 
     .backdrop { inset:0; background:var(--backdrop); z-index:1250; display:none; }
     .backdrop.visible { display:block; }
 
-    .modal { top:50%; left:50%; transform:translate(-50%,-50%); background: linear-gradient(180deg, rgba(8,10,12,0.98), rgba(18,20,22,0.98)); padding:16px; border-radius:12px; z-index:1300; min-width:300px; max-width:92vw; display:none; color:var(--muted); border:1px solid rgba(255,255,255,0.04); box-shadow:0 24px 80px rgba(0,0,0,0.6); }
+    .modal { top:50%; left:50%; transform:translate(-50%,-50%); background: linear-gradient(180deg, rgba(8,10,12,0.98), rgba(18,20,22,0.98)); padding:16px; border-radius:12px; z-index:1300; min-width:320px; display:none; }
     .modal.visible { display:block; }
     .modal h3 { text-align:center; margin-top:0; } /* center modal titles */
     .modal p { text-align:center; margin:6px 0 12px; } /* center descriptions */
@@ -137,7 +140,7 @@
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.08)); color:#ffdcb3; font-weight:700; cursor:pointer; margin:8px 0 4px 0; }
+    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.04)); color:#eaf2ff; font-weight:700; cursor:pointer; }
 
     @media (max-width:480px) {
       :root { --phone-width:94vw; }
@@ -152,7 +155,7 @@
 <body>
   <div class="phone-shell">
     <div class="frame" role="application" aria-label="Mage Knight Companion">
-      <header class="topbar"><h1>Mage Knight Companion</h1></header>
+      <header class="topbar"><h1></h1></header>
 
       <!-- Reputation -->
       <section class="card" id="reputation-card" aria-labelledby="rep-title">
@@ -254,7 +257,7 @@
             </div>
 
             <div class="dummy-controls" aria-hidden="false">
-              <button id="draw-cards" class="small-btn" title="Draw cards">Draw</button>
+              <button id="draw-cards" class="small-btn" title="Play a turn">Play Turn</button>
               <div id="end-desc" class="end-round-desc" style="display:none;">End of Round Announced</div>
             </div>
 
@@ -264,10 +267,14 @@
         </div>
       </section>
 
-      <!-- New Game -->
-      <div>
-        <button id="new-game" class="new-game-btn primary" title="Reset the app to a new game">New Game</button>
-      </div>
+      <!-- Controls: Undo + New Game (as a card to match spacing) -->
+      <section class="card controls-card" id="controls-card" aria-labelledby="controls-title">
+        <div class="card-header"><div><h2 id="controls-title" class="card-title" style="visibility:hidden;">Controls</h2></div></div>
+        <div class="card-body">
+          <button type="button" id="undo-automa" class="small-btn" title="Undo last Automa action" style="display:none;" aria-hidden="true">Undo Automa</button>
+          <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game" onclick="if(window.__mk_new_game) window.__mk_new_game();">New Game</button>
+        </div>
+      </section>
 
       <footer class="footer"></footer>
     </div>
@@ -366,7 +373,8 @@
         dummy: { crystals:{red:0,blue:0,green:0,white:0}, cards:{red:0,blue:0,green:0,white:0} },
         discard: [],
         awaitingEndRound: false,
-        showDummy: false
+        showDummy: false,
+        automaHistory: [] // stack of snapshots for undo
       };
 
       const el = {
@@ -395,6 +403,7 @@
         crystalTotal: document.getElementById('crystal-total'),
         cardTotal: document.getElementById('card-total'),
         newGameBtn: document.getElementById('new-game'),
+        undoBtn: document.getElementById('undo-automa'),
         backdrop: document.getElementById('backdrop'),
         endModal: document.getElementById('end-modal'),
         selectCrystals: document.getElementById('select-crystals'),
@@ -412,6 +421,7 @@
       function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
       function sumObject(obj){ return Object.values(obj || {}).reduce((a,b)=>a+(Number(b)||0),0); }
       function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+      function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
 
       function classifyLabel(label){ if (label === "0") return 'zero'; if (label === "X" || label.startsWith('-')) return 'negative'; if (label.startsWith('+')) return 'positive'; return ''; }
       function colorForLabel(label){
@@ -510,11 +520,13 @@
           el.drawBtn.textContent = 'End Round';
           el.endDesc.style.display = 'block';
         } else {
-          el.drawBtn.textContent = 'Draw';
+          el.drawBtn.textContent = 'Play Turn';
           el.endDesc.style.display = 'none';
         }
 
         el.dummyCardSection.style.display = state.showDummy ? 'block' : 'none';
+
+        updateUndoState();
       }
 
       function buildFullTooltip(level) {
@@ -588,10 +600,60 @@
         return pickRandom(top);
       }
 
+      // --- Automa undo helpers ---
+      function pushAutomaSnapshot() {
+        try {
+          const snap = {
+            repIndex: state.repIndex,
+            fame: state.fame,
+            previousLevel: state.previousLevel,
+            dummy: deepClone(state.dummy),
+            discard: Array.isArray(state.discard) ? state.discard.slice() : [],
+            awaitingEndRound: state.awaitingEndRound,
+            showDummy: state.showDummy
+          };
+          state.automaHistory = state.automaHistory || [];
+          state.automaHistory.push(snap);
+          // cap history to avoid unbounded growth
+          if (state.automaHistory.length > 100) state.automaHistory.shift();
+          updateUndoState();
+          saveToStorage();
+        } catch (err) {}
+      }
+
+      function updateUndoState() {
+        // show Undo button only when automa (Dummy) is currently active and history has snapshots
+        const hasHistory = Array.isArray(state.automaHistory) && state.automaHistory.length > 0;
+        const shouldShow = !!state.showDummy && hasHistory;
+        if (el.undoBtn) {
+          el.undoBtn.disabled = !hasHistory;
+          el.undoBtn.style.display = shouldShow ? 'inline-flex' : 'none';
+          el.undoBtn.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
+        }
+      }
+
+      function undoAutoma() {
+        if (!Array.isArray(state.automaHistory) || state.automaHistory.length === 0) return;
+        const snap = state.automaHistory.pop();
+        // restore snapshot
+        state.repIndex = typeof snap.repIndex === 'number' ? snap.repIndex : DEFAULT_REP_INDEX;
+        state.fame = typeof snap.fame === 'number' ? snap.fame : 0;
+        state.previousLevel = typeof snap.previousLevel === 'number' ? snap.previousLevel : getLevelForFame(state.fame || 0);
+        state.dummy = deepClone(snap.dummy || { crystals:{red:0,blue:0,green:0,white:0}, cards:{red:0,blue:0,green:0,white:0} });
+        state.discard = Array.isArray(snap.discard) ? snap.discard.slice() : [];
+        state.awaitingEndRound = !!snap.awaitingEndRound;
+        state.showDummy = !!snap.showDummy;
+        renderReputation(); renderFameAndLevel(); renderDummy();
+        saveToStorage();
+      }
+      // --- end undo helpers ---
+
       el.drawBtn.addEventListener('click', () => {
         const cardsLeft = sumObject(state.dummy.cards);
         if (cardsLeft <= 0) {
           if (!state.awaitingEndRound) {
+            // if the dummy is visible (automa selected) record snapshot to allow undo
+            if (state.showDummy) pushAutomaSnapshot();
             state.awaitingEndRound = true;
             renderDummy();
             saveToStorage();
@@ -601,6 +663,9 @@
             return;
           }
         }
+
+        // record snapshot for undo only when dummy (Automa) is active
+        if (state.showDummy) pushAutomaSnapshot();
 
         const initial = drawFromDeck(3);
         state.discard = state.discard.concat(initial);
@@ -684,6 +749,8 @@
 
       el.automaConfirm.addEventListener('click', () => {
         if (!automaChoice) return;
+        // save snapshot so the automa choice can be undone
+        pushAutomaSnapshot();
         state.showDummy = (automaChoice === 'dummy');
         closeAutomaModal();
         renderDummy();
@@ -705,17 +772,43 @@
         state.showDummy = false;
       }
       function newGame(){
+        // debugging hook - keeps non-destructive
+        try { console.debug && console.debug('newGame() called'); } catch(e){}
         state.repIndex = DEFAULT_REP_INDEX;
         state.fame = 0;
         state.previousLevel = getLevelForFame(0);
         randomizeDummyOnNewGame();
         closeTooltip(); closeFameTooltip();
         el.addFameInput.value = '';
+        // reset automa history and choice so user must pick again
+        automaChoice = null;
+        state.showDummy = false;
+        state.automaHistory = [];
         renderReputation(); renderFameAndLevel(); renderDummy();
-        openAutomaModal();
+        // persist reset state
         saveToStorage();
+        // prompt the user to choose an Automa
+        openAutomaModal();
       }
-      el.newGameBtn.addEventListener('click', newGame);
+
+      // expose the handler globally as a robust fallback for environments where addEventListener might be missed
+      window.__mk_new_game = newGame;
+
+      // attach new game and undo handlers robustly (guard for DOM timing)
+      if (el.newGameBtn) {
+        try {
+          el.newGameBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); newGame(); });
+        } catch (err) {
+          el.newGameBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); newGame(); };
+        }
+      }
+      if (el.undoBtn) {
+        try {
+          el.undoBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); undoAutoma(); });
+        } catch (err) {
+          el.undoBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); undoAutoma(); };
+        }
+      }
 
       function commitAddFameEdit() {
         const raw = (el.addFameInput.value || '').trim();
@@ -774,7 +867,8 @@
             dummy: state.dummy,
             discard: state.discard,
             awaitingEndRound: state.awaitingEndRound,
-            showDummy: state.showDummy
+            showDummy: state.showDummy,
+            automaHistory: state.automaHistory || []
           }));
         } catch (err) {}
       }
@@ -795,6 +889,7 @@
           if (Array.isArray(parsed.discard)) state.discard = parsed.discard;
           if (typeof parsed.awaitingEndRound === 'boolean') state.awaitingEndRound = parsed.awaitingEndRound;
           if (typeof parsed.showDummy === 'boolean') state.showDummy = parsed.showDummy;
+          if (Array.isArray(parsed.automaHistory)) state.automaHistory = parsed.automaHistory;
           return true;
         } catch (err) { return false; }
       }
@@ -808,8 +903,8 @@
       state.previousLevel = state.previousLevel || getLevelForFame(state.fame || 0);
       renderReputation(); renderFameAndLevel(); renderDummy();
 
-      // show automa modal on initial load
-      openAutomaModal();
+      // show automa modal on initial load only when there's no saved state
+      if (!loaded) openAutomaModal();
 
       setInterval(saveToStorage, 2000);
     })();
