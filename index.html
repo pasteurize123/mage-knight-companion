@@ -35,8 +35,11 @@
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
 
-    /* ensure controls card body uses same internal spacing */
-    .controls-card .card-body { display:flex; flex-direction:column; gap:8px; align-items:stretch; }
+    /* ensure controls card body uses same internal spacing and center buttons */
+    .controls-card .card-body { display:flex; flex-direction:column; gap:8px; align-items:center; }
+
+    /* bring controls above modal/backdrop so New Game is always clickable */
+    .controls-card { position:relative; z-index:1405; pointer-events:auto; }
 
     /* center titles for Reputation, Fame and Dummy Player */
     #reputation-card .card-header,
@@ -140,7 +143,37 @@
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.04)); color:#eaf2ff; font-weight:700; cursor:pointer; }
+    /* New Game button: gold accent (uses --gold) */
+    .new-game-btn {
+      display:block;
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.04);
+      background: linear-gradient(180deg, rgba(199,146,79,0.18), rgba(199,146,79,0.06));
+      color:#eaf2ff;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    /* Undo button: red accent, same size/shape */
+    .undo-btn {
+      display:block;
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.04);
+      background: linear-gradient(180deg, rgba(217,83,79,0.18), rgba(217,83,79,0.06));
+      color:#eaf2ff;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    /* Confirm-new-game modal (above controls) */
+    .confirm-modal { z-index:1505; min-width:300px; }
+    .confirm-modal .actions { margin-top:12px; display:flex; gap:8px; justify-content:center; }
+    .confirm-yes { background: linear-gradient(180deg, rgba(199,146,79,0.18), rgba(199,146,79,0.06)); border-radius:8px; padding:8px 12px; color:#fff; border:1px solid rgba(255,255,255,0.04); font-weight:700; cursor:pointer; }
+    .confirm-no { background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border-radius:8px; padding:8px 12px; color:var(--muted); border:1px solid rgba(255,255,255,0.04); font-weight:700; cursor:pointer; }
 
     @media (max-width:480px) {
       :root { --phone-width:94vw; }
@@ -271,8 +304,8 @@
       <section class="card controls-card" id="controls-card" aria-labelledby="controls-title">
         <div class="card-header"><div><h2 id="controls-title" class="card-title" style="visibility:hidden;">Controls</h2></div></div>
         <div class="card-body">
-          <button type="button" id="undo-automa" class="small-btn" title="Undo last Automa action" style="display:none;" aria-hidden="true">Undo Automa</button>
-          <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game" onclick="if(window.__mk_new_game) window.__mk_new_game();">New Game</button>
+          <button type="button" id="undo-automa" class="undo-btn" title="Undo last Automa action" style="display:none;" aria-hidden="true">Undo Automa</button>
+          <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game">New Game</button>
         </div>
       </section>
 
@@ -310,6 +343,17 @@
 
     <div style="display:flex; justify-content:center; gap:8px;">
       <button id="automa-confirm" class="small-btn" disabled>Confirm</button>
+    </div>
+  </div>
+
+  <!-- Confirm New Game modal (in-app, styled) -->
+  <div id="confirm-new-game-backdrop" class="backdrop" aria-hidden="true" style="z-index:1500;"></div>
+  <div id="confirm-new-game-modal" class="modal confirm-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="confirm-new-game-title" style="z-index:1505;">
+    <h3 id="confirm-new-game-title">Start a New Game?</h3>
+    <p>Are you sure you want to start a new game? This will reset reputation, fame and the dummy deck.</p>
+    <div class="actions">
+      <button id="confirm-new-yes" class="confirm-yes" type="button">Yes</button>
+      <button id="confirm-new-no" class="confirm-no" type="button">No</button>
     </div>
   </div>
 
@@ -415,7 +459,11 @@
         automaConfirm: document.getElementById('automa-confirm'),
         automaDummy: document.getElementById('automa-dummy'),
         automaNone: document.getElementById('automa-none'),
-        dummyCardSection: document.getElementById('dummy-card')
+        dummyCardSection: document.getElementById('dummy-card'),
+        confirmNewBackdrop: document.getElementById('confirm-new-game-backdrop'),
+        confirmNewModal: document.getElementById('confirm-new-game-modal'),
+        confirmNewYes: document.getElementById('confirm-new-yes'),
+        confirmNewNo: document.getElementById('confirm-new-no')
       };
 
       function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
@@ -627,7 +675,7 @@
         const shouldShow = !!state.showDummy && hasHistory;
         if (el.undoBtn) {
           el.undoBtn.disabled = !hasHistory;
-          el.undoBtn.style.display = shouldShow ? 'inline-flex' : 'none';
+          el.undoBtn.style.display = shouldShow ? 'block' : 'none';
           el.undoBtn.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
         }
       }
@@ -789,17 +837,38 @@
         saveToStorage();
         // prompt the user to choose an Automa
         openAutomaModal();
+        // hide confirm modal if open
+        hideConfirmNewGame();
       }
 
-      // expose the handler globally as a robust fallback for environments where addEventListener might be missed
+      // Confirm modal controls
+      function showConfirmNewGame(){
+        if (el.confirmNewBackdrop && el.confirmNewModal){
+          el.confirmNewBackdrop.classList.add('visible'); el.confirmNewBackdrop.setAttribute('aria-hidden','false');
+          el.confirmNewModal.classList.add('visible'); el.confirmNewModal.setAttribute('aria-hidden','false');
+        } else {
+          // fallback to native confirm
+          const ok = window.confirm('Start a New Game?');
+          if (ok) newGame();
+        }
+      }
+      function hideConfirmNewGame(){
+        if (el.confirmNewBackdrop && el.confirmNewModal){
+          el.confirmNewBackdrop.classList.remove('visible'); el.confirmNewBackdrop.setAttribute('aria-hidden','true');
+          el.confirmNewModal.classList.remove('visible'); el.confirmNewModal.setAttribute('aria-hidden','true');
+        }
+      }
+
+      // expose the handler globally as a robust fallback
       window.__mk_new_game = newGame;
+      window.__mk_show_confirm_new_game = showConfirmNewGame;
 
       // attach new game and undo handlers robustly (guard for DOM timing)
       if (el.newGameBtn) {
         try {
-          el.newGameBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); newGame(); });
+          el.newGameBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); showConfirmNewGame(); });
         } catch (err) {
-          el.newGameBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); newGame(); };
+          el.newGameBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); showConfirmNewGame(); };
         }
       }
       if (el.undoBtn) {
@@ -808,6 +877,23 @@
         } catch (err) {
           el.undoBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); undoAutoma(); };
         }
+      }
+
+      // delegated fallback: if a click reaches document for #new-game, ensure action runs
+      document.addEventListener('click', function (e) {
+        const btn = e.target.closest && e.target.closest('#new-game');
+        if (btn) {
+          e.preventDefault && e.preventDefault();
+          showConfirmNewGame();
+        }
+      });
+
+      // confirm modal button wiring
+      if (el.confirmNewYes) {
+        el.confirmNewYes.addEventListener('click', function (e) { e.preventDefault && e.preventDefault(); newGame(); });
+      }
+      if (el.confirmNewNo) {
+        el.confirmNewNo.addEventListener('click', function (e) { e.preventDefault && e.preventDefault(); hideConfirmNewGame(); });
       }
 
       function commitAddFameEdit() {
