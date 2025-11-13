@@ -30,16 +30,10 @@
     .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
     .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
     .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); pointer-events:auto; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 8px rgba(0,0,0,0.4); margin-bottom:10px; }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 8px rgba(0,0,0,0.4); }
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
-
-    /* ensure controls card body uses same internal spacing and center buttons */
-    .controls-card .card-body { display:flex; flex-direction:column; gap:8px; align-items:center; }
-
-    /* bring controls above modal/backdrop so New Game is always clickable */
-    .controls-card { position:relative; z-index:1405; pointer-events:auto; }
 
     /* center titles for Reputation, Fame and Dummy Player */
     #reputation-card .card-header,
@@ -143,37 +137,7 @@
     .tooltip-item .lvl { color:#eaf2ff; font-weight:800; min-width:86px; text-align:left; flex:0 0 auto; }
     .tooltip-item .reward { color:var(--muted); font-weight:600; text-align:right; margin-left:8px; flex:1 1 auto; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
-    /* New Game button: gold accent (uses --gold) */
-    .new-game-btn {
-      display:block;
-      width:100%;
-      padding:10px 12px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.04);
-      background: linear-gradient(180deg, rgba(199,146,79,0.18), rgba(199,146,79,0.06));
-      color:#eaf2ff;
-      font-weight:700;
-      cursor:pointer;
-    }
-
-    /* Undo button: red accent, same size/shape */
-    .undo-btn {
-      display:block;
-      width:100%;
-      padding:10px 12px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.04);
-      background: linear-gradient(180deg, rgba(217,83,79,0.18), rgba(217,83,79,0.06));
-      color:#eaf2ff;
-      font-weight:700;
-      cursor:pointer;
-    }
-
-    /* Confirm-new-game modal (above controls) */
-    .confirm-modal { z-index:1505; min-width:300px; }
-    .confirm-modal .actions { margin-top:12px; display:flex; gap:8px; justify-content:center; }
-    .confirm-yes { background: linear-gradient(180deg, rgba(199,146,79,0.18), rgba(199,146,79,0.06)); border-radius:8px; padding:8px 12px; color:#fff; border:1px solid rgba(255,255,255,0.04); font-weight:700; cursor:pointer; }
-    .confirm-no { background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border-radius:8px; padding:8px 12px; color:var(--muted); border:1px solid rgba(255,255,255,0.04); font-weight:700; cursor:pointer; }
+    .new-game-btn { display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(199,146,79,0.12), rgba(199,146,79,0.04)); color:#eaf2ff; font-weight:700; cursor:pointer; }
 
     @media (max-width:480px) {
       :root { --phone-width:94vw; }
@@ -300,14 +264,11 @@
         </div>
       </section>
 
-      <!-- Controls: Undo + New Game (as a card to match spacing) -->
-      <section class="card controls-card" id="controls-card" aria-labelledby="controls-title">
-        <div class="card-header"><div><h2 id="controls-title" class="card-title" style="visibility:hidden;">Controls</h2></div></div>
-        <div class="card-body">
-          <button type="button" id="undo-automa" class="undo-btn" title="Undo last Automa action" style="display:none;" aria-hidden="true">Undo Automa</button>
-          <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game">New Game</button>
-        </div>
-      </section>
+      <!-- New Game -->
+      <div>
+        <!-- inline onclick as an additional robustness measure -->
+        <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game" onclick="if(window.__mk_new_game) window.__mk_new_game();">New Game</button>
+      </div>
 
       <footer class="footer"></footer>
     </div>
@@ -343,17 +304,6 @@
 
     <div style="display:flex; justify-content:center; gap:8px;">
       <button id="automa-confirm" class="small-btn" disabled>Confirm</button>
-    </div>
-  </div>
-
-  <!-- Confirm New Game modal (in-app, styled) -->
-  <div id="confirm-new-game-backdrop" class="backdrop" aria-hidden="true" style="z-index:1500;"></div>
-  <div id="confirm-new-game-modal" class="modal confirm-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="confirm-new-game-title" style="z-index:1505;">
-    <h3 id="confirm-new-game-title">Start a New Game?</h3>
-    <p>Are you sure you want to start a new game? This will reset reputation, fame and the dummy deck.</p>
-    <div class="actions">
-      <button id="confirm-new-yes" class="confirm-yes" type="button">Yes</button>
-      <button id="confirm-new-no" class="confirm-no" type="button">No</button>
     </div>
   </div>
 
@@ -417,8 +367,7 @@
         dummy: { crystals:{red:0,blue:0,green:0,white:0}, cards:{red:0,blue:0,green:0,white:0} },
         discard: [],
         awaitingEndRound: false,
-        showDummy: false,
-        automaHistory: [] // stack of snapshots for undo
+        showDummy: false
       };
 
       const el = {
@@ -447,7 +396,6 @@
         crystalTotal: document.getElementById('crystal-total'),
         cardTotal: document.getElementById('card-total'),
         newGameBtn: document.getElementById('new-game'),
-        undoBtn: document.getElementById('undo-automa'),
         backdrop: document.getElementById('backdrop'),
         endModal: document.getElementById('end-modal'),
         selectCrystals: document.getElementById('select-crystals'),
@@ -459,17 +407,12 @@
         automaConfirm: document.getElementById('automa-confirm'),
         automaDummy: document.getElementById('automa-dummy'),
         automaNone: document.getElementById('automa-none'),
-        dummyCardSection: document.getElementById('dummy-card'),
-        confirmNewBackdrop: document.getElementById('confirm-new-game-backdrop'),
-        confirmNewModal: document.getElementById('confirm-new-game-modal'),
-        confirmNewYes: document.getElementById('confirm-new-yes'),
-        confirmNewNo: document.getElementById('confirm-new-no')
+        dummyCardSection: document.getElementById('dummy-card')
       };
 
       function clamp(n,min=0,max=9999){return Math.max(min,Math.min(max,n));}
       function sumObject(obj){ return Object.values(obj || {}).reduce((a,b)=>a+(Number(b)||0),0); }
       function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-      function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
 
       function classifyLabel(label){ if (label === "0") return 'zero'; if (label === "X" || label.startsWith('-')) return 'negative'; if (label.startsWith('+')) return 'positive'; return ''; }
       function colorForLabel(label){
@@ -573,8 +516,6 @@
         }
 
         el.dummyCardSection.style.display = state.showDummy ? 'block' : 'none';
-
-        updateUndoState();
       }
 
       function buildFullTooltip(level) {
@@ -648,60 +589,10 @@
         return pickRandom(top);
       }
 
-      // --- Automa undo helpers ---
-      function pushAutomaSnapshot() {
-        try {
-          const snap = {
-            repIndex: state.repIndex,
-            fame: state.fame,
-            previousLevel: state.previousLevel,
-            dummy: deepClone(state.dummy),
-            discard: Array.isArray(state.discard) ? state.discard.slice() : [],
-            awaitingEndRound: state.awaitingEndRound,
-            showDummy: state.showDummy
-          };
-          state.automaHistory = state.automaHistory || [];
-          state.automaHistory.push(snap);
-          // cap history to avoid unbounded growth
-          if (state.automaHistory.length > 100) state.automaHistory.shift();
-          updateUndoState();
-          saveToStorage();
-        } catch (err) {}
-      }
-
-      function updateUndoState() {
-        // show Undo button only when automa (Dummy) is currently active and history has snapshots
-        const hasHistory = Array.isArray(state.automaHistory) && state.automaHistory.length > 0;
-        const shouldShow = !!state.showDummy && hasHistory;
-        if (el.undoBtn) {
-          el.undoBtn.disabled = !hasHistory;
-          el.undoBtn.style.display = shouldShow ? 'block' : 'none';
-          el.undoBtn.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
-        }
-      }
-
-      function undoAutoma() {
-        if (!Array.isArray(state.automaHistory) || state.automaHistory.length === 0) return;
-        const snap = state.automaHistory.pop();
-        // restore snapshot
-        state.repIndex = typeof snap.repIndex === 'number' ? snap.repIndex : DEFAULT_REP_INDEX;
-        state.fame = typeof snap.fame === 'number' ? snap.fame : 0;
-        state.previousLevel = typeof snap.previousLevel === 'number' ? snap.previousLevel : getLevelForFame(state.fame || 0);
-        state.dummy = deepClone(snap.dummy || { crystals:{red:0,blue:0,green:0,white:0}, cards:{red:0,blue:0,green:0,white:0} });
-        state.discard = Array.isArray(snap.discard) ? snap.discard.slice() : [];
-        state.awaitingEndRound = !!snap.awaitingEndRound;
-        state.showDummy = !!snap.showDummy;
-        renderReputation(); renderFameAndLevel(); renderDummy();
-        saveToStorage();
-      }
-      // --- end undo helpers ---
-
       el.drawBtn.addEventListener('click', () => {
         const cardsLeft = sumObject(state.dummy.cards);
         if (cardsLeft <= 0) {
           if (!state.awaitingEndRound) {
-            // if the dummy is visible (automa selected) record snapshot to allow undo
-            if (state.showDummy) pushAutomaSnapshot();
             state.awaitingEndRound = true;
             renderDummy();
             saveToStorage();
@@ -711,9 +602,6 @@
             return;
           }
         }
-
-        // record snapshot for undo only when dummy (Automa) is active
-        if (state.showDummy) pushAutomaSnapshot();
 
         const initial = drawFromDeck(3);
         state.discard = state.discard.concat(initial);
@@ -797,8 +685,6 @@
 
       el.automaConfirm.addEventListener('click', () => {
         if (!automaChoice) return;
-        // save snapshot so the automa choice can be undone
-        pushAutomaSnapshot();
         state.showDummy = (automaChoice === 'dummy');
         closeAutomaModal();
         renderDummy();
@@ -828,72 +714,32 @@
         randomizeDummyOnNewGame();
         closeTooltip(); closeFameTooltip();
         el.addFameInput.value = '';
-        // reset automa history and choice so user must pick again
+        // ensure automa selection is reset and dummy hidden until user picks
         automaChoice = null;
         state.showDummy = false;
-        state.automaHistory = [];
         renderReputation(); renderFameAndLevel(); renderDummy();
         // persist reset state
         saveToStorage();
         // prompt the user to choose an Automa
         openAutomaModal();
-        // hide confirm modal if open
-        hideConfirmNewGame();
       }
 
-      // Confirm modal controls
-      function showConfirmNewGame(){
-        if (el.confirmNewBackdrop && el.confirmNewModal){
-          el.confirmNewBackdrop.classList.add('visible'); el.confirmNewBackdrop.setAttribute('aria-hidden','false');
-          el.confirmNewModal.classList.add('visible'); el.confirmNewModal.setAttribute('aria-hidden','false');
-        } else {
-          // fallback to native confirm
-          const ok = window.confirm('Start a New Game?');
-          if (ok) newGame();
-        }
-      }
-      function hideConfirmNewGame(){
-        if (el.confirmNewBackdrop && el.confirmNewModal){
-          el.confirmNewBackdrop.classList.remove('visible'); el.confirmNewBackdrop.setAttribute('aria-hidden','true');
-          el.confirmNewModal.classList.remove('visible'); el.confirmNewModal.setAttribute('aria-hidden','true');
-        }
-      }
-
-      // expose the handler globally as a robust fallback
+      // expose the handler globally as a robust fallback for environments where addEventListener might be missed
       window.__mk_new_game = newGame;
-      window.__mk_show_confirm_new_game = showConfirmNewGame;
 
-      // attach new game and undo handlers robustly (guard for DOM timing)
+      // attach new game handler robustly (guard for DOM timing)
       if (el.newGameBtn) {
         try {
-          el.newGameBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); showConfirmNewGame(); });
+          el.newGameBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); newGame(); });
         } catch (err) {
-          el.newGameBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); showConfirmNewGame(); };
+          // fallback to setting onclick directly
+          el.newGameBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); newGame(); };
         }
-      }
-      if (el.undoBtn) {
-        try {
-          el.undoBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); undoAutoma(); });
-        } catch (err) {
-          el.undoBtn.onclick = function(e){ e && e.preventDefault && e.preventDefault(); undoAutoma(); };
+      } else {
+        const fallbackBtn = document.getElementById('new-game');
+        if (fallbackBtn) {
+          fallbackBtn.addEventListener('click', (e) => { e.preventDefault && e.preventDefault(); newGame(); });
         }
-      }
-
-      // delegated fallback: if a click reaches document for #new-game, ensure action runs
-      document.addEventListener('click', function (e) {
-        const btn = e.target.closest && e.target.closest('#new-game');
-        if (btn) {
-          e.preventDefault && e.preventDefault();
-          showConfirmNewGame();
-        }
-      });
-
-      // confirm modal button wiring
-      if (el.confirmNewYes) {
-        el.confirmNewYes.addEventListener('click', function (e) { e.preventDefault && e.preventDefault(); newGame(); });
-      }
-      if (el.confirmNewNo) {
-        el.confirmNewNo.addEventListener('click', function (e) { e.preventDefault && e.preventDefault(); hideConfirmNewGame(); });
       }
 
       function commitAddFameEdit() {
@@ -953,8 +799,7 @@
             dummy: state.dummy,
             discard: state.discard,
             awaitingEndRound: state.awaitingEndRound,
-            showDummy: state.showDummy,
-            automaHistory: state.automaHistory || []
+            showDummy: state.showDummy
           }));
         } catch (err) {}
       }
@@ -975,7 +820,6 @@
           if (Array.isArray(parsed.discard)) state.discard = parsed.discard;
           if (typeof parsed.awaitingEndRound === 'boolean') state.awaitingEndRound = parsed.awaitingEndRound;
           if (typeof parsed.showDummy === 'boolean') state.showDummy = parsed.showDummy;
-          if (Array.isArray(parsed.automaHistory)) state.automaHistory = parsed.automaHistory;
           return true;
         } catch (err) { return false; }
       }
