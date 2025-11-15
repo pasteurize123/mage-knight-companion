@@ -32,16 +32,14 @@
     .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
     .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); pointer-events:auto; }
     .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 18px rgba(0,0,0,0.35); }
-    
-
-    /* small spacing between main sections */
-    .card + .card {
-    margin-bottom: 10px;
-    }
-
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
+
+    /* Add a small spacing between consecutive card sections (Reputation, Fame, Dummy Player, General Volkare) */
+    .card + .card {
+    margin-bottom: 10px;
+    }
     
     /* center titles for Reputation, Fame and Dummy Player */
     #reputation-card .card-header,
