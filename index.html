@@ -38,6 +38,11 @@
       margin-top: 10px;
     }
 
+    /* Ensure spacing between the last card and the following control block (New Game) */
+    .card + .new-game-wrap {
+      margin-top: 10px;
+    }
+
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
@@ -378,9 +383,6 @@
       <!-- New Game -->
       <div>
         <button type="button" id="new-game" class="new-game-btn primary" title="Reset the app to a new game" onclick="if(window.__mk_new_game) window.__mk_new_game();">New Game</button>
-        .card + .card {
-        margin-top: 10px;
-        }
       </div>
 
       <footer class="footer"></footer>
