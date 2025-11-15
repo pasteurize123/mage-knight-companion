@@ -26,21 +26,22 @@
       --wound:#8f8f8f;
     }
     * { box-sizing: border-box; }
-    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:#e6eef6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    html,body { height:100%; margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071028 0%, #061226 100%); color:var(--white); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
     .phone-shell { width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 12px; }
-    .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.45); }
+    .frame { width:var(--phone-width); max-width:94vw; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); border-radius:28px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
     .topbar { position:fixed; left:50%; transform:translateX(-50%); top:18px; width:var(--phone-width); max-width:94vw; text-align:center; pointer-events:none; }
     .topbar h1 { margin:0; font-size:14px; font-weight:600; color:var(--muted); pointer-events:auto; }
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 18px rgba(0,0,0,0.35); }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); border-radius: var(--radius); padding:12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 3px 12px rgba(0,0,0,0.45); }
+
+    /* Add a small spacing between consecutive card sections (Reputation, Fame, Dummy Player, General Volkare) */
+    .card + .card {
+      margin-top: 10px;
+    }
+
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
 
-    /* Add a small spacing between consecutive card sections (Reputation, Fame, Dummy Player, General Volkare) */
-    .card + .card {
-    margin-bottom: 10px;
-    }
-    
     /* center titles for Reputation, Fame and Dummy Player */
     #reputation-card .card-header,
     #fame-card .card-header,
