@@ -38,6 +38,13 @@
       margin-top: 10px;
     }
 
+    /* ensure consistent spacing when New Game is a plain div */
+    .card + div > .new-game-btn,
+    .card + .new-game-btn {
+    margin-top: 10px;
+    display: block; /* keep full-width button spacing consistent */
+    }
+    
     .card-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
     .card-title { font-size:16px; margin:0; color:#fff; }
     .card-body { font-size:14px; color:#e6eef6; }
